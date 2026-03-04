@@ -1,0 +1,134 @@
+package com.example.g46_kotlin.cards
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+data class HousingCardUi(
+    val name: String,
+    val pricePerMonth: Int,
+    val rating: Double,
+    val distanceToCampus: String,
+    val propertyType: String,
+    val isVerified: Boolean,
+    val isLiked: Boolean
+)
+
+@Composable
+fun HousingCard(
+    ui: HousingCardUi,
+    modifier: Modifier = Modifier,
+    onCardClick: () -> Unit = {},
+    onLikeClick: () -> Unit = {},
+    onAvailabilityClick: () -> Unit = {}
+) {
+    Card(
+        modifier = modifier.clickable { onCardClick() },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+    ) {
+        Column(Modifier.fillMaxWidth().padding(12.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .background(Color(0xFF696C70), RoundedCornerShape(16.dp))
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (ui.isVerified) {
+                        Chip("✓ VERIFIED")
+                    } else {
+                        Spacer(Modifier)
+                    }
+                    Chip(if (ui.isLiked) "❤\uFE0F\uFE0F" else "♡", onClick = onLikeClick)
+                }
+
+                Chip(
+                    text = "$${ui.pricePerMonth}/mo",
+                    modifier = Modifier.align(Alignment.BottomStart)
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(ui.name, fontSize = 24.sp / 1.5f, fontWeight = FontWeight.Bold)
+                Chip("☆ ${ui.rating}")
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Text("\uD83D\uDCCD ${ui.distanceToCampus} from campus", color = Color(0xFF282E38))
+            Spacer(Modifier.height(4.dp))
+            Text("\uD83C\uDFE0 ${ui.propertyType}", color = Color(0xFF282E38))
+
+            Spacer(Modifier.height(14.dp))
+
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onAvailabilityClick,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0077C8)),
+                shape = RoundedCornerShape(12.dp),
+            ) {
+                Text("View Availability")
+            }
+        }
+    }
+}
+
+@Composable
+private fun Chip(
+    text: String,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
+) {
+    Box(
+        modifier = modifier
+            .then(
+                if (onClick != null) Modifier.clickable { onClick() } else Modifier
+            )
+            .background(Color.White.copy(alpha = 0.9f), RoundedCornerShape(50))
+            .padding(horizontal = 10.dp, vertical = 6.dp)
+    ) {
+        Text(text, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF000000))
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFF)
+@Composable
+fun HousingCardPreview() {
+    HousingCard(
+        ui = HousingCardUi(
+            name = "Oakwood Residences",
+            pricePerMonth = 850,
+            rating = 4.8,
+            distanceToCampus = "0.5 miles",
+            propertyType = "2 Bed · Shared Kitchen",
+            isVerified = true,
+            isLiked = false
+        ),
+        modifier = Modifier.padding(16.dp)
+    )
+}

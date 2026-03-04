@@ -5,50 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="49cdc1cf-599d-4d72-8d2d-bdecac192970" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/markdown.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/cards/HouseCard.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/designsystem/Colors.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/designsystem/Shapes.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/designsystem/Theme.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/designsystem/Typography.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/navigation/NavGraph.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/network/NetworkModule.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/ui/Components.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/mapper/ListingMapper.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/mapper/MessageMapper.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/mapper/UserMapper.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/remote/ChatApi.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/remote/ListingApi.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/remote/UserApi.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/repository/ChatRepositoryImpl.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/repository/ListingRepositoryImpl.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/repository/UserRepositoryImpl.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/model/Listing.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/model/Message.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/model/User.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/repository/ChatRepository.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/repository/ListingRepository.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/repository/UserRepository.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/usecase/GetListingsUseCase.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/usecase/GetNearbyListingsUseCase.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/usecase/LoginUseCase.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/usecase/RegisterUserUseCase.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/domain/usecase/SendMessageUseCase.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/features/auth/AuthScreen.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/features/auth/AuthViewModel.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/features/chat/ChatScreen.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/features/chat/ChatViewModel.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/features/listings/ListingsScreen.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/features/listings/ListingsViewModel.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/features/map/MapScreen.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/features/map/MapViewModel.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/features/profile/ProfileScreen.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/features/profile/ProfileViewModel.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/init-clean-structure.ps1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/miniexplicacion.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +16,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\palep\.android\avd\Medium_Phone.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -81,21 +39,28 @@
       </state>
     </system>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "DavK19"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;DavK19&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/DavK19/G46-Kotlin.git",
-    "accountId": "2bb6cf8d-31c0-42bc-b0b9-b90ebd3f7ad9"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/DavK19/G46-Kotlin.git&quot;,
+    &quot;accountId&quot;: &quot;2bb6cf8d-31c0-42bc-b0b9-b90ebd3f7ad9&quot;
   }
-}]]></component>
+}</component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\Juand\.gradle\wrapper\dists\gradle-9.2.1-bin\2t0n5ozlw9xmuyvbp7dnzaxug\gradle-9.2.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.2.1">
     <option name="jvmArguments">
       <list>
@@ -121,7 +86,7 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "cards",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/programacion/2026-1/Moviles"
   }
@@ -209,5 +174,21 @@
       <updated>1772150368632</updated>
     </task>
     <servers />
+  </component>
+  <component name="play_dynamic_filters_status">
+    <option name="appIdToCheckInfo">
+      <map>
+        <entry key="com.example.g46_kotlin">
+          <value>
+            <CheckInfo lastCheckTimestamp="1772585416667" />
+          </value>
+        </entry>
+        <entry key="com.example.g46_kotlin.test">
+          <value>
+            <CheckInfo lastCheckTimestamp="1772585416669" />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
