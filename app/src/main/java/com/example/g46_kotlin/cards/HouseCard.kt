@@ -8,6 +8,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.g46_kotlin.ui.theme.G46KotlinTheme
+
 
 data class HousingCardUi(
     val name: String,
@@ -39,7 +42,7 @@ fun HousingCard(
     Card(
         modifier = modifier.clickable { onCardClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
         Column(Modifier.fillMaxWidth().padding(12.dp)) {
@@ -47,7 +50,7 @@ fun HousingCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)
-                    .background(Color(0xFF696C70), RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
                     .padding(10.dp)
             ) {
                 Row(
@@ -75,21 +78,26 @@ fun HousingCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(ui.name, fontSize = 24.sp / 1.5f, fontWeight = FontWeight.Bold)
+                Text(ui.name,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
                 Chip("☆ ${ui.rating}")
             }
 
             Spacer(Modifier.height(8.dp))
-            Text("\uD83D\uDCCD ${ui.distanceToCampus} from campus", color = Color(0xFF282E38))
+            Text("\uD83D\uDCCD ${ui.distanceToCampus} from campus", color = MaterialTheme.colorScheme.onSurface)
             Spacer(Modifier.height(4.dp))
-            Text("\uD83C\uDFE0 ${ui.propertyType}", color = Color(0xFF282E38))
+            Text("\uD83C\uDFE0 ${ui.propertyType}", color = MaterialTheme.colorScheme.onSurface)
 
             Spacer(Modifier.height(14.dp))
 
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onAvailabilityClick,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0077C8)),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary),
                 shape = RoundedCornerShape(12.dp),
             ) {
                 Text("View Availability")
@@ -109,26 +117,29 @@ private fun Chip(
             .then(
                 if (onClick != null) Modifier.clickable { onClick() } else Modifier
             )
-            .background(Color.White.copy(alpha = 0.9f), RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.surface,
+                RoundedCornerShape(50))
             .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
-        Text(text, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF000000))
+        Text(text, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFF)
 @Composable
 fun HousingCardPreview() {
-    HousingCard(
-        ui = HousingCardUi(
-            name = "Oakwood Residences",
-            pricePerMonth = 850,
-            rating = 4.8,
-            distanceToCampus = "0.5 miles",
-            propertyType = "2 Bed · Shared Kitchen",
-            isVerified = true,
-            isLiked = false
-        ),
-        modifier = Modifier.padding(16.dp)
-    )
+    G46KotlinTheme(dynamicColor = false) {
+        HousingCard(
+            ui = HousingCardUi(
+                name = "Oakwood Residences",
+                pricePerMonth = 850,
+                rating = 4.8,
+                distanceToCampus = "0.5 miles",
+                propertyType = "2 Bed · Shared Kitchen",
+                isVerified = true,
+                isLiked = false
+            ),
+            modifier = Modifier.padding(16.dp)
+        )
+    }
 }
