@@ -76,10 +76,10 @@ fun RoomieCard(
                     verticalAlignment = Alignment.Top
                 ) {
                     Column {
-                        Text(text = "□ ${ui.job}", color = MaterialTheme.colorScheme.onSurface,
+                        Text(text = "\uD83D\uDCBC ${ui.job}", color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 13.sp)
                         Spacer(Modifier.height(6.dp))
-                        Text(text = "□ ${ui.university}", color = MaterialTheme.colorScheme.onSurface,
+                        Text(text = "\uD83D\uDCD6 ${ui.university}", color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 13.sp)
                     }
 
