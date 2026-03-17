@@ -31,6 +31,9 @@ data class HousingCardUi(
     val isLiked: Boolean
 )
 
+// Todo: put the font with the general theme
+// use the library for the icons insted of my web
+
 @Composable
 fun HousingCard(
     ui: HousingCardUi,
@@ -55,17 +58,8 @@ fun HousingCard(
                     .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
                     .padding(10.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    if (ui.isVerified) {
-                        Chip("✓ VERIFIED")
-                    } else {
-                        Spacer(Modifier)
-                    }
-                    Chip(if (ui.isLiked) "❤\uFE0F\uFE0F" else "♡", onClick = onLikeClick)
-                }
+                    Chip(if (ui.isLiked) "❤\uFE0F\uFE0F" else "♡", onClick = onLikeClick,
+                        modifier = Modifier.align(Alignment.TopEnd))
             }
 
             Spacer(Modifier.height(12.dp))
