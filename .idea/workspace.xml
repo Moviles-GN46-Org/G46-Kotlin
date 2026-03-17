@@ -10,8 +10,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="49cdc1cf-599d-4d72-8d2d-bdecac192970" name="Changes" comment="arreglo housing use de code theme, and new roomie card also with the code theme">
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/cards/RoomieCard.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/cards/RoomieCard.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/cards/HouseCard.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/cards/HouseCard.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/ui/theme/Color.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/ui/theme/Color.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/ui/theme/Theme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/ui/theme/Theme.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,20 +64,13 @@
     &quot;assignee&quot;: &quot;DavK19&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/DavK19/G46-Kotlin.git",
-    "accountId": "cf039197-6970-4f3b-892a-64c6ffb74d23"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/DavK19/G46-Kotlin.git&quot;,
+    &quot;accountId&quot;: &quot;cf039197-6970-4f3b-892a-64c6ffb74d23&quot;
   }
-}]]></component>
-  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\Juand\.gradle\wrapper\dists\gradle-9.2.1-bin\2t0n5ozlw9xmuyvbp7dnzaxug\gradle-9.2.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.2.1">
-    <option name="jvmArguments">
-      <list>
-        <option value="-Didea.compose.hot-reload=true" />
-        <option value="-Didea.compose.hot-reload.version=2" />
-      </list>
-    </option>
-  </component>
+}</component>
+  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\palep\.gradle\wrapper\dists\gradle-9.2.1-bin\2t0n5ozlw9xmuyvbp7dnzaxug\gradle-9.2.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.2.1" />
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -84,6 +81,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Compose Preview.HousingCardPreview.executor&quot;: &quot;Run&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
@@ -93,7 +91,7 @@
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;cards&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/programacion/2026-1/Moviles&quot;
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/palep/G46-Kotlin&quot;
   }
 }</component>
   <component name="RunManager" selected="Compose Preview.HousingCardPreview">
