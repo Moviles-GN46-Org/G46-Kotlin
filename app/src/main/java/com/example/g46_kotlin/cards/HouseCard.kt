@@ -45,7 +45,9 @@ fun HousingCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
-        Column(Modifier.fillMaxWidth().padding(12.dp)) {
+        Column(Modifier
+            .fillMaxWidth()
+            .padding(12.dp)) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -64,11 +66,6 @@ fun HousingCard(
                     }
                     Chip(if (ui.isLiked) "❤\uFE0F\uFE0F" else "♡", onClick = onLikeClick)
                 }
-
-                Chip(
-                    text = "$${ui.pricePerMonth}/mo",
-                    modifier = Modifier.align(Alignment.BottomStart)
-                )
             }
 
             Spacer(Modifier.height(12.dp))
@@ -86,21 +83,36 @@ fun HousingCard(
                 Chip("☆ ${ui.rating}")
             }
 
-            Spacer(Modifier.height(8.dp))
-            Text("\uD83D\uDCCD ${ui.distanceToCampus} from campus", color = MaterialTheme.colorScheme.onSurface)
-            Spacer(Modifier.height(4.dp))
-            Text("\uD83C\uDFE0 ${ui.propertyType}", color = MaterialTheme.colorScheme.onSurface)
-
-            Spacer(Modifier.height(14.dp))
-
-            Button(
+            Row (
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onAvailabilityClick,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary),
-                shape = RoundedCornerShape(12.dp),
-            ) {
-                Text("View Availability")
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Column{
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "\uD83D\uDCCD ${ui.distanceToCampus} from campus",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "\uD83C\uDFE0 ${ui.propertyType}",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(Modifier.height(14.dp))
+                }
+
+                Button(
+                    onClick = onAvailabilityClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Text("$${ui.pricePerMonth}/mo")
+                }
             }
         }
     }
@@ -117,8 +129,10 @@ private fun Chip(
             .then(
                 if (onClick != null) Modifier.clickable { onClick() } else Modifier
             )
-            .background(MaterialTheme.colorScheme.surface,
-                RoundedCornerShape(50))
+            .background(
+                MaterialTheme.colorScheme.surface,
+                RoundedCornerShape(50)
+            )
             .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
         Text(text, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
