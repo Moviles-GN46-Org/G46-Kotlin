@@ -39,6 +39,7 @@ fun HousingCard(
     onLikeClick: () -> Unit = {},
     onAvailabilityClick: () -> Unit = {}
 ) {
+    //TODO: Change material theme for fluent theme in the repo settings
     Card(
         modifier = modifier.clickable { onCardClick() },
         shape = RoundedCornerShape(20.dp),

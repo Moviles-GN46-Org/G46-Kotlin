@@ -9,7 +9,15 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="49cdc1cf-599d-4d72-8d2d-bdecac192970" name="Changes" comment="ajuste del theme general y rediseño del card de house" />
+=======
+    <list default="true" id="49cdc1cf-599d-4d72-8d2d-bdecac192970" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/cards/HouseCard.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/cards/HouseCard.kt" afterDir="false" />
+    </list>
+>>>>>>> 4fc330d4e0dc6a8ef5f20f5b4e1e4fba319543f6
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -18,7 +26,15 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\palep\.android\avd\Medium_Phone.avd]" />
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/programacion/2026-1/moviles/G46-Kotlin" value="3AEGZ6yRzqUdX3OwbinRJtwRTnj" />
+    </persistenceIdMap>
+  </component>
+  <component name="CopilotUserSelectedChatMode">
+    <option name="chatModeId" value="Ask" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\Juand\.android\avd\Medium_Phone.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -49,6 +65,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dev" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -57,10 +78,42 @@
     &quot;assignee&quot;: &quot;DavK19&quot;
   }
 }</component>
+<<<<<<< HEAD
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/DavK19/G46-Kotlin.git&quot;,
     &quot;accountId&quot;: &quot;cf039197-6970-4f3b-892a-64c6ffb74d23&quot;
+=======
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="cards" />
+                    <option name="lastUsedInstant" value="1773782533" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="dev" />
+                    <option name="lastUsedInstant" value="1773782532" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Moviles-GN46-Org/G46-Kotlin.git",
+    "accountId": "2bb6cf8d-31c0-42bc-b0b9-b90ebd3f7ad9"
+>>>>>>> 4fc330d4e0dc6a8ef5f20f5b4e1e4fba319543f6
   }
 }</component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\palep\.gradle\wrapper\dists\gradle-9.2.1-bin\2t0n5ozlw9xmuyvbp7dnzaxug\gradle-9.2.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.2.1" />
@@ -72,6 +125,7 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+<<<<<<< HEAD
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;Compose Preview.HousingCardPreview.executor&quot;: &quot;Run&quot;,
@@ -85,8 +139,23 @@
     &quot;git-widget-placeholder&quot;: &quot;cards&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/palep/G46-Kotlin&quot;
+=======
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "cards",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/programacion/2026-1/Moviles",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
+>>>>>>> 4fc330d4e0dc6a8ef5f20f5b4e1e4fba319543f6
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Compose Preview.HousingCardPreview">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="G46-Kotlin.app" />
@@ -236,6 +305,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Compose Preview.HousingCardPreview" />
+        <item itemvalue="Compose Preview.HousingCardPreview" />
       </list>
     </recent_temporary>
   </component>
@@ -266,10 +336,41 @@
     <option name="localTasksCounter" value="3" />
     <servers />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="cards" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="arreglo housing use de code theme, and new roomie card also with the code theme" />
     <MESSAGE value="ajuste del theme general y rediseño del card de house" />
     <option name="LAST_COMMIT_MESSAGE" value="ajuste del theme general y rediseño del card de house" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
