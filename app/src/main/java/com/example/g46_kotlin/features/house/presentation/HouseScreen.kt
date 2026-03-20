@@ -36,9 +36,9 @@ import com.example.g46_kotlin.cards.HousingCard
 import com.example.g46_kotlin.cards.HousingCardUi
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 
-private val budgetOptions = listOf("Budget")
-private val roomTypeOptions = listOf("Room Type")
-private val amenitiesOptions = listOf("Amenities")
+private val budgetOptions = listOf("0-700", "700-1000", "1000-1400", "1400+")
+private val roomTypeOptions = listOf("APARTMENT", "ROOM", "STUDIO", "HOUSE", "SHARED ROOM")
+private val amenitiesOptions = emptyList<String>()
 
 @Composable
 fun HouseScreen() {
@@ -52,8 +52,7 @@ fun HouseScreen() {
         onRoomTypeClick = viewModel::onRoomTypeClick,
         onAmenityClick = viewModel::onAmenityClick,
         onHouseClick = viewModel::onHouseClick,
-        onAvailabilityClick = viewModel::onAvailabilityClick,
-        onLikeClick = viewModel::onLikeClick
+        onAvailabilityClick = viewModel::onAvailabilityClick
     )
 }
 
@@ -65,7 +64,6 @@ private fun HouseContent(
     onRoomTypeClick: (String) -> Unit,
     onAmenityClick: (String) -> Unit,
     onHouseClick: (String) -> Unit,
-    onLikeClick: (String) -> Unit,
     onAvailabilityClick: (String) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -151,7 +149,6 @@ private fun HouseContent(
                     ui = house,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     onCardClick = { onHouseClick(house.name) },
-                    onLikeClick = { onLikeClick(house.name) },
                     onAvailabilityClick = { onAvailabilityClick(house.name) }
                 )
             }
@@ -219,7 +216,6 @@ private fun HouseContentPreview() {
             onRoomTypeClick = {},
             onAmenityClick = {},
             onHouseClick = {},
-            onLikeClick = {},
             onAvailabilityClick = {}
         )
     }
@@ -230,27 +226,22 @@ private val previewHouses = listOf(
         name = "Lakeside Suite",
         pricePerMonth = 860,
         rating = 4.5,
-        distanceToCampus = "1.0 miles",
+        neighborhood = "1.0 miles",
         propertyType = "2 Bed · 1 Bath",
-        isVerified = true,
-        isLiked = false
+
     ),
     HousingCardUi(
         name = "Riverstone Flat",
         pricePerMonth = 780,
         rating = 4.4,
-        distanceToCampus = "0.6 miles",
+        neighborhood = "0.6 miles",
         propertyType = "Studio · 1 Bath · Kitchenette",
-        isVerified = true,
-        isLiked = true
     ),
     HousingCardUi(
         name = "Riverstone Flat2",
         pricePerMonth = 780,
         rating = 4.4,
-        distanceToCampus = "0.6 miles",
+        neighborhood = "0.6 miles",
         propertyType = "Studio · 1 Bath · Kitchenette",
-        isVerified = true,
-        isLiked = true
     )
 )

@@ -25,10 +25,8 @@ data class HousingCardUi(
     val name: String,
     val pricePerMonth: Int,
     val rating: Double,
-    val distanceToCampus: String,
+    val neighborhood: String,
     val propertyType: String,
-    val isVerified: Boolean,
-    val isLiked: Boolean
 )
 
 // Todo: put the font with the general theme
@@ -39,7 +37,6 @@ fun HousingCard(
     ui: HousingCardUi,
     modifier: Modifier = Modifier,
     onCardClick: () -> Unit = {},
-    onLikeClick: () -> Unit = {},
     onAvailabilityClick: () -> Unit = {}
 ) {
     Card(
@@ -58,8 +55,6 @@ fun HousingCard(
                     .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
                     .padding(10.dp)
             ) {
-                    Chip(if (ui.isLiked) "❤\uFE0F\uFE0F" else "♡", onClick = onLikeClick,
-                        modifier = Modifier.align(Alignment.TopEnd))
             }
 
             Spacer(Modifier.height(12.dp))
@@ -85,7 +80,7 @@ fun HousingCard(
                 Column{
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "\uD83D\uDCCD ${ui.distanceToCampus} from campus",
+                        "\uD83D\uDCCD ${ui.neighborhood}",
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(Modifier.height(4.dp))
@@ -142,10 +137,8 @@ fun HousingCardPreview() {
                 name = "Oakwood Residences",
                 pricePerMonth = 850,
                 rating = 4.8,
-                distanceToCampus = "0.5 miles",
+                neighborhood = "0.5 miles",
                 propertyType = "2 Bed · Shared Kitchen",
-                isVerified = true,
-                isLiked = false
             ),
             modifier = Modifier.padding(16.dp)
         )

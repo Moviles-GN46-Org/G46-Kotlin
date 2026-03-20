@@ -3,6 +3,7 @@ package com.example.g46_kotlin.features.house.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.cards.HousingCardUi
+import com.example.g46_kotlin.features.house.domain.model.Property
 import com.example.g46_kotlin.features.house.domain.usecase.GetHouseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -30,18 +31,8 @@ class HouseViewModel @Inject constructor(
 
             runCatching {
                 getHouseUseCase()
-            }.onSuccess { houses ->
-                val mapped = houses.map { house ->
-                    HousingCardUi(
-                        name = house.title,
-                        pricePerMonth = house.pricePerMonth,
-                        rating = house.rating,
-                        distanceToCampus = house.distanceToCampus,
-                        propertyType = house.propertyType,
-                        isVerified = house.isVerified,
-                        isLiked = house.isLiked
-                    )
-                }
+            }.onSuccess { properties ->
+                val mapped = properties.map { property -> property.toHousingCardUi() }
 
                 _uiState.update {
                     it.copy(
@@ -56,7 +47,7 @@ class HouseViewModel @Inject constructor(
                         isLoading = false,
                         houses = emptyList(),
                         visibleHouses = emptyList(),
-                        errorMessage = error.message ?: "Error cargando casas"
+                        errorMessage = error.message ?: "Error cargando propiedades"
                     )
                 }
             }
@@ -95,9 +86,33 @@ class HouseViewModel @Inject constructor(
         applyUiOnlyFilters()
     }
 
-    // UI-only por ahora: mantiene todas las casas visibles.
     private fun applyUiOnlyFilters() {
-        _uiState.update { it.copy(visibleHouses = it.houses) }
+        _uiState.update { state ->
+            val q = state.query.trim().lowercase()
+
+            val filtered = state.houses.filter { house ->
+                val matchesQuery = q.isBlank() ||
+                        house.name.lowercase().contains(q) ||
+                        house.neighborhood.lowercase().contains(q) ||
+                        house.propertyType.lowercase().contains(q)
+
+                val matchesBudget = when (state.selectedBudget) {
+                    null -> true
+                    "0-700" -> house.pricePerMonth in 0..700
+                    "700-1000" -> house.pricePerMonth in 700..1000
+                    "1000-1400" -> house.pricePerMonth in 1000..1400
+                    "1400+" -> house.pricePerMonth >= 1400
+                    else -> true
+                }
+
+                val matchesRoomType = state.selectedRoomType == null ||
+                        house.propertyType.contains(state.selectedRoomType, ignoreCase = true)
+
+                matchesQuery && matchesBudget && matchesRoomType
+            }
+
+            state.copy(visibleHouses = filtered)
+        }
     }
 
     fun onHouseClick(houseName: String) {
@@ -115,23 +130,16 @@ class HouseViewModel @Inject constructor(
         }
     }
 
-    fun onLikeClick(houseName: String) {
-        _uiState.update { state ->
-            val updated = state.houses.map { house ->
-                if (house.name == houseName) {
-                    house.copy(isLiked = !house.isLiked)
-                } else {
-                    house
-                }
-            }
+    private fun Property.toHousingCardUi(): HousingCardUi {
+        val typeLabel = propertyType.name.replace("_", " ")
+        val roomLabel = "$bedrooms Bed · $bathrooms Bath"
 
-            val likedNow = updated.firstOrNull { it.name == houseName }?.isLiked == true
-
-            state.copy(
-                houses = updated,
-                visibleHouses = updated,
-                lastActionMessage = if (likedNow) "Te gusta $houseName" else "Quitaste like de $houseName"
-            )
-        }
+        return HousingCardUi(
+            name = title,
+            pricePerMonth = monthlyRent.toInt(),
+            rating = 0.0,
+            neighborhood = neighborhood,
+            propertyType = "$typeLabel · $roomLabel",
+        )
     }
 }
