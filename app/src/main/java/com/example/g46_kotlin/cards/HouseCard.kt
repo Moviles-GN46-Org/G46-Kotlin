@@ -22,6 +22,7 @@ import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 
 
 data class HousingCardUi(
+    val id: String,
     val name: String,
     val pricePerMonth: Int,
     val rating: Double,
@@ -134,6 +135,7 @@ fun HousingCardPreview() {
     G46KotlinTheme(dynamicColor = false) {
         HousingCard(
             ui = HousingCardUi(
+                id = "p1",
                 name = "Oakwood Residences",
                 pricePerMonth = 850,
                 rating = 4.8,

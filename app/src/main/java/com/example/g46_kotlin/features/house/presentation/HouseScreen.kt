@@ -58,7 +58,8 @@ fun HouseScreen() {
         onAvailabilityClick = viewModel::onAvailabilityClick,
         onNotificationIconClick = viewModel::onNotificationIconClick,
         onDismissNotificationsPanel = viewModel::onDismissNotificationsPanel,
-        onClearNotifications = viewModel::onClearNotifications
+        onClearNotifications = viewModel::onClearNotifications,
+        onBackFromDetail = viewModel::onBackFromDetail
     )
 }
 
@@ -73,115 +74,123 @@ private fun HouseContent(
     onAvailabilityClick: (String) -> Unit,
     onNotificationIconClick: () -> Unit,
     onDismissNotificationsPanel: () -> Unit,
-    onClearNotifications: () -> Unit
+    onClearNotifications: () -> Unit,
+    onBackFromDetail: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 12.dp)
-        ) {
-            item {
-                HouseHeader(
-                    state = state,
-                    onNotificationIconClick = onNotificationIconClick,
-                    onDismissNotificationsPanel = onDismissNotificationsPanel,
-                    onClearNotifications = onClearNotifications
-                )
-            }
-
-            item {
-                OutlinedTextField(
-                    value = state.query,
-                    onValueChange = onQueryChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    singleLine = true,
-                    placeholder = { Text("Search near University...") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Search,
-                            contentDescription = "Search"
-                        )
-                    },
-                    shape = MaterialTheme.shapes.large,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.outline,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
-                    )
-                )
-            }
-
-            item {
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+        if (state.showPropertyDetail && state.selectedPropertyDetail != null) {
+            PropertyDetailScreen(
+                detail = state.selectedPropertyDetail,
+                onBackClick = onBackFromDetail
+            )
+        } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(vertical = 12.dp)
                 ) {
-                    items(budgetOptions) { option ->
-                        FilterChip(
-                            selected = state.selectedBudget == option,
-                            onClick = { onBudgetClick(option) },
-                            label = { Text(option) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                    item {
+                        HouseHeader(
+                            state = state,
+                            onNotificationIconClick = onNotificationIconClick,
+                            onDismissNotificationsPanel = onDismissNotificationsPanel,
+                            onClearNotifications = onClearNotifications
+                        )
+                    }
+
+                    item {
+                        OutlinedTextField(
+                            value = state.query,
+                            onValueChange = onQueryChange,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            singleLine = true,
+                            placeholder = { Text("Search near University...") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Search,
+                                    contentDescription = "Search"
+                                )
+                            },
+                            shape = MaterialTheme.shapes.large,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.outline,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
                             )
                         )
                     }
 
-                    items(roomTypeOptions) { option ->
-                        FilterChip(
-                            selected = state.selectedRoomType == option,
-                            onClick = { onRoomTypeClick(option) },
-                            label = { Text(option) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        )
+                    item {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(budgetOptions) { option ->
+                                FilterChip(
+                                    selected = state.selectedBudget == option,
+                                    onClick = { onBudgetClick(option) },
+                                    label = { Text(option) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                )
+                            }
+
+                            items(roomTypeOptions) { option ->
+                                FilterChip(
+                                    selected = state.selectedRoomType == option,
+                                    onClick = { onRoomTypeClick(option) },
+                                    label = { Text(option) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                )
+                            }
+
+                            items(amenitiesOptions) { option ->
+                                FilterChip(
+                                    selected = state.selectedAmenities.contains(option),
+                                    onClick = { onAmenityClick(option) },
+                                    label = { Text(option) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                )
+                            }
+                        }
                     }
 
-                    items(amenitiesOptions) { option ->
-                        FilterChip(
-                            selected = state.selectedAmenities.contains(option),
-                            onClick = { onAmenityClick(option) },
-                            label = { Text(option) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                            )
+                    items(state.visibleHouses) { house ->
+                        HousingCard(
+                            ui = house,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            onCardClick = { onHouseClick(house.id) },
+                            onAvailabilityClick = { onAvailabilityClick(house.name) }
                         )
                     }
                 }
+
+                if (state.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+
+                state.errorMessage?.let { msg ->
+                    Text(
+                        text = msg,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 16.dp),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
-
-            items(state.visibleHouses) { house ->
-                HousingCard(
-                    ui = house,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    onCardClick = { onHouseClick(house.name) },
-                    onAvailabilityClick = { onAvailabilityClick(house.name) }
-                )
-            }
         }
-
-        if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
-
-        state.errorMessage?.let { msg ->
-            Text(
-                text = msg,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 16.dp),
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-    }
 }
 
 @Composable
@@ -273,13 +282,15 @@ private fun HouseContentPreview() {
             onAvailabilityClick = {},
             onNotificationIconClick = {},
             onDismissNotificationsPanel = {},
-            onClearNotifications = {}
+            onClearNotifications = {},
+            onBackFromDetail = {}
         )
     }
 }
 
 private val previewHouses = listOf(
     HousingCardUi(
+        id = "p1",
         name = "Lakeside Suite",
         pricePerMonth = 860,
         rating = 4.5,
@@ -288,6 +299,7 @@ private val previewHouses = listOf(
 
     ),
     HousingCardUi(
+        id = "p2",
         name = "Riverstone Flat",
         pricePerMonth = 780,
         rating = 4.4,
@@ -295,6 +307,7 @@ private val previewHouses = listOf(
         propertyType = "Studio · 1 Bath · Kitchenette",
     ),
     HousingCardUi(
+        id = "p3",
         name = "Riverstone Flat2",
         pricePerMonth = 780,
         rating = 4.4,

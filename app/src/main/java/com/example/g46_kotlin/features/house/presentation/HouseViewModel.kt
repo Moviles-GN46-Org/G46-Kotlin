@@ -66,6 +66,7 @@ class HouseViewModel @Inject constructor(
                         isLoading = false,
                         houses = mapped,
                         visibleHouses = mapped,
+                        allProperties = properties,
                         notifications = updatedNotifications,
                         lastActionMessage = nearest?.let { result ->
                             "Cerca de ti: ${result.property.title} a ${formatDistance(result.distanceMeters)}"
@@ -146,11 +147,39 @@ class HouseViewModel @Inject constructor(
         }
     }
 
-    fun onHouseClick(houseName: String) {
+    fun onHouseClick(propertyId: String) {
+        val property = _uiState.value.allProperties.firstOrNull { it.id == propertyId } ?: return
         _uiState.update {
             it.copy(
-                selectedHouseName = houseName,
-                lastActionMessage = "Abrir detalle de $houseName"
+                showPropertyDetail = true,
+                selectedPropertyDetail = PropertyDetailUi(
+                    id = property.id,
+                    title = property.title,
+                    description = property.description,
+                    monthlyRent = property.monthlyRent.toInt(),
+                    depositAmount = property.depositAmount?.toInt(),
+                    neighborhood = property.neighborhood,
+                    address = property.address,
+                    bedrooms = property.bedrooms,
+                    bathrooms = property.bathrooms,
+                    sizeM2 = property.sizeM2,
+                    furnished = property.furnished,
+                    petFriendly = property.petFriendly,
+                    hasParking = property.hasParking,
+                    hasLaundry = property.hasLaundry,
+                    hasWifi = property.hasWifi,
+                    includesUtilities = property.includesUtilities,
+                    propertyType = property.propertyType.name.replace("_", " ")
+                )
+            )
+        }
+    }
+
+    fun onBackFromDetail() {
+        _uiState.update {
+            it.copy(
+                showPropertyDetail = false,
+                selectedPropertyDetail = null
             )
         }
     }
@@ -166,6 +195,7 @@ class HouseViewModel @Inject constructor(
         val roomLabel = "$bedrooms Bed · $bathrooms Bath"
 
         return HousingCardUi(
+            id = id,
             name = title,
             pricePerMonth = monthlyRent.toInt(),
             rating = 0.0,
