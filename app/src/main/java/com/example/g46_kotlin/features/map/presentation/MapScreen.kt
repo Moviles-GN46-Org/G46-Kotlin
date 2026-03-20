@@ -3,10 +3,14 @@ package com.example.g46_kotlin.features.map.presentation
 import android.animation.ValueAnimator
 import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -48,6 +51,9 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 
@@ -58,6 +64,8 @@ private fun MapScreenLayout(
     errorMessage: String?,
     onBack: () -> Unit,
     onSettingsClick: () -> Unit,
+    showSettingsOverlay: Boolean = false,
+    onDismissSettingsOverlay: () -> Unit = {},
     mapContent: @Composable () -> Unit
 ) {
     Scaffold(
@@ -87,6 +95,13 @@ private fun MapScreenLayout(
                     color = MaterialTheme.colorScheme.error
                 )
             }
+
+            MapOverlayHost(
+                visible = showSettingsOverlay,
+                onDismiss = onDismissSettingsOverlay
+            ) {
+                MapSettingsOverlay(onDismiss = onDismissSettingsOverlay)
+            }
         }
     }
 }
@@ -99,6 +114,8 @@ fun MapScreen(
 ) {
     val viewModel: MapViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showSettingsOverlay by rememberSaveable { mutableStateOf(false) }
+
 
     // Temporal: dispara carga inicial hasta conectar ubicación real
     LaunchedEffect(Unit) {
@@ -111,11 +128,17 @@ fun MapScreen(
         isLoading = uiState.isLoading,
         errorMessage = uiState.errorMessage,
         onBack = onBack,
-        onSettingsClick = onSettingsClick,
+        onSettingsClick = {
+            showSettingsOverlay = true
+            onSettingsClick()
+        },
+        showSettingsOverlay = showSettingsOverlay,
+        onDismissSettingsOverlay = { showSettingsOverlay = false },
         mapContent = {
             Map(
-                uiState.userLocation,
-                uiState.apartments)
+                userLocation = uiState.userLocation,
+                apartments = uiState.apartments
+            )
         }
     )
 }
@@ -154,6 +177,115 @@ private fun MapTopBar(
     )
 }
 
+@Composable
+private fun MapOverlayHost(
+    visible: Boolean,
+    onDismiss: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    if (!visible) return
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f))
+            .clickable(onClick = onDismiss)
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Evita que tap dentro del card cierre el overlay
+        Box(modifier = Modifier.clickable(enabled = false, onClick = {})) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun MapSettingsOverlay(
+    onDismiss: () -> Unit = {}
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(0.90f)
+            .fillMaxHeight(0.72f),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // Header
+            Text(
+                text = "Ajustes del mapa",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = "Funcion en desarrollo",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            // Bloque visual placeholder para futuros filtros
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+                )
+            ) {
+                Text(
+                    text = "Pronto podras configurar filtros de precio, distancia y calificacion.",
+                    modifier = Modifier.padding(14.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
+
+            FilledTonalButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.End)
+            ) {
+                Text("Entendido")
+            }
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+private fun MapSettingsOverlayPreview() {
+    G46KotlinTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f)),
+            contentAlignment = Alignment.Center
+        ) {
+            MapSettingsOverlay()
+        }
+    }
+}
 
 
 @Preview(showBackground = true, showSystemUi = true)
