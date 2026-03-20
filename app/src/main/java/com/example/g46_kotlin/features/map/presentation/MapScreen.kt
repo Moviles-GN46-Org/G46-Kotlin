@@ -63,65 +63,153 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
+import com.example.g46_kotlin.features.map.presentation.components.MiniHouseCard
+import com.example.g46_kotlin.features.map.presentation.components.MiniHouseCardUi
 import android.graphics.Color as AndroidColor
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MapScreenLayout(
-    isLoading: Boolean,
-    errorMessage: String?,
+    uiState: MapUiState,
     onBack: () -> Unit,
     onSettingsClick: () -> Unit,
-    showSettingsOverlay: Boolean = false,
-    onDismissSettingsOverlay: () -> Unit = {},
-    mapContent: @Composable () -> Unit
+    onApartmentTapped: (String) -> Unit,
+    mapContent: @Composable () -> Unit,
 ) {
-    Scaffold(
+    val sheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.PartiallyExpanded,
+        skipHiddenState = true
+    )
+    val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
+    val scope = rememberCoroutineScope()
+    val isExpanded = sheetState.currentValue == SheetValue.Expanded
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             MapTopBar(
                 title = stringResource(id = R.string.map_view_title),
                 onBack = onBack,
                 onSettingsClick = onSettingsClick
             )
+        },
+        sheetPeekHeight = 90.dp,
+        sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        sheetDragHandle = {
+            DrawerHandleHeader()
+        },
+        sheetContent = {
+            DrawerContent(
+                apartments = uiState.apartments,
+                selectedApartmentId = uiState.selectedApartmentId,
+                canScroll = isExpanded,
+                onApartmentClick = { id ->
+                    onApartmentTapped(id)
+                }
+            )
         }
     ) { innerPadding ->
         Box(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
-                .padding(top = innerPadding.calculateTopPadding())
+                .padding(innerPadding)
         ) {
             mapContent()
 
-            if (isLoading) {
+            if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
-            errorMessage?.let { msg ->
+            uiState.errorMessage?.let { msg ->
                 Text(
                     text = msg,
                     modifier = Modifier.align(Alignment.TopCenter),
                     color = MaterialTheme.colorScheme.error
                 )
             }
-
-            MapOverlayHost(
-                visible = showSettingsOverlay,
-                onDismiss = onDismissSettingsOverlay
-            ) {
-                MapSettingsOverlay(onDismiss = onDismissSettingsOverlay)
-            }
         }
     }
 }
+
+@Composable
+private fun DrawerHandleHeader(title: String = "Recommended for you") {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp, bottom = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .width(44.dp)
+                .height(5.dp)
+                .clip(RoundedCornerShape(999.dp))
+                .background(MaterialTheme.colorScheme.onSurfaceVariant)
+        )
+        Spacer(Modifier.height(14.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun DrawerContent(
+    apartments: List<ApartmentPinUi>,
+    selectedApartmentId: String?,
+    canScroll: Boolean,
+    onApartmentClick: (String) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 120.dp, max = 520.dp)
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        userScrollEnabled = canScroll,
+        contentPadding = PaddingValues(top = 20.dp,bottom = 20.dp)
+    ) {
+        items(apartments, key = { it.id }) { apt ->
+            MiniHouseCard(
+                ui = MiniHouseCardUi(
+                    name = apt.title,
+                    pricePerMonth = apt.price.filter { it.isDigit() }.toIntOrNull() ?: 0,
+                    rating = apt.rating,
+                    distanceToCampus = apt.description, // cámbialo por distancia real si la tienes
+                    propertyType = "Apartment"
+                ),
+                onCardClick = { onApartmentClick(apt.id) }
+            )
+        }
+    }
+}
+
 
 
 @Composable
 fun MapScreen(
     onBack: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
-    onApartmentClick: (ApartmentPinUi) -> Unit = {}
+    onApartmentClick: (id: String) -> Unit = {}
 ) {
     val viewModel: MapViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -141,6 +229,11 @@ fun MapScreen(
 
         hasLocationPermission = granted
         viewModel.startLocationTracking(granted)
+    }
+
+    val onApartmentTapped: (String) -> Unit = { apartmentId ->
+        viewModel.onApartmentSelected(apartmentId)
+        onApartmentClick(apartmentId)
     }
 
     LaunchedEffect(Unit) {
@@ -165,20 +258,18 @@ fun MapScreen(
     }
 
     MapScreenLayout(
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
+        uiState = uiState,
         onBack = onBack,
         onSettingsClick = {
             showSettingsOverlay = true
             onSettingsClick()
         },
-        showSettingsOverlay = showSettingsOverlay,
-        onDismissSettingsOverlay = { showSettingsOverlay = false },
+        onApartmentTapped = onApartmentTapped,
         mapContent = {
             MapRender(
                 userLocation = uiState.userLocation,
                 apartments = uiState.apartments,
-                onApartmentClick = onApartmentClick
+                onApartmentClick = onApartmentTapped
             )
         }
     )
@@ -333,12 +424,38 @@ private fun MapSettingsOverlayPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MapScreenPreview() {
+    val previewState = MapUiState(
+        isLoading = false,
+        userLocation = UserLocationUI(lat = 4.6016, lon = -74.0661),
+        apartments = listOf(
+            ApartmentPinUi(
+                id = "1",
+                title = "Oakwood Residences",
+                description = "0.5 miles",
+                rating = 4.8,
+                lat = 4.6020,
+                lon = -74.0665,
+                price = "$120"
+            ),
+            ApartmentPinUi(
+                id = "2",
+                title = "City Lofts",
+                description = "0.8 miles",
+                rating = 4.6,
+                lat = 4.6030,
+                lon = -74.0670,
+                price = "$450"
+            )
+        ),
+        selectedApartmentId = null
+    )
+
     G46KotlinTheme {
         MapScreenLayout(
-            isLoading = false,
-            errorMessage = null,
+            uiState = previewState,
             onBack = {},
             onSettingsClick = {},
+            onApartmentTapped = {},
             mapContent = {
                 PreviewMapWithMarkers(
                     prices = listOf("$120", "$450", "$1.200")
@@ -347,6 +464,7 @@ fun MapScreenPreview() {
         )
     }
 }
+
 
 
 @Composable
@@ -432,7 +550,7 @@ private fun ZoomControlsOverlay(
 fun MapRender(
     userLocation: UserLocationUI?,
     apartments: List<ApartmentPinUi>,
-    onApartmentClick: (ApartmentPinUi) -> Unit = {}
+    onApartmentClick: (id: String) -> Unit = {}
 ) {
     var initialized by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
@@ -511,7 +629,7 @@ fun MapRender(
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
 
                         setOnMarkerClickListener { _, _ ->
-                            onApartmentClick(apt)
+                            onApartmentClick(apt.id)
                             true
                         }
                     }

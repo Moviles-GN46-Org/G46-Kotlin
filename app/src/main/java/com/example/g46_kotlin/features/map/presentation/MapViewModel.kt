@@ -37,6 +37,10 @@ class MapViewModel @Inject constructor(
         const val APARTMENTS_RELOAD_MIN_DISTANCE_METERS = 120.0
     }
 
+    fun onApartmentSelected(id: String) {
+        _uiState.update { it.copy(selectedApartmentId = id) }
+    }
+
     fun startLocationTracking(hasLocationPermission: Boolean) {
         if (locationTrackingJob?.isActive == true) return
 

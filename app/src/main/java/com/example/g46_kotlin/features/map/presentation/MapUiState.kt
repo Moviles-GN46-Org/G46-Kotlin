@@ -20,4 +20,5 @@ data class MapUiState(
     val userLocation: UserLocationUI? = null,
     val apartments: List<ApartmentPinUi> = emptyList(),
     val errorMessage: String? = null,
+    val selectedApartmentId: String? = null,
 )
