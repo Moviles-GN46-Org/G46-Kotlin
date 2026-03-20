@@ -1,4 +1,4 @@
-package com.example.g46_kotlin.cards
+package com.example.g46_kotlin.features.map.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,18 +38,15 @@ data class MiniHouseCardUi(
     val pricePerMonth: Int,
     val rating: Double,
     val distanceToCampus: String,
-    val propertyType: String
+    val propertyType: String,
+    val imageResId: Int = R.drawable.house_example
 )
-
-// Todo: put the font with the general theme
-// use the library for the icons insted of my web
 
 @Composable
 fun MiniHouseCard(
     ui: MiniHouseCardUi,
     modifier: Modifier = Modifier,
     onCardClick: () -> Unit = {},
-    imageResId: Int = R.drawable.house_example
 ) {
     Box(modifier = modifier) {
         Card(
@@ -71,7 +68,7 @@ fun MiniHouseCard(
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Image(
-                        painter = painterResource(id = imageResId),
+                        painter = painterResource(id = ui.imageResId),
                         contentDescription = "Imagen de ${ui.name}",
                         modifier = Modifier
                             .fillMaxWidth()
