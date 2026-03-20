@@ -7,11 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.g46_kotlin"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.g46_kotlin"
@@ -40,6 +36,10 @@ android {
         compose = true
     }
 
+}
+
+hilt {
+    enableAggregatingTask = true
 }
 
 dependencies {
@@ -76,4 +76,3 @@ dependencies {
 ksp {
     arg("hilt.enableTransformForLocalTests", "true")
 }
-
