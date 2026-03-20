@@ -2,7 +2,9 @@ package com.example.g46_kotlin.features.map.presentation
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -49,6 +51,11 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.runtime.remember
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import org.osmdroid.views.CustomZoomButtonsController
+import kotlin.math.roundToInt
+import androidx.compose.ui.graphics.asImageBitmap
+import android.animation.ValueAnimator
+import android.view.animation.DecelerateInterpolator
+import androidx.compose.runtime.DisposableEffect
 
 
 @Composable
@@ -92,6 +99,38 @@ fun MapScreenPreview() {
             prices = listOf("$120", "$450", "$1.200")
         )
     }
+}
+
+private fun addSoftShadow(
+    source: Bitmap,
+    blur: Float = 6f,
+    dx: Float = 0f,
+    dy: Float = 2f,
+    shadowColor: Int = 0x33000000
+): Bitmap {
+    val pad = (blur * 2).roundToInt()
+    val out = createBitmap(source.width + pad * 2, source.height + pad * 2)
+    val canvas = Canvas(out)
+
+    val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = shadowColor.toInt()
+        maskFilter = BlurMaskFilter(blur, BlurMaskFilter.Blur.NORMAL)
+    }
+
+    val offset = IntArray(2)
+    val alpha = source.extractAlpha(shadowPaint, offset)
+
+    canvas.drawBitmap(
+        alpha,
+        pad + offset[0] + dx,
+        pad + offset[1] + dy,
+        shadowPaint
+    )
+
+    canvas.drawBitmap(source, pad.toFloat(), pad.toFloat(), null)
+
+    alpha.recycle()
+    return out
 }
 
 @Composable
@@ -142,16 +181,13 @@ private fun MarkerBubblePreview(
     price: String,
     modifier: Modifier = Modifier
 ) {
-    AndroidView(
-        modifier = modifier,
-        factory = { context ->
-            LayoutInflater.from(context).inflate(R.layout.view_map_marker, null).apply {
-                findViewById<TextView>(R.id.tvMarkerPrice).text = price
-            }
-        },
-        update = { view ->
-            view.findViewById<TextView>(R.id.tvMarkerPrice).text = price
-        }
+    val context = LocalContext.current
+    val markerBitmap = remember(price) { createMarkerBitmap(context, price) }
+
+    Image(
+        bitmap = markerBitmap.asImageBitmap(),
+        contentDescription = "Marcador con sombra",
+        modifier = modifier
     )
 }
 
@@ -166,11 +202,37 @@ private fun createMarkerIcon(context: Context, price: String): BitmapDrawable {
     view.layout(0, 0, view.measuredWidth, view.measuredHeight)
 
     val bitmap = createBitmap(view.measuredWidth, view.measuredHeight)
-    val canvas = Canvas(bitmap)
+    val bitmapWithShadow = createMarkerBitmap(context, price)
+    val canvas = Canvas(bitmapWithShadow)
     view.draw(canvas)
 
-    return bitmap.toDrawable(context.resources)
+    return bitmapWithShadow.toDrawable(context.resources)
 }
+
+private fun createMarkerBitmap(context: Context, price: String): Bitmap {
+    val view = LayoutInflater.from(context).inflate(R.layout.view_map_marker, null)
+    view.findViewById<TextView>(R.id.tvMarkerPrice).text = price
+
+    view.measure(
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+    )
+    view.layout(0, 0, view.measuredWidth, view.measuredHeight)
+
+    // 1) Dibuja primero el marcador base
+    val base = createBitmap(view.measuredWidth, view.measuredHeight)
+    val baseCanvas = Canvas(base)
+    view.draw(baseCanvas)
+
+    // 2) Aplica sombra sobre ese marcador ya dibujado
+    return addSoftShadow(
+        source = base,
+        blur = 5f,
+        dy = 2f,
+        shadowColor = 0x2A000000
+    )
+}
+
 
 @Composable
 private fun ZoomControlsOverlay(
@@ -206,6 +268,30 @@ fun Map(
     val maxZoom = 25.0
     val zoomStep = 1.0
 
+    var zoomAnimator by remember { mutableStateOf<ValueAnimator?>(null) }
+
+
+    fun animateZoomBy(delta: Double) {
+        val map = mapRef ?: return
+        val start = map.zoomLevelDouble
+        val end = (start + delta).coerceIn(minZoom, maxZoom)
+        if (start == end) return
+
+        zoomAnimator?.cancel()
+        zoomAnimator = ValueAnimator.ofFloat(start.toFloat(), end.toFloat()).apply {
+            duration = 220L
+            interpolator = DecelerateInterpolator()
+            addUpdateListener { animator ->
+                val z = (animator.animatedValue as Float).toDouble()
+                map.controller.setZoom(z)
+            }
+            start()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { zoomAnimator?.cancel() }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
@@ -219,7 +305,6 @@ fun Map(
                     minZoomLevel = minZoom
                     maxZoomLevel = maxZoom
 
-                    // Oculta botones nativos para usar nuestros controles
                     zoomController.setVisibility(
                         org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER
                     )
@@ -253,18 +338,8 @@ fun Map(
         )
 
         ZoomControlsOverlay(
-            onZoomIn = {
-                mapRef?.let { map ->
-                    val target = (map.zoomLevelDouble + zoomStep).coerceIn(minZoom, maxZoom)
-                    map.controller.setZoom(target)
-                }
-            },
-            onZoomOut = {
-                mapRef?.let { map ->
-                    val target = (map.zoomLevelDouble - zoomStep).coerceIn(minZoom, maxZoom)
-                    map.controller.setZoom(target)
-                }
-            },
+            onZoomIn = { animateZoomBy(+zoomStep) },
+            onZoomOut = { animateZoomBy(-zoomStep) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .offset(x = (-16).dp, y = (-24).dp)
