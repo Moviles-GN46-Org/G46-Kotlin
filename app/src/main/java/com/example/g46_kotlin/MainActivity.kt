@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun G46KotlinApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.WELCOME) }
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -66,12 +66,6 @@ fun G46KotlinApp() {
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
-                AppDestinations.WELCOME -> {
-                    Greeting(
-                        name = "G46",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
                 AppDestinations.HOME -> {
                     HouseScreen()
                 }
@@ -93,8 +87,7 @@ enum class AppDestinations(
     val label: String,
     val icon: ImageVector,
 ) {
-    WELCOME("Welcome", Icons.Default.AccountBox),
-    HOME("Home", Icons.Default.Home),
+    HOME("Houses", Icons.Default.Home),
     MAP("Map", Icons.Default.LocationOn),
     FAVORITES("Favorites", Icons.Default.Favorite),
     PROFILE("Profile", Icons.Default.AccountBox),
