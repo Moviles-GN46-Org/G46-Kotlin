@@ -72,7 +72,9 @@ fun G46KotlinApp() {
                     )
                 }
                 AppDestinations.MAP -> {
-                    MapScreen()
+                    MapScreen(
+                        onBack = { currentDestination = AppDestinations.HOME },
+                    )
                 }
                 AppDestinations.FAVORITES -> {
                     Text("Favorites", modifier = Modifier.padding(innerPadding))

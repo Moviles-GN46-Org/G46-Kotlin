@@ -1,26 +1,25 @@
 package com.example.g46_kotlin.features.map.presentation
 
 import android.animation.ValueAnimator
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BlurMaskFilter
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.drawable.BitmapDrawable
-import android.view.LayoutInflater
-import android.view.View
 import android.view.animation.DecelerateInterpolator
-import android.widget.TextView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -35,24 +34,69 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.graphics.createBitmap
-import androidx.core.graphics.drawable.toDrawable
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.g46_kotlin.R
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import kotlin.math.roundToInt
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 
 
 @Composable
-fun MapScreen() {
+private fun MapScreenLayout(
+    isLoading: Boolean,
+    errorMessage: String?,
+    onBack: () -> Unit,
+    onSettingsClick: () -> Unit,
+    mapContent: @Composable () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            MapTopBar(
+                title = stringResource(id = R.string.map_view_title),
+                onBack = onBack,
+                onSettingsClick = onSettingsClick
+            )
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = innerPadding.calculateTopPadding())
+        ) {
+            mapContent()
+
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+
+            errorMessage?.let { msg ->
+                Text(
+                    text = msg,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun MapScreen(
+    onBack: () -> Unit = {},
+    onSettingsClick: () -> Unit = {}
+) {
     val viewModel: MapViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -63,68 +107,73 @@ fun MapScreen() {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Map(
-            userLocation = uiState.userLocation,
-            apartments = uiState.apartments
-        )
-
-        if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+    MapScreenLayout(
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.errorMessage,
+        onBack = onBack,
+        onSettingsClick = onSettingsClick,
+        mapContent = {
+            Map(
+                uiState.userLocation,
+                uiState.apartments)
         }
-
-        uiState.errorMessage?.let { msg ->
-            Text(
-                text = msg,
-                modifier = Modifier.align(Alignment.TopCenter),
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-    }
+    )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MapTopBar(
+    title: String,
+    onBack: () -> Unit,
+    onSettingsClick: () -> Unit
+) {
+    CenterAlignedTopAppBar(
+        title = { Text(title) },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(id = R.string.cd_back)
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = stringResource(id = R.string.cd_settings)
+                )
+            }
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    )
+}
+
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MapScreenPreview() {
-
-    G46KotlinTheme{
-        PreviewMapWithMarkers(
-            prices = listOf("$120", "$450", "$1.200")
+    G46KotlinTheme {
+        MapScreenLayout(
+            isLoading = false,
+            errorMessage = null,
+            onBack = {},
+            onSettingsClick = {},
+            mapContent = {
+                PreviewMapWithMarkers(
+                    prices = listOf("$120", "$450", "$1.200")
+                )
+            }
         )
     }
 }
 
-private fun addSoftShadow(
-    source: Bitmap,
-    blur: Float = 6f,
-    dx: Float = 0f,
-    dy: Float = 2f,
-    shadowColor: Int = 0x33000000
-): Bitmap {
-    val pad = (blur * 2).roundToInt()
-    val out = createBitmap(source.width + pad * 2, source.height + pad * 2)
-    val canvas = Canvas(out)
-
-    val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = shadowColor
-        maskFilter = BlurMaskFilter(blur, BlurMaskFilter.Blur.NORMAL)
-    }
-
-    val offset = IntArray(2)
-    val alpha = source.extractAlpha(shadowPaint, offset)
-
-    canvas.drawBitmap(
-        alpha,
-        pad + offset[0] + dx,
-        pad + offset[1] + dy,
-        shadowPaint
-    )
-
-    canvas.drawBitmap(source, pad.toFloat(), pad.toFloat(), null)
-
-    alpha.recycle()
-    return out
-}
 
 @Composable
 private fun PreviewMapWithMarkers(prices: List<String>) {
@@ -175,53 +224,12 @@ private fun MarkerBubblePreview(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val markerBitmap = remember(price) { createMarkerBitmap(context, price) }
+    val markerBitmap = remember(price) { MapMarkerFactory.createMarkerBitmap(context, price) }
 
     Image(
         bitmap = markerBitmap.asImageBitmap(),
         contentDescription = "Marcador con sombra",
         modifier = modifier
-    )
-}
-
-private fun createMarkerIcon(context: Context, price: String): BitmapDrawable {
-    val view = LayoutInflater.from(context).inflate(R.layout.view_map_marker, null)
-    view.findViewById<TextView>(R.id.tvMarkerPrice).text = price
-
-    view.measure(
-        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-    )
-    view.layout(0, 0, view.measuredWidth, view.measuredHeight)
-
-    val bitmapWithShadow = createMarkerBitmap(context, price)
-    val canvas = Canvas(bitmapWithShadow)
-    view.draw(canvas)
-
-    return bitmapWithShadow.toDrawable(context.resources)
-}
-
-private fun createMarkerBitmap(context: Context, price: String): Bitmap {
-    val view = LayoutInflater.from(context).inflate(R.layout.view_map_marker, null)
-    view.findViewById<TextView>(R.id.tvMarkerPrice).text = price
-
-    view.measure(
-        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-    )
-    view.layout(0, 0, view.measuredWidth, view.measuredHeight)
-
-    // 1) Dibuja primero el marcador base
-    val base = createBitmap(view.measuredWidth, view.measuredHeight)
-    val baseCanvas = Canvas(base)
-    view.draw(baseCanvas)
-
-    // 2) Aplica sombra sobre ese marcador ya dibujado
-    return addSoftShadow(
-        source = base,
-        blur = 5f,
-        dy = 2f,
-        shadowColor = 0x2A000000
     )
 }
 
@@ -298,7 +306,7 @@ fun Map(
                     maxZoomLevel = maxZoom
 
                     zoomController.setVisibility(
-                        org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER
+                        CustomZoomButtonsController.Visibility.NEVER
                     )
 
                     mapRef = this
@@ -319,7 +327,7 @@ fun Map(
                         position = GeoPoint(apt.lat, apt.lon)
                         title = apt.title
                         snippet = "${apt.description} · ${apt.rating}"
-                        icon = createMarkerIcon(context, apt.price)
+                        icon = MapMarkerFactory.createMarkerIcon(context, apt.price)
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     }
                     mapView.overlays.add(marker)
