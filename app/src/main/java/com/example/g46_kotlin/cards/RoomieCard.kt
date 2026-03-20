@@ -36,6 +36,9 @@ data class RoomieCardUi(
     val habitsPreferences: List<String>
 )
 
+// Todo: put the font with the general theme
+// use the library for the icons insted of my web
+
 @Composable
 fun RoomieCard(
     ui: RoomieCardUi,

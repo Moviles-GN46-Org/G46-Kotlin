@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.example.g46_kotlin.features.house.presentation.HouseScreen
 import com.example.g46_kotlin.features.map.presentation.MapScreen
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -66,10 +67,7 @@ fun G46KotlinApp() {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
                 AppDestinations.HOME -> {
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    HouseScreen()
                 }
                 AppDestinations.MAP -> {
                     MapScreen(
@@ -91,7 +89,7 @@ enum class AppDestinations(
     val label: String,
     val icon: ImageVector,
 ) {
-    HOME("Home", Icons.Default.Home),
+    HOME("Houses", Icons.Default.Home),
     MAP("Map", Icons.Default.LocationOn),
     FAVORITES("Favorites", Icons.Default.Favorite),
     PROFILE("Profile", Icons.Default.AccountBox),
@@ -100,7 +98,7 @@ enum class AppDestinations(
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = "Hola $name.",
         modifier = modifier
     )
 }
@@ -109,6 +107,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     G46KotlinTheme {
-        Greeting("Android")
+        Greeting("G46")
     }
 }
