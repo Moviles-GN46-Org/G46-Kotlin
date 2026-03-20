@@ -12,10 +12,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.example.g46_kotlin.core.location.CurrentLocationSource
+import com.example.g46_kotlin.features.house.domain.usecase.GetNearestAvailablePropertyUseCase
+import java.util.UUID
+
 
 @HiltViewModel
 class HouseViewModel @Inject constructor(
-    private val getHouseUseCase: GetHouseUseCase
+    private val getHouseUseCase: GetHouseUseCase,
+    private val currentLocationSource: CurrentLocationSource,
+    private val getNearestAvailablePropertyUseCase: GetNearestAvailablePropertyUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HouseUiState())
@@ -32,13 +38,38 @@ class HouseViewModel @Inject constructor(
             runCatching {
                 getHouseUseCase()
             }.onSuccess { properties ->
+                val userLocation = currentLocationSource.getCurrentLocationOrNull()
+                val nearest = userLocation?.let { location ->
+                    getNearestAvailablePropertyUseCase(location, properties)
+                }
+
+                val newNotification = nearest?.let { result ->
+                    HouseInAppNotification(
+                        id = UUID.randomUUID().toString(),
+                        title = "Propiedad cerca de ti",
+                        message = "${result.property.title} en ${result.property.neighborhood} a ${formatDistance(result.distanceMeters)}",
+                        createdAtMillis = System.currentTimeMillis(),
+                        isRead = false
+                    )
+                }
+
                 val mapped = properties.map { property -> property.toHousingCardUi() }
 
-                _uiState.update {
-                    it.copy(
+                _uiState.update { state ->
+                    val updatedNotifications = if (newNotification != null) {
+                        listOf(newNotification) + state.notifications
+                    } else {
+                        state.notifications
+                    }
+
+                    state.copy(
                         isLoading = false,
                         houses = mapped,
-                        visibleHouses = mapped
+                        visibleHouses = mapped,
+                        notifications = updatedNotifications,
+                        lastActionMessage = nearest?.let { result ->
+                            "Cerca de ti: ${result.property.title} a ${formatDistance(result.distanceMeters)}"
+                        }
                     )
                 }
             }.onFailure { error ->
@@ -141,5 +172,30 @@ class HouseViewModel @Inject constructor(
             neighborhood = neighborhood,
             propertyType = "$typeLabel · $roomLabel",
         )
+    }
+
+    private fun formatDistance(distanceMeters: Int): String {
+        return if (distanceMeters < 1000) {
+            "${distanceMeters} m"
+        } else {
+            String.format("%.1f km", distanceMeters / 1000.0)
+        }
+    }
+
+    fun onNotificationIconClick() {
+        _uiState.update { state ->
+            state.copy(
+                showNotificationsPanel = true,
+                notifications = state.notifications.map { it.copy(isRead = true) }
+            )
+        }
+    }
+
+    fun onDismissNotificationsPanel() {
+        _uiState.update { it.copy(showNotificationsPanel = false) }
+    }
+
+    fun onClearNotifications() {
+        _uiState.update { it.copy(notifications = emptyList(), showNotificationsPanel = false) }
     }
 }

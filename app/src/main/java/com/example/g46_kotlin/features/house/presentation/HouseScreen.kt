@@ -35,6 +35,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.g46_kotlin.cards.HousingCard
 import com.example.g46_kotlin.cards.HousingCardUi
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
 
 private val budgetOptions = listOf("0-700", "700-1000", "1000-1400", "1400+")
 private val roomTypeOptions = listOf("APARTMENT", "ROOM", "STUDIO", "HOUSE", "SHARED ROOM")
@@ -52,7 +55,10 @@ fun HouseScreen() {
         onRoomTypeClick = viewModel::onRoomTypeClick,
         onAmenityClick = viewModel::onAmenityClick,
         onHouseClick = viewModel::onHouseClick,
-        onAvailabilityClick = viewModel::onAvailabilityClick
+        onAvailabilityClick = viewModel::onAvailabilityClick,
+        onNotificationIconClick = viewModel::onNotificationIconClick,
+        onDismissNotificationsPanel = viewModel::onDismissNotificationsPanel,
+        onClearNotifications = viewModel::onClearNotifications
     )
 }
 
@@ -64,7 +70,10 @@ private fun HouseContent(
     onRoomTypeClick: (String) -> Unit,
     onAmenityClick: (String) -> Unit,
     onHouseClick: (String) -> Unit,
-    onAvailabilityClick: (String) -> Unit
+    onAvailabilityClick: (String) -> Unit,
+    onNotificationIconClick: () -> Unit,
+    onDismissNotificationsPanel: () -> Unit,
+    onClearNotifications: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -72,7 +81,12 @@ private fun HouseContent(
             contentPadding = PaddingValues(vertical = 12.dp)
         ) {
             item {
-                HouseHeader()
+                HouseHeader(
+                    state = state,
+                    onNotificationIconClick = onNotificationIconClick,
+                    onDismissNotificationsPanel = onDismissNotificationsPanel,
+                    onClearNotifications = onClearNotifications
+                )
             }
 
             item {
@@ -171,7 +185,12 @@ private fun HouseContent(
 }
 
 @Composable
-private fun HouseHeader() {
+private fun HouseHeader(
+    state: HouseUiState,
+    onNotificationIconClick: () -> Unit,
+    onDismissNotificationsPanel: () -> Unit,
+    onClearNotifications: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -187,17 +206,52 @@ private fun HouseHeader() {
             )
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Icon(
-                imageVector = Icons.Outlined.NotificationsNone,
-                contentDescription = "Notifications",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Icon(
-                imageVector = Icons.Outlined.Place,
-                contentDescription = "Location",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box {
+                IconButton(onClick = onNotificationIconClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.NotificationsNone,
+                        contentDescription = "Notifications",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = state.showNotificationsPanel,
+                    onDismissRequest = onDismissNotificationsPanel
+                ) {
+                    if (state.notifications.isEmpty()) {
+                        DropdownMenuItem(
+                            text = { Text("No notifications") },
+                            onClick = {}
+                        )
+                    } else {
+                        state.notifications.take(5).forEach { notification ->
+                            val prefix = if (notification.isRead) "" else "[new] "
+                            DropdownMenuItem(
+                                text = { Text(prefix + notification.title) },
+                                onClick = {}
+                            )
+                            DropdownMenuItem(
+                                text = { Text(notification.message) },
+                                onClick = {}
+                            )
+                        }
+                        DropdownMenuItem(
+                            text = { Text("Clear all") },
+                            onClick = onClearNotifications
+                        )
+                    }
+                }
+            }
+
+            IconButton(onClick = {}) {
+                Icon(
+                    imageVector = Icons.Outlined.Place,
+                    contentDescription = "Location",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
@@ -216,7 +270,10 @@ private fun HouseContentPreview() {
             onRoomTypeClick = {},
             onAmenityClick = {},
             onHouseClick = {},
-            onAvailabilityClick = {}
+            onAvailabilityClick = {},
+            onNotificationIconClick = {},
+            onDismissNotificationsPanel = {},
+            onClearNotifications = {}
         )
     }
 }
