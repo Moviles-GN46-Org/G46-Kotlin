@@ -9,10 +9,15 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
+    <list default="true" id="49cdc1cf-599d-4d72-8d2d-bdecac192970" name="Changes" comment="ajuste del theme general y rediseño del card de house" />
+=======
     <list default="true" id="49cdc1cf-599d-4d72-8d2d-bdecac192970" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/cards/HouseCard.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/g46_kotlin/cards/HouseCard.kt" afterDir="false" />
     </list>
+>>>>>>> 4fc330d4e0dc6a8ef5f20f5b4e1e4fba319543f6
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -73,6 +78,12 @@
     &quot;assignee&quot;: &quot;DavK19&quot;
   }
 }</component>
+<<<<<<< HEAD
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/DavK19/G46-Kotlin.git&quot;,
+    &quot;accountId&quot;: &quot;cf039197-6970-4f3b-892a-64c6ffb74d23&quot;
+=======
   <component name="GitToolBoxStore">
     <option name="recentBranches">
       <RecentBranches>
@@ -98,20 +109,14 @@
       </RecentBranches>
     </option>
   </component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Moviles-GN46-Org/G46-Kotlin.git&quot;,
-    &quot;accountId&quot;: &quot;2bb6cf8d-31c0-42bc-b0b9-b90ebd3f7ad9&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Moviles-GN46-Org/G46-Kotlin.git",
+    "accountId": "2bb6cf8d-31c0-42bc-b0b9-b90ebd3f7ad9"
+>>>>>>> 4fc330d4e0dc6a8ef5f20f5b4e1e4fba319543f6
   }
 }</component>
-  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\Juand\.gradle\wrapper\dists\gradle-9.2.1-bin\2t0n5ozlw9xmuyvbp7dnzaxug\gradle-9.2.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.2.1">
-    <option name="jvmArguments">
-      <list>
-        <option value="-Didea.compose.hot-reload=true" />
-        <option value="-Didea.compose.hot-reload.version=2" />
-      </list>
-    </option>
-  </component>
+  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\palep\.gradle\wrapper\dists\gradle-9.2.1-bin\2t0n5ozlw9xmuyvbp7dnzaxug\gradle-9.2.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.2.1" />
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -120,8 +125,10 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+<<<<<<< HEAD
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Compose Preview.HousingCardPreview.executor&quot;: &quot;Run&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
@@ -131,10 +138,24 @@
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;cards&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/programacion/2026-1/Moviles&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/palep/G46-Kotlin&quot;
+=======
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "cards",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/programacion/2026-1/Moviles",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
+>>>>>>> 4fc330d4e0dc6a8ef5f20f5b4e1e4fba319543f6
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Compose Preview.HousingCardPreview">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="G46-Kotlin.app" />
@@ -281,10 +302,6 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <list>
-      <item itemvalue="Android App.app" />
-      <item itemvalue="Compose Preview.HousingCardPreview" />
-    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Compose Preview.HousingCardPreview" />
@@ -308,7 +325,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772681160772</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="ajuste del theme general y rediseño del card de house">
+      <option name="closed" value="true" />
+      <created>1773782886348</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1773782886348</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -336,7 +361,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="arreglo housing use de code theme, and new roomie card also with the code theme" />
-    <option name="LAST_COMMIT_MESSAGE" value="arreglo housing use de code theme, and new roomie card also with the code theme" />
+    <MESSAGE value="ajuste del theme general y rediseño del card de house" />
+    <option name="LAST_COMMIT_MESSAGE" value="ajuste del theme general y rediseño del card de house" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
