@@ -22,21 +22,22 @@ import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 
 
 data class HousingCardUi(
+    val id: String,
     val name: String,
     val pricePerMonth: Int,
     val rating: Double,
-    val distanceToCampus: String,
+    val neighborhood: String,
     val propertyType: String,
-    val isVerified: Boolean,
-    val isLiked: Boolean
 )
+
+// Todo: put the font with the general theme
+// use the library for the icons insted of my web
 
 @Composable
 fun HousingCard(
     ui: HousingCardUi,
     modifier: Modifier = Modifier,
     onCardClick: () -> Unit = {},
-    onLikeClick: () -> Unit = {},
     onAvailabilityClick: () -> Unit = {}
 ) {
     Card(
@@ -55,17 +56,6 @@ fun HousingCard(
                     .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
                     .padding(10.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    if (ui.isVerified) {
-                        Chip("✓ VERIFIED")
-                    } else {
-                        Spacer(Modifier)
-                    }
-                    Chip(if (ui.isLiked) "❤\uFE0F\uFE0F" else "♡", onClick = onLikeClick)
-                }
             }
 
             Spacer(Modifier.height(12.dp))
@@ -91,7 +81,7 @@ fun HousingCard(
                 Column{
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "\uD83D\uDCCD ${ui.distanceToCampus} from campus",
+                        "\uD83D\uDCCD ${ui.neighborhood}",
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(Modifier.height(4.dp))
@@ -145,13 +135,12 @@ fun HousingCardPreview() {
     G46KotlinTheme(dynamicColor = false) {
         HousingCard(
             ui = HousingCardUi(
+                id = "p1",
                 name = "Oakwood Residences",
                 pricePerMonth = 850,
                 rating = 4.8,
-                distanceToCampus = "0.5 miles",
+                neighborhood = "0.5 miles",
                 propertyType = "2 Bed · Shared Kitchen",
-                isVerified = true,
-                isLiked = false
             ),
             modifier = Modifier.padding(16.dp)
         )
