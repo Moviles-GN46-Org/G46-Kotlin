@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.example.g46_kotlin.features.house.presentation.HouseScreen
 import com.example.g46_kotlin.features.map.presentation.MapScreen
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,7 +45,7 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun G46KotlinApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.WELCOME) }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -65,11 +66,14 @@ fun G46KotlinApp() {
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
-                AppDestinations.HOME -> {
+                AppDestinations.WELCOME -> {
                     Greeting(
-                        name = "Android",
+                        name = "G46",
                         modifier = Modifier.padding(innerPadding)
                     )
+                }
+                AppDestinations.HOME -> {
+                    HouseScreen()
                 }
                 AppDestinations.MAP -> {
                     MapScreen()
@@ -89,6 +93,7 @@ enum class AppDestinations(
     val label: String,
     val icon: ImageVector,
 ) {
+    WELCOME("Welcome", Icons.Default.AccountBox),
     HOME("Home", Icons.Default.Home),
     MAP("Map", Icons.Default.LocationOn),
     FAVORITES("Favorites", Icons.Default.Favorite),
@@ -98,7 +103,7 @@ enum class AppDestinations(
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = "Hola $name.",
         modifier = modifier
     )
 }
@@ -107,6 +112,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     G46KotlinTheme {
-        Greeting("Android")
+        Greeting("G46")
     }
 }
