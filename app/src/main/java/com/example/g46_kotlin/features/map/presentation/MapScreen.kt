@@ -1,61 +1,54 @@
 package com.example.g46_kotlin.features.map.presentation
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
+import android.view.LayoutInflater
+import android.view.View
+import android.view.animation.DecelerateInterpolator
+import android.widget.TextView
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.g46_kotlin.R
+import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import com.example.g46_kotlin.R
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.TextView
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.offset
-import androidx.compose.runtime.remember
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.graphics.createBitmap
-import kotlin.text.clear
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.runtime.remember
-import com.example.g46_kotlin.ui.theme.G46KotlinTheme
-import org.osmdroid.views.CustomZoomButtonsController
 import kotlin.math.roundToInt
-import androidx.compose.ui.graphics.asImageBitmap
-import android.animation.ValueAnimator
-import android.view.animation.DecelerateInterpolator
-import androidx.compose.runtime.DisposableEffect
 
 
 @Composable
@@ -113,7 +106,7 @@ private fun addSoftShadow(
     val canvas = Canvas(out)
 
     val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = shadowColor.toInt()
+        color = shadowColor
         maskFilter = BlurMaskFilter(blur, BlurMaskFilter.Blur.NORMAL)
     }
 
@@ -201,7 +194,6 @@ private fun createMarkerIcon(context: Context, price: String): BitmapDrawable {
     )
     view.layout(0, 0, view.measuredWidth, view.measuredHeight)
 
-    val bitmap = createBitmap(view.measuredWidth, view.measuredHeight)
     val bitmapWithShadow = createMarkerBitmap(context, price)
     val canvas = Canvas(bitmapWithShadow)
     view.draw(canvas)
