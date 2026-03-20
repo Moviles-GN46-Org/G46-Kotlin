@@ -7,6 +7,7 @@ data class ApartmentPinUi (
     val rating: Double,
     val lat: Double,
     val lon: Double,
+    val price: String,
 )
 
 data class UserLocationUI(

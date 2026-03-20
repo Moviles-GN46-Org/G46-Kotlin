@@ -55,7 +55,8 @@ class MapViewModel @Inject constructor(
                                 description = apt.description,
                                 rating = apt.rating,
                                 lat = apt.lat,
-                                lon = apt.lon
+                                lon = apt.lon,
+                                price = apt.price,
                             )
                         }
                     )

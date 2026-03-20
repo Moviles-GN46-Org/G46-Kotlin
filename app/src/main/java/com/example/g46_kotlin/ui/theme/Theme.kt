@@ -12,24 +12,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-
-    primary = LightBronze,
-    onPrimary = WarmWhite,
-
-    background = DarkBackground,
-    onBackground = WarmWhite,
-
-    surface = DarkSurface,
-    onSurface = WarmWhite
-)
-
-private val LightColorScheme = lightColorScheme(
-
     primary = LightBronze,
     onPrimary = WarmWhite,
 
     secondary = DustyTaupe,
     onSecondary = WarmWhite,
+
+    // Importante para FilledTonalButton
+    secondaryContainer = DustyTaupe,
+    onSecondaryContainer = WarmWhite,
+
+    background = DarkBackground,
+    onBackground = WarmWhite,
+
+    surface = DarkSurface,
+    onSurface = WarmWhite,
+
+    // Opcional, mejora consistencia de tarjetas/controles
+    surfaceVariant = DeepMocha,
+    onSurfaceVariant = WarmWhite
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = LightBronze,
+    onPrimary = WarmWhite,
+
+    secondary = DustyTaupe,
+    onSecondary = WarmWhite,
+
+    // Importante para FilledTonalButton
+    secondaryContainer = LightBronze.copy(alpha = 0.22f),
+    onSecondaryContainer = DeepMocha,
 
     background = Linen,
     onBackground = AshBrown,
@@ -37,8 +50,13 @@ private val LightColorScheme = lightColorScheme(
     surface = WarmWhite,
     onSurface = AshBrown,
 
-    tertiary = DeepMocha // puedes usarlo para títulos
+    // Opcional, mejora consistencia de textos secundarios
+    surfaceVariant = Linen,
+    onSurfaceVariant = DustyTaupe,
+
+    tertiary = DeepMocha
 )
+
 
 @Composable
 fun G46KotlinTheme(

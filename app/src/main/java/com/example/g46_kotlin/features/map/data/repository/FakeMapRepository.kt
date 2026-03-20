@@ -18,7 +18,8 @@ class FakeMapRepository: MapRepository {
                 "2 habitaciones",
                 4.6,
                 userLat + 0.0020,
-                userLon + 0.0015
+                userLon + 0.0015,
+                "$1000"
             ),
             Apartment(
                 "a2",
@@ -26,7 +27,8 @@ class FakeMapRepository: MapRepository {
                 "1 habitacion",
                 4.2,
                 userLat - 0.0012,
-                userLon + 0.0022
+                userLon + 0.0022,
+                "$1500"
             ),
             Apartment(
                 "a3",
@@ -34,7 +36,8 @@ class FakeMapRepository: MapRepository {
                 "Cerca al campus",
                 4.8,
                 userLat + 0.0010,
-                userLon - 0.0018
+                userLon - 0.0018,
+                "$2000"
             )
         )
     }
