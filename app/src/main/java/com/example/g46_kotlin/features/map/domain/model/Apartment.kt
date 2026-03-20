@@ -6,5 +6,6 @@ data class Apartment(
     val description: String,
     val rating: Double,
     val lat: Double,
-    val lon: Double
+    val lon: Double,
+    val price: String
 )
