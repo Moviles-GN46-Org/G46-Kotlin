@@ -56,6 +56,16 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.ContextCompat
+import android.graphics.Color as AndroidColor
 
 
 @Composable
@@ -110,18 +120,48 @@ private fun MapScreenLayout(
 @Composable
 fun MapScreen(
     onBack: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onApartmentClick: (ApartmentPinUi) -> Unit = {}
 ) {
     val viewModel: MapViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showSettingsOverlay by rememberSaveable { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    var hasLocationPermission by remember {
+        mutableStateOf(hasLocationPermission(context))
+    }
+    var permissionRequested by rememberSaveable { mutableStateOf(false) }
 
-    // Temporal: dispara carga inicial hasta conectar ubicación real
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { grants ->
+        val granted = grants[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+        hasLocationPermission = granted
+        viewModel.startLocationTracking(granted)
+    }
+
     LaunchedEffect(Unit) {
-        if (uiState.userLocation == null) {
-            viewModel.onLocationResolved(lat = 4.7110, lon = -74.0721)
+        if (hasLocationPermission) {
+            viewModel.startLocationTracking(true)
+        } else if (!permissionRequested) {
+            permissionRequested = true
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        } else {
+            // Ya se pidió permiso y no fue concedido: fallback en ViewModel (Los Andes).
+            viewModel.startLocationTracking(false)
         }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { viewModel.stopLocationTracking() }
     }
 
     MapScreenLayout(
@@ -135,13 +175,15 @@ fun MapScreen(
         showSettingsOverlay = showSettingsOverlay,
         onDismissSettingsOverlay = { showSettingsOverlay = false },
         mapContent = {
-            Map(
+            MapRender(
                 userLocation = uiState.userLocation,
-                apartments = uiState.apartments
+                apartments = uiState.apartments,
+                onApartmentClick = onApartmentClick
             )
         }
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -168,7 +210,7 @@ private fun MapTopBar(
                 )
             }
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -387,12 +429,18 @@ private fun ZoomControlsOverlay(
 }
 
 @Composable
-fun Map(
+fun MapRender(
     userLocation: UserLocationUI?,
-    apartments: List<ApartmentPinUi>
+    apartments: List<ApartmentPinUi>,
+    onApartmentClick: (ApartmentPinUi) -> Unit = {}
 ) {
     var initialized by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
+
+    val userMarkerColor = MaterialTheme.colorScheme.primary.toArgb()
+    val userMarkerIcon = remember(userMarkerColor) {
+        createUserLocationDrawable(context, userMarkerColor)
+    }
 
     var mapRef by remember { mutableStateOf<MapView?>(null)}
 
@@ -454,15 +502,31 @@ fun Map(
                     initialized = true
                 }
 
+                //Apartments markers
                 apartments.forEach { apt ->
                     val marker = Marker(mapView).apply {
                         position = GeoPoint(apt.lat, apt.lon)
                         title = apt.title
-                        snippet = "${apt.description} · ${apt.rating}"
                         icon = MapMarkerFactory.createMarkerIcon(context, apt.price)
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+                        setOnMarkerClickListener { _, _ ->
+                            onApartmentClick(apt)
+                            true
+                        }
                     }
                     mapView.overlays.add(marker)
+                }
+
+                //User markers
+                userLocation?.let { loc ->
+                    val userMarker = Marker(mapView).apply {
+                        position = GeoPoint(loc.lat, loc.lon)
+                        title = "Your location"
+                        icon = userMarkerIcon
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    }
+                    mapView.overlays.add(userMarker)
                 }
 
                 mapView.invalidate()
@@ -479,3 +543,34 @@ fun Map(
 
     }
 }
+
+private fun hasLocationPermission(context: Context): Boolean {
+    val fineGranted = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+    val coarseGranted = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+    return fineGranted || coarseGranted
+}
+
+private fun createUserLocationDrawable(
+    context: Context,
+    fillColor: Int
+): Drawable {
+    val density = context.resources.displayMetrics.density
+    val sizePx = (16 * density).toInt()
+    val strokePx = (2 * density).toInt()
+
+    return GradientDrawable().apply {
+        shape = GradientDrawable.OVAL
+        setSize(sizePx, sizePx)
+        setColor(fillColor)
+        setStroke(strokePx, AndroidColor.WHITE)
+    }
+}
+
