@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,8 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.example.g46_kotlin.features.house.presentation.HouseScreen
+import com.example.g46_kotlin.features.map.presentation.MapScreen
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,10 +65,22 @@ fun G46KotlinApp() {
         }
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
+            when (currentDestination) {
+                AppDestinations.HOME -> {
+                    HouseScreen()
+                }
+                AppDestinations.MAP -> {
+                    MapScreen(
+                        onBack = { currentDestination = AppDestinations.HOME },
+                    )
+                }
+                AppDestinations.FAVORITES -> {
+                    Text("Favorites", modifier = Modifier.padding(innerPadding))
+                }
+                AppDestinations.PROFILE -> {
+                    Text("Profile", modifier = Modifier.padding(innerPadding))
+                }
+            }
         }
     }
 }
@@ -72,7 +89,8 @@ enum class AppDestinations(
     val label: String,
     val icon: ImageVector,
 ) {
-    HOME("Home", Icons.Default.Home),
+    HOME("Houses", Icons.Default.Home),
+    MAP("Map", Icons.Default.LocationOn),
     FAVORITES("Favorites", Icons.Default.Favorite),
     PROFILE("Profile", Icons.Default.AccountBox),
 }
@@ -80,7 +98,7 @@ enum class AppDestinations(
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = "Hola $name.",
         modifier = modifier
     )
 }
@@ -89,6 +107,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     G46KotlinTheme {
-        Greeting("Android")
+        Greeting("G46")
     }
 }
