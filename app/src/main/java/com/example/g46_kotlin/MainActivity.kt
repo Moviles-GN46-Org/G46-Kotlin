@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -24,11 +25,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.example.g46_kotlin.features.auth.presentation.login.LoginScreen
 import com.example.g46_kotlin.features.house.presentation.HouseScreen
 import com.example.g46_kotlin.features.map.presentation.MapScreen
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import dagger.hilt.android.AndroidEntryPoint
-
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,40 +51,75 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun G46KotlinApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.LOGIN) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.label
-                        )
+    if (currentDestination == AppDestinations.LOGIN) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        ) { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding)) {
+                LoginScreen(
+                    onLoginSuccess = { currentDestination = AppDestinations.HOME },
+                    onSignUpClick = {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Sign up pending")
+                        }
                     },
-                    label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
+                    onShowMessage = { message ->
+                        scope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    }
                 )
             }
         }
-    ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            when (currentDestination) {
-                AppDestinations.HOME -> {
-                    HouseScreen()
-                }
-                AppDestinations.MAP -> {
-                    MapScreen(
-                        onBack = { currentDestination = AppDestinations.HOME },
-                    )
-                }
-                AppDestinations.FAVORITES -> {
-                    Text("Favorites", modifier = Modifier.padding(innerPadding))
-                }
-                AppDestinations.PROFILE -> {
-                    Text("Profile", modifier = Modifier.padding(innerPadding))
+    } else {
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                AppDestinations.entries
+                    .filter { it != AppDestinations.LOGIN }
+                    .forEach {
+                        item(
+                            icon = {
+                                Icon(
+                                    it.icon,
+                                    contentDescription = it.label
+                                )
+                            },
+                            label = { Text(it.label) },
+                            selected = it == currentDestination,
+                            onClick = { currentDestination = it }
+                        )
+                    }
+            }
+        ) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+            ) { innerPadding ->
+                when (currentDestination) {
+                    AppDestinations.HOME -> {
+                        HouseScreen()
+                    }
+
+                    AppDestinations.MAP -> {
+                        MapScreen(
+                            onBack = { currentDestination = AppDestinations.HOME },
+                        )
+                    }
+
+                    AppDestinations.FAVORITES -> {
+                        Text("Favorites", modifier = Modifier.padding(innerPadding))
+                    }
+
+                    AppDestinations.PROFILE -> {
+                        Text("Profile", modifier = Modifier.padding(innerPadding))
+                    }
+
+                    AppDestinations.LOGIN -> Unit
                 }
             }
         }
@@ -89,6 +130,7 @@ enum class AppDestinations(
     val label: String,
     val icon: ImageVector,
 ) {
+    LOGIN("Login", Icons.Default.AccountBox),
     HOME("Houses", Icons.Default.Home),
     MAP("Map", Icons.Default.LocationOn),
     FAVORITES("Favorites", Icons.Default.Favorite),
