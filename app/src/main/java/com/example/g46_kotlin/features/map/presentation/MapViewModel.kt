@@ -127,7 +127,8 @@ class MapViewModel @Inject constructor(
                                 rating = apt.rating,
                                 lat = apt.lat,
                                 lon = apt.lon,
-                                price = formatCopToThousandsLabel(apt.price)
+                                price = formatCopToThousandsLabel(apt.price),
+                                imageUrl = apt.image
                             )
                         }
                     )
