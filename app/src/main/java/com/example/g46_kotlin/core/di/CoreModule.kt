@@ -1,6 +1,7 @@
 package com.example.g46_kotlin.core.di
 
 import com.example.g46_kotlin.BuildConfig
+import com.example.g46_kotlin.features.house.data.remote.HouseApiService
 import com.example.g46_kotlin.features.map.data.remote.MapApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -53,4 +54,10 @@ object CoreModule {
     @Singleton
     fun provideMapApiService(retrofit: Retrofit): MapApiService =
         retrofit.create(MapApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideHouseApiService(retrofit: Retrofit): HouseApiService =
+        retrofit.create(HouseApiService::class.java)
+
 }
