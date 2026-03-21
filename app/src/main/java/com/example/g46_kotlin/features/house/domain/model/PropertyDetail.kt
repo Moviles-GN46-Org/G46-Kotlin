@@ -15,7 +15,7 @@ enum class PropertyStatus {
     EXPIRED
 }
 
-data class Property(
+data class PropertyDetail(
     val id: String,
     val landlordId: String,
     val title: String,
