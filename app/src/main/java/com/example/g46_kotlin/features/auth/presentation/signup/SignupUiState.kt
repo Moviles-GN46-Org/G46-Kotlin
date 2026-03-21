@@ -7,6 +7,24 @@ enum class HousingPlaceType {
     OWN_ROOM,
     SHARED_ROOM
 }
+
+enum class SleepSchedule {
+    EARLY_BIRD,
+    NIGHT_OWL,
+    FLEXIBLE
+}
+
+enum class CleanlinessLevel {
+    VERY_TIDY,
+    MODERATE,
+    RELAXED
+}
+
+enum class NoisePreference {
+    QUIET,
+    MODERATE,
+    LIVELY
+}
 data class SignupUiState(
     val currentStep: Int = 1,
     val selectedRole: UserRole = UserRole.STUDENT,
@@ -36,4 +54,15 @@ data class SignupUiState(
 
     val placeTypeError: String? = null,
     val monthlyBudgetError: String? = null,
+
+    val sleepSchedule: SleepSchedule? = null,
+    val cleanlinessLevel: CleanlinessLevel? = null,
+    val noisePreference: NoisePreference? = null,
+    val smokes: Boolean = false,
+    val hasPets: Boolean = false,
+
+    val bio: String = "",
+    val budgetMin: String = "",
+    val budgetMax: String = "",
+    val preferredArea: String = "",
 )

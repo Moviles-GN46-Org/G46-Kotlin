@@ -22,4 +22,15 @@ sealed interface SignupUiEvent {
     data class OnLaundryToggle(val value: Boolean) : SignupUiEvent
     data class OnParkingToggle(val value: Boolean) : SignupUiEvent
     data class OnInternetToggle(val value: Boolean) : SignupUiEvent
+
+    data class OnSleepScheduleSelected(val value: SleepSchedule) : SignupUiEvent
+    data class OnCleanlinessSelected(val value: CleanlinessLevel) : SignupUiEvent
+    data class OnNoisePreferenceSelected(val value: NoisePreference) : SignupUiEvent
+    data class OnSmokesToggle(val value: Boolean) : SignupUiEvent
+    data class OnHasPetsToggle(val value: Boolean) : SignupUiEvent
+
+    data class OnBioChanged(val bio: String) : SignupUiEvent
+    data class OnBudgetMinChanged(val budgetMin: String) : SignupUiEvent
+    data class OnBudgetMaxChanged(val budgetMax: String) : SignupUiEvent
+    data class OnPreferredAreaChanged(val preferredArea: String) : SignupUiEvent
 }

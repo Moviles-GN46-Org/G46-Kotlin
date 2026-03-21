@@ -118,6 +118,39 @@ class SignupViewModel @Inject constructor() : ViewModel() {
                 _uiState.update { it.copy(wantsInternet = event.value, message = null) }
             }
 
+            is SignupUiEvent.OnSleepScheduleSelected -> {
+                _uiState.update { it.copy(sleepSchedule = event.value, message = null) }
+            }
+
+            is SignupUiEvent.OnCleanlinessSelected -> {
+                _uiState.update { it.copy(cleanlinessLevel = event.value, message = null) }
+            }
+
+            is SignupUiEvent.OnNoisePreferenceSelected -> {
+                _uiState.update { it.copy(noisePreference = event.value, message = null) }
+            }
+
+            is SignupUiEvent.OnSmokesToggle -> {
+                _uiState.update { it.copy(smokes = event.value, message = null) }
+            }
+
+            is SignupUiEvent.OnHasPetsToggle -> {
+                _uiState.update { it.copy(hasPets = event.value, message = null) }
+            }
+
+            is SignupUiEvent.OnBioChanged -> {
+                _uiState.update { it.copy(bio = event.bio, message = null) }
+            }
+            is SignupUiEvent.OnBudgetMinChanged -> {
+                _uiState.update { it.copy(budgetMin = event.budgetMin, message = null) }
+            }
+            is SignupUiEvent.OnBudgetMaxChanged -> {
+                _uiState.update { it.copy(budgetMax = event.budgetMax, message = null) }
+            }
+            is SignupUiEvent.OnPreferredAreaChanged -> {
+                _uiState.update { it.copy(preferredArea = event.preferredArea, message = null) }
+            }
+
             SignupUiEvent.OnNextStep -> onNextStep()
             SignupUiEvent.OnPreviousStep -> onPreviousStep()
             SignupUiEvent.OnSubmit -> onSubmit()
@@ -155,8 +188,12 @@ class SignupViewModel @Inject constructor() : ViewModel() {
                 if (!validateStep3()) return
                 _uiState.update { it.copy(currentStep = 4, message = null) }
             }
-            4 -> _uiState.update { it.copy(currentStep = 5, message = null) }
-            5 -> onSubmit()
+
+            4 -> {
+                if (!validateStep4()) return
+                _uiState.update { it.copy(currentStep = 5, message = null) }
+            }
+            5 -> { onSubmit() }
         }
     }
 
@@ -174,6 +211,8 @@ class SignupViewModel @Inject constructor() : ViewModel() {
             emitMessage("Complete all steps before submitting")
             return
         }
+
+        if (!validateStep5()) return
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, message = null) }
@@ -239,6 +278,49 @@ class SignupViewModel @Inject constructor() : ViewModel() {
         }
 
         return placeTypeError == null && monthlyBudgetError == null
+    }
+
+    private fun validateStep4(): Boolean {
+        val state = _uiState.value
+
+        val sleepScheduleError = if (state.sleepSchedule == null) "Select a sleep schedule" else null
+        val cleanlinessError = if (state.cleanlinessLevel == null) "Select cleanliness level" else null
+        val noiseError = if (state.noisePreference == null) "Select noise preference" else null
+
+        _uiState.update {
+            it.copy(
+                message = if (sleepScheduleError != null || cleanlinessError != null || noiseError != null) {
+                    "Please complete all fields"
+                } else null
+            )
+        }
+
+        return sleepScheduleError == null && cleanlinessError == null && noiseError == null
+    }
+
+    private fun validateStep5(): Boolean {
+        val state = uiState.value
+        if (state.bio.isBlank()) {
+            _uiState.update { it.copy(message = "Bio is required") }
+            return false
+        }
+        if (state.budgetMin.isBlank() || state.budgetMin.toIntOrNull() == null || state.budgetMin.toInt() <= 0) {
+            _uiState.update { it.copy(message = "Minimum budget must be a positive number") }
+            return false
+        }
+        if (state.budgetMax.isBlank() || state.budgetMax.toIntOrNull() == null || state.budgetMax.toInt() <= 0) {
+            _uiState.update { it.copy(message = "Maximum budget must be a positive number") }
+            return false
+        }
+        if (state.budgetMin.toInt() > state.budgetMax.toInt()) {
+            _uiState.update { it.copy(message = "Minimum budget cannot exceed maximum budget") }
+            return false
+        }
+        if (state.preferredArea.isBlank()) {
+            _uiState.update { it.copy(message = "Preferred area is required") }
+            return false
+        }
+        return true
     }
 
     private fun emitMessage(message: String) {
