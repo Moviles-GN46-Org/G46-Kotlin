@@ -1,6 +1,6 @@
 package com.example.g46_kotlin.features.house.presentation
 import com.example.g46_kotlin.cards.HousingCardUi
-import com.example.g46_kotlin.features.house.domain.model.Property
+import com.example.g46_kotlin.features.house.domain.model.PropertyDetail
 
 data class HouseUiState(
     val isLoading: Boolean = false,
@@ -17,7 +17,7 @@ data class HouseUiState(
     val showNotificationsPanel: Boolean = false,
     val selectedPropertyDetail: PropertyDetailUi? = null,
     val showPropertyDetail: Boolean = false,
-    val allProperties: List<Property> = emptyList()
+    val allProperties: List<PropertyDetail> = emptyList()
 )
 
 data class HouseInAppNotification(
