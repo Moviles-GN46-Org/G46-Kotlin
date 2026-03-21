@@ -3,7 +3,6 @@ package com.example.g46_kotlin.features.house.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.cards.HousingCardUi
-import com.example.g46_kotlin.features.house.domain.model.Property
 import com.example.g46_kotlin.features.house.domain.usecase.GetHouseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -13,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.example.g46_kotlin.core.location.CurrentLocationSource
+import com.example.g46_kotlin.features.house.domain.model.PropertyDetail
 import com.example.g46_kotlin.features.house.domain.usecase.GetNearestAvailablePropertyUseCase
 import java.util.UUID
 
@@ -190,7 +190,7 @@ class HouseViewModel @Inject constructor(
         }
     }
 
-    private fun Property.toHousingCardUi(): HousingCardUi {
+    private fun PropertyDetail.toHousingCardUi(): HousingCardUi {
         val typeLabel = propertyType.name.replace("_", " ")
         val roomLabel = "$bedrooms Bed · $bathrooms Bath"
 
