@@ -21,7 +21,6 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -56,92 +55,225 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.FontWeight
+import androidx.core.content.ContextCompat
+import com.example.g46_kotlin.features.map.presentation.components.MiniHouseCard
+import com.example.g46_kotlin.features.map.presentation.components.MiniHouseCardUi
+import android.graphics.Color as AndroidColor
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MapScreenLayout(
-    isLoading: Boolean,
-    errorMessage: String?,
+    uiState: MapUiState,
     onBack: () -> Unit,
     onSettingsClick: () -> Unit,
-    showSettingsOverlay: Boolean = false,
-    onDismissSettingsOverlay: () -> Unit = {},
-    mapContent: @Composable () -> Unit
+    onApartmentTapped: (String) -> Unit,
+    mapContent: @Composable () -> Unit,
 ) {
-    Scaffold(
+    val sheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.PartiallyExpanded,
+        skipHiddenState = true
+    )
+    val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
+    val scope = rememberCoroutineScope()
+    val isExpanded = sheetState.currentValue == SheetValue.Expanded
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             MapTopBar(
                 title = stringResource(id = R.string.map_view_title),
                 onBack = onBack,
                 onSettingsClick = onSettingsClick
             )
+        },
+        sheetPeekHeight = 90.dp,
+        sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        sheetDragHandle = {
+            DrawerHandleHeader()
+        },
+        sheetContent = {
+            DrawerContent(
+                apartments = uiState.apartments,
+                selectedApartmentId = uiState.selectedApartmentId,
+                canScroll = isExpanded,
+                onApartmentClick = { id ->
+                    onApartmentTapped(id)
+                }
+            )
         }
     ) { innerPadding ->
         Box(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
-                .padding(top = innerPadding.calculateTopPadding())
+                .padding(innerPadding)
         ) {
             mapContent()
 
-            if (isLoading) {
+            if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
-            errorMessage?.let { msg ->
+            uiState.errorMessage?.let { msg ->
                 Text(
                     text = msg,
                     modifier = Modifier.align(Alignment.TopCenter),
                     color = MaterialTheme.colorScheme.error
                 )
             }
-
-            MapOverlayHost(
-                visible = showSettingsOverlay,
-                onDismiss = onDismissSettingsOverlay
-            ) {
-                MapSettingsOverlay(onDismiss = onDismissSettingsOverlay)
-            }
         }
     }
 }
+
+@Composable
+private fun DrawerHandleHeader(title: String = "Recommended for you") {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp, bottom = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .width(44.dp)
+                .height(5.dp)
+                .clip(RoundedCornerShape(999.dp))
+                .background(MaterialTheme.colorScheme.onSurfaceVariant)
+        )
+        Spacer(Modifier.height(14.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun DrawerContent(
+    apartments: List<PropertyPinUi>,
+    selectedApartmentId: String?,
+    canScroll: Boolean,
+    onApartmentClick: (String) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 120.dp, max = 520.dp)
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        userScrollEnabled = canScroll,
+        contentPadding = PaddingValues(top = 20.dp,bottom = 20.dp)
+    ) {
+        items(apartments, key = { it.id }) { apt ->
+            MiniHouseCard(
+                ui = MiniHouseCardUi(
+                    name = apt.title,
+                    pricePerMonth = apt.price,
+                    rating = apt.rating,
+                    distanceToCampus = apt.description, // cámbialo por distancia real si la tienes
+                    propertyType = "Apartment"
+                ),
+                onCardClick = { onApartmentClick(apt.id) }
+            )
+        }
+    }
+}
+
 
 
 @Composable
 fun MapScreen(
     onBack: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onApartmentClick: (id: String) -> Unit = {}
 ) {
     val viewModel: MapViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showSettingsOverlay by rememberSaveable { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    var hasLocationPermission by remember {
+        mutableStateOf(hasLocationPermission(context))
+    }
+    var permissionRequested by rememberSaveable { mutableStateOf(false) }
 
-    // Temporal: dispara carga inicial hasta conectar ubicación real
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { grants ->
+        val granted = grants[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+        hasLocationPermission = granted
+        viewModel.startLocationTracking(granted)
+    }
+
+    val onApartmentTapped: (String) -> Unit = { apartmentId ->
+        viewModel.onApartmentSelected(apartmentId)
+        onApartmentClick(apartmentId)
+    }
+
     LaunchedEffect(Unit) {
-        if (uiState.userLocation == null) {
-            viewModel.onLocationResolved(lat = 4.7110, lon = -74.0721)
+        if (hasLocationPermission) {
+            viewModel.startLocationTracking(true)
+        } else if (!permissionRequested) {
+            permissionRequested = true
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        } else {
+            // Ya se pidió permiso y no fue concedido: fallback en ViewModel (Los Andes).
+            viewModel.startLocationTracking(false)
         }
     }
 
+    DisposableEffect(Unit) {
+        onDispose { viewModel.stopLocationTracking() }
+    }
+
     MapScreenLayout(
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
+        uiState = uiState,
         onBack = onBack,
         onSettingsClick = {
             showSettingsOverlay = true
             onSettingsClick()
         },
-        showSettingsOverlay = showSettingsOverlay,
-        onDismissSettingsOverlay = { showSettingsOverlay = false },
+        onApartmentTapped = onApartmentTapped,
         mapContent = {
-            Map(
+            MapRender(
                 userLocation = uiState.userLocation,
-                apartments = uiState.apartments
+                apartments = uiState.apartments,
+                onApartmentClick = onApartmentTapped
             )
         }
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -168,7 +300,7 @@ private fun MapTopBar(
                 )
             }
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -291,12 +423,38 @@ private fun MapSettingsOverlayPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MapScreenPreview() {
+    val previewState = MapUiState(
+        isLoading = false,
+        userLocation = UserLocationUI(lat = 4.6016, lon = -74.0661),
+        apartments = listOf(
+            PropertyPinUi(
+                id = "1",
+                title = "Oakwood Residences",
+                description = "0.5 miles",
+                rating = 4.8,
+                lat = 4.6020,
+                lon = -74.0665,
+                price = "$120"
+            ),
+            PropertyPinUi(
+                id = "2",
+                title = "City Lofts",
+                description = "0.8 miles",
+                rating = 4.6,
+                lat = 4.6030,
+                lon = -74.0670,
+                price = "$450"
+            )
+        ),
+        selectedApartmentId = null
+    )
+
     G46KotlinTheme {
         MapScreenLayout(
-            isLoading = false,
-            errorMessage = null,
+            uiState = previewState,
             onBack = {},
             onSettingsClick = {},
+            onApartmentTapped = {},
             mapContent = {
                 PreviewMapWithMarkers(
                     prices = listOf("$120", "$450", "$1.200")
@@ -305,6 +463,7 @@ fun MapScreenPreview() {
         )
     }
 }
+
 
 
 @Composable
@@ -387,12 +546,18 @@ private fun ZoomControlsOverlay(
 }
 
 @Composable
-fun Map(
+fun MapRender(
     userLocation: UserLocationUI?,
-    apartments: List<ApartmentPinUi>
+    apartments: List<PropertyPinUi>,
+    onApartmentClick: (id: String) -> Unit = {}
 ) {
     var initialized by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
+
+    val userMarkerColor = MaterialTheme.colorScheme.primary.toArgb()
+    val userMarkerIcon = remember(userMarkerColor) {
+        createUserLocationDrawable(context, userMarkerColor)
+    }
 
     var mapRef by remember { mutableStateOf<MapView?>(null)}
 
@@ -454,15 +619,31 @@ fun Map(
                     initialized = true
                 }
 
+                //Apartments markers
                 apartments.forEach { apt ->
                     val marker = Marker(mapView).apply {
                         position = GeoPoint(apt.lat, apt.lon)
                         title = apt.title
-                        snippet = "${apt.description} · ${apt.rating}"
                         icon = MapMarkerFactory.createMarkerIcon(context, apt.price)
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+                        setOnMarkerClickListener { _, _ ->
+                            onApartmentClick(apt.id)
+                            true
+                        }
                     }
                     mapView.overlays.add(marker)
+                }
+
+                //User markers
+                userLocation?.let { loc ->
+                    val userMarker = Marker(mapView).apply {
+                        position = GeoPoint(loc.lat, loc.lon)
+                        title = "Your location"
+                        icon = userMarkerIcon
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    }
+                    mapView.overlays.add(userMarker)
                 }
 
                 mapView.invalidate()
@@ -479,3 +660,34 @@ fun Map(
 
     }
 }
+
+private fun hasLocationPermission(context: Context): Boolean {
+    val fineGranted = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+    val coarseGranted = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+    return fineGranted || coarseGranted
+}
+
+private fun createUserLocationDrawable(
+    context: Context,
+    fillColor: Int
+): Drawable {
+    val density = context.resources.displayMetrics.density
+    val sizePx = (16 * density).toInt()
+    val strokePx = (2 * density).toInt()
+
+    return GradientDrawable().apply {
+        shape = GradientDrawable.OVAL
+        setSize(sizePx, sizePx)
+        setColor(fillColor)
+        setStroke(strokePx, AndroidColor.WHITE)
+    }
+}
+
