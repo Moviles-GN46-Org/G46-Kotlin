@@ -4,12 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,8 +25,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.example.g46_kotlin.features.auth.presentation.login.LoginScreen
+import com.example.g46_kotlin.features.house.presentation.HouseScreen
+import com.example.g46_kotlin.features.map.presentation.MapScreen
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
-
+import dagger.hilt.android.AndroidEntryPoint
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import com.example.g46_kotlin.features.auth.presentation.signup.SignupScreen
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,30 +52,93 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun G46KotlinApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.LOGIN) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.label
+    if (currentDestination == AppDestinations.LOGIN || currentDestination == AppDestinations.SIGNUP) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        ) { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding)) {
+                when (currentDestination) {
+                    AppDestinations.LOGIN -> {
+                        LoginScreen(
+                            onLoginSuccess = { currentDestination = AppDestinations.HOME },
+                            onSignUpClick = { currentDestination = AppDestinations.SIGNUP },
+                            onShowMessage = { message ->
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(message)
+                                }
+                            }
                         )
-                    },
-                    label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
-                )
+                    }
+
+                    AppDestinations.SIGNUP -> {
+                        SignupScreen(
+                            onBackClick = { currentDestination = AppDestinations.LOGIN },
+                            onSignupFinished = { currentDestination = AppDestinations.LOGIN },
+                            onShowMessage = { message ->
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(message)
+                                }
+                            }
+                        )
+                    }
+
+                    else -> Unit
+                }
             }
         }
-    ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
+    } else {
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                AppDestinations.entries
+                    .filter { it != AppDestinations.LOGIN && it != AppDestinations.SIGNUP }
+                    .forEach {
+                        item(
+                            icon = {
+                                Icon(
+                                    it.icon,
+                                    contentDescription = it.label
+                                )
+                            },
+                            label = { Text(it.label) },
+                            selected = it == currentDestination,
+                            onClick = { currentDestination = it }
+                        )
+                    }
+            }
+        ) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+            ) { innerPadding ->
+                when (currentDestination) {
+                    AppDestinations.HOME -> {
+                        HouseScreen()
+                    }
+
+                    AppDestinations.MAP -> {
+                        MapScreen(
+                            onBack = { currentDestination = AppDestinations.HOME },
+                        )
+                    }
+
+                    AppDestinations.FAVORITES -> {
+                        Text("Favorites", modifier = Modifier.padding(innerPadding))
+                    }
+
+                    AppDestinations.PROFILE -> {
+                        Text("Profile", modifier = Modifier.padding(innerPadding))
+                    }
+
+                    AppDestinations.LOGIN -> Unit
+
+                    AppDestinations.SIGNUP -> Unit
+                }
+            }
         }
     }
 }
@@ -72,7 +147,10 @@ enum class AppDestinations(
     val label: String,
     val icon: ImageVector,
 ) {
-    HOME("Home", Icons.Default.Home),
+    LOGIN("Login", Icons.Default.AccountBox),
+    SIGNUP("Sign up", Icons.Default.AccountBox),
+    HOME("Houses", Icons.Default.Home),
+    MAP("Map", Icons.Default.LocationOn),
     FAVORITES("Favorites", Icons.Default.Favorite),
     PROFILE("Profile", Icons.Default.AccountBox),
 }
@@ -80,7 +158,7 @@ enum class AppDestinations(
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = "Hola $name.",
         modifier = modifier
     )
 }
@@ -89,6 +167,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     G46KotlinTheme {
-        Greeting("Android")
+        Greeting("G46")
     }
 }

@@ -2,10 +2,14 @@ package com.example.g46_kotlin.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Primary palette (tu diseño)
+val LightBronze = Color(0xFFDA9958)   // Primary accent
+val DeepMocha = Color(0xFF3C2E26)     // Titles
+val AshBrown = Color(0xFF58463A)      // Body text
+val DustyTaupe = Color(0xFF8B7364)    // Secondary text
+val Linen = Color(0xFFFBF3EB)         // Background
+val WarmWhite = Color(0xFFFDFBF9)     // Surfaces / cards
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Opcional: variantes para dark theme
+val DarkBackground = Color(0xFF2B211B)
+val DarkSurface = Color(0xFF3A2E26)
