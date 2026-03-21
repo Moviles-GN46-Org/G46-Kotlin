@@ -17,5 +17,6 @@ data class PropertyDetailUi(
     val hasLaundry: Boolean,
     val hasWifi: Boolean,
     val includesUtilities: Boolean,
-    val propertyType: String
+    val propertyType: String,
+    val imageUrl: String? = null
 )

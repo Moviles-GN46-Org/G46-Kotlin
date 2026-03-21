@@ -169,7 +169,8 @@ class HouseViewModel @Inject constructor(
                     hasLaundry = property.hasLaundry,
                     hasWifi = property.hasWifi,
                     includesUtilities = property.includesUtilities,
-                    propertyType = property.propertyType.name.replace("_", " ")
+                    propertyType = property.propertyType.name.replace("_", " "),
+                    imageUrl = property.imageUrls.firstOrNull()
                 )
             )
         }
@@ -201,6 +202,7 @@ class HouseViewModel @Inject constructor(
             rating = 0.0,
             neighborhood = neighborhood,
             propertyType = "$typeLabel · $roomLabel",
+            imageUrl = imageUrls.firstOrNull()
         )
     }
 

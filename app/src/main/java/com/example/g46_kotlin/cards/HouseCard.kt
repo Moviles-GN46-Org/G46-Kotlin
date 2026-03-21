@@ -19,6 +19,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
+import androidx.compose.foundation.Image
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
+import com.example.g46_kotlin.R
 
 
 data class HousingCardUi(
@@ -28,6 +34,7 @@ data class HousingCardUi(
     val rating: Double,
     val neighborhood: String,
     val propertyType: String,
+    val imageUrl: String? = null,
 )
 
 // Todo: put the font with the general theme
@@ -53,9 +60,26 @@ fun HousingCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
-                    .padding(10.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
+                if (ui.imageUrl.isNullOrBlank()) {
+                    Image(
+                        painter = painterResource(id = R.drawable.house_example),
+                        contentDescription = "Imagen de ${ui.name}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    AsyncImage(
+                        model = ui.imageUrl,
+                        contentDescription = "Imagen de ${ui.name}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(id = R.drawable.house_example),
+                        placeholder = painterResource(id = R.drawable.house_example)
+                    )
+                }
             }
 
             Spacer(Modifier.height(12.dp))

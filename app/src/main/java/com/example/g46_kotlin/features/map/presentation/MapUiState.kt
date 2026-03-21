@@ -8,6 +8,7 @@ data class PropertyPinUi (
     val lat: Double,
     val lon: Double,
     val price: String,
+    val imageUrl: String
 )
 
 data class UserLocationUI(

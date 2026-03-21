@@ -33,6 +33,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
+import com.example.g46_kotlin.R
 
 @Composable
 fun PropertyDetailScreen(
@@ -51,7 +56,7 @@ fun PropertyDetailScreen(
             }
 
             item {
-                PropertyImageSection()
+                PropertyImageSection(detail = detail)
             }
 
             item {
@@ -110,7 +115,7 @@ private fun PropertyDetailHeader(
 }
 
 @Composable
-private fun PropertyImageSection() {
+private fun PropertyImageSection(detail: PropertyDetailUi) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -118,14 +123,21 @@ private fun PropertyImageSection() {
             .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                "Property Image",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp
+        if (detail.imageUrl.isNullOrBlank()) {
+            Image(
+                painter = painterResource(id = R.drawable.house_example),
+                contentDescription = "Property image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            AsyncImage(
+                model = detail.imageUrl,
+                contentDescription = "Property image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(id = R.drawable.house_example),
+                error = painterResource(id = R.drawable.house_example)
             )
         }
 
@@ -427,7 +439,8 @@ private fun PropertyDetailScreenPreview() {
                 hasLaundry = true,
                 hasWifi = true,
                 includesUtilities = true,
-                propertyType = "STUDIO"
+                propertyType = "STUDIO",
+                imageUrl = null
             ),
             onBackClick = {}
         )

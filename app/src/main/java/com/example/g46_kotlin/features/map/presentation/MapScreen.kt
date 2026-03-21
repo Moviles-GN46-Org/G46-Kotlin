@@ -194,7 +194,8 @@ private fun DrawerContent(
                     pricePerMonth = apt.price,
                     rating = apt.rating,
                     distanceToCampus = apt.description, // cámbialo por distancia real si la tienes
-                    propertyType = "Apartment"
+                    propertyType = "Apartment",
+                    imageUrl = apt.imageUrl
                 ),
                 onCardClick = { onApartmentClick(apt.id) }
             )
@@ -434,7 +435,8 @@ fun MapScreenPreview() {
                 rating = 4.8,
                 lat = 4.6020,
                 lon = -74.0665,
-                price = "$120"
+                price = "$120",
+                imageUrl = ""
             ),
             PropertyPinUi(
                 id = "2",
@@ -443,7 +445,8 @@ fun MapScreenPreview() {
                 rating = 4.6,
                 lat = 4.6030,
                 lon = -74.0670,
-                price = "$450"
+                price = "$450",
+                imageUrl = ""
             )
         ),
         selectedApartmentId = null
