@@ -3,12 +3,10 @@ package com.example.g46_kotlin.features.map.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.core.location.CurrentLocationSource
-import com.example.g46_kotlin.core.location.FusedCurrentLocationSource
 import com.example.g46_kotlin.features.map.domain.usecase.GetNearbyApartmentsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import javax.inject.Inject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -122,14 +120,14 @@ class MapViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         apartments = apartments.map { apt ->
-                            ApartmentPinUi(
+                            PropertyPinUi(
                                 id = apt.id,
-                                title = apt.title,
+                                title = shortenTitleForMap(apt.title, maxWords = 3),
                                 description = apt.description,
                                 rating = apt.rating,
                                 lat = apt.lat,
                                 lon = apt.lon,
-                                price = apt.price
+                                price = formatCopToThousandsLabel(apt.price)
                             )
                         }
                     )

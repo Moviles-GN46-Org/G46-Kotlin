@@ -35,7 +35,7 @@ import androidx.compose.foundation.Image
 
 data class MiniHouseCardUi(
     val name: String,
-    val pricePerMonth: Int,
+    val pricePerMonth: String,
     val rating: Double,
     val distanceToCampus: String,
     val propertyType: String,
@@ -142,7 +142,7 @@ fun MiniHouseCard(
 
 @Composable
 private fun PriceTag(
-    price: Int,
+    price: String,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -162,7 +162,7 @@ private fun PriceTag(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "$$price",
+                text = price,
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
@@ -185,7 +185,7 @@ fun MiniHouseCardPreview() {
         MiniHouseCard(
             ui = MiniHouseCardUi(
                 name = "Oakwood Residences",
-                pricePerMonth = 850,
+                pricePerMonth = "$1'000",
                 rating = 4.8,
                 distanceToCampus = "0.5 miles",
                 propertyType = "2 Bed · Shared Kitchen"

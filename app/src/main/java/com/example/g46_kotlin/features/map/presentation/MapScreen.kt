@@ -21,7 +21,6 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -174,7 +173,7 @@ private fun DrawerHandleHeader(title: String = "Recommended for you") {
 
 @Composable
 private fun DrawerContent(
-    apartments: List<ApartmentPinUi>,
+    apartments: List<PropertyPinUi>,
     selectedApartmentId: String?,
     canScroll: Boolean,
     onApartmentClick: (String) -> Unit
@@ -192,7 +191,7 @@ private fun DrawerContent(
             MiniHouseCard(
                 ui = MiniHouseCardUi(
                     name = apt.title,
-                    pricePerMonth = apt.price.filter { it.isDigit() }.toIntOrNull() ?: 0,
+                    pricePerMonth = apt.price,
                     rating = apt.rating,
                     distanceToCampus = apt.description, // cámbialo por distancia real si la tienes
                     propertyType = "Apartment"
@@ -428,7 +427,7 @@ fun MapScreenPreview() {
         isLoading = false,
         userLocation = UserLocationUI(lat = 4.6016, lon = -74.0661),
         apartments = listOf(
-            ApartmentPinUi(
+            PropertyPinUi(
                 id = "1",
                 title = "Oakwood Residences",
                 description = "0.5 miles",
@@ -437,7 +436,7 @@ fun MapScreenPreview() {
                 lon = -74.0665,
                 price = "$120"
             ),
-            ApartmentPinUi(
+            PropertyPinUi(
                 id = "2",
                 title = "City Lofts",
                 description = "0.8 miles",
@@ -549,7 +548,7 @@ private fun ZoomControlsOverlay(
 @Composable
 fun MapRender(
     userLocation: UserLocationUI?,
-    apartments: List<ApartmentPinUi>,
+    apartments: List<PropertyPinUi>,
     onApartmentClick: (id: String) -> Unit = {}
 ) {
     var initialized by rememberSaveable { mutableStateOf(false) }
