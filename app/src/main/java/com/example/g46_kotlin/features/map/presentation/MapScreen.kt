@@ -193,7 +193,7 @@ private fun DrawerContent(
                     name = apt.title,
                     pricePerMonth = apt.price,
                     rating = apt.rating,
-                    distanceToCampus = apt.description, // cámbialo por distancia real si la tienes
+                    distanceToCampus = apt.description,
                     propertyType = "Apartment"
                 ),
                 onCardClick = { onApartmentClick(apt.id) }
@@ -247,7 +247,6 @@ fun MapScreen(
                 )
             )
         } else {
-            // Ya se pidió permiso y no fue concedido: fallback en ViewModel (Los Andes).
             viewModel.startLocationTracking(false)
         }
     }
@@ -374,7 +373,7 @@ private fun MapSettingsOverlay(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            // Bloque visual placeholder para futuros filtros
+            // TODO: Implementar mas tarde filtros para el mapa
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
