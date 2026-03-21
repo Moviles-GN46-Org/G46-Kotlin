@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.sp
 import com.example.g46_kotlin.R
 
 val InstrumentSans = FontFamily(
-    Font(R.font.instrument_sans_bold, FontWeight.Normal),
+    Font(R.font.instrument_sans_regular, FontWeight.Normal),
     Font(R.font.instrument_sans_medium, FontWeight.Medium),
     Font(R.font.instrument_sans_bold, FontWeight.Bold)
 )

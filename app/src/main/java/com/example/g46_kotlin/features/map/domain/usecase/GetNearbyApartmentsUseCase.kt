@@ -1,6 +1,6 @@
 package com.example.g46_kotlin.features.map.domain.usecase
 
-import com.example.g46_kotlin.features.map.domain.model.Apartment
+import com.example.g46_kotlin.features.map.domain.model.Property
 import com.example.g46_kotlin.features.map.domain.repository.MapRepository
 
 class GetNearbyApartmentsUseCase (
@@ -9,8 +9,8 @@ class GetNearbyApartmentsUseCase (
     suspend operator fun invoke(
         userLat: Double,
         userLon: Double,
-        radiusMeters: Int = 3000
-    ): List<Apartment> {
+        radiusMeters: Int = 7000
+    ): List<Property> {
         return repository.getNearbyApartments(userLat, userLon, radiusMeters)
     }
 }

@@ -12,7 +12,7 @@ abstract class LocationModule {
     @Binds
     @Singleton
     abstract fun bindCurrentLocationSource(
-        impl: HardcodedCurrentLocationSource
+        impl: FusedCurrentLocationSource
     ): CurrentLocationSource
 }
 
