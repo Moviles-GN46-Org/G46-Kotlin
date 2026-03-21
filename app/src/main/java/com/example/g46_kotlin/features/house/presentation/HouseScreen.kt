@@ -39,6 +39,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 
+
 private val budgetOptions = listOf("0-700", "700-1000", "1000-1400", "1400+")
 private val roomTypeOptions = listOf("APARTMENT", "ROOM", "STUDIO", "HOUSE", "SHARED ROOM")
 private val amenitiesOptions = emptyList<String>()
