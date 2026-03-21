@@ -18,7 +18,6 @@ private val DarkColorScheme = darkColorScheme(
     secondary = DustyTaupe,
     onSecondary = WarmWhite,
 
-    // Importante para FilledTonalButton
     secondaryContainer = DustyTaupe,
     onSecondaryContainer = WarmWhite,
 
@@ -28,7 +27,6 @@ private val DarkColorScheme = darkColorScheme(
     surface = DarkSurface,
     onSurface = WarmWhite,
 
-    // Opcional, mejora consistencia de tarjetas/controles
     surfaceVariant = DeepMocha,
     onSurfaceVariant = WarmWhite
 )
@@ -40,7 +38,6 @@ private val LightColorScheme = lightColorScheme(
     secondary = DustyTaupe,
     onSecondary = WarmWhite,
 
-    // Importante para FilledTonalButton
     secondaryContainer = LightBronze.copy(alpha = 0.22f),
     onSecondaryContainer = DeepMocha,
 
@@ -50,7 +47,6 @@ private val LightColorScheme = lightColorScheme(
     surface = WarmWhite,
     onSurface = AshBrown,
 
-    // Opcional, mejora consistencia de textos secundarios
     surfaceVariant = Linen,
     onSurfaceVariant = DustyTaupe,
 
@@ -61,7 +57,6 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun G46KotlinTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

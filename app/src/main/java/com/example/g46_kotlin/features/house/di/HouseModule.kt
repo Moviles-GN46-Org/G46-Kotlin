@@ -1,6 +1,5 @@
 package com.example.g46_kotlin.features.house.di
 
-import com.example.g46_kotlin.features.house.data.remote.HouseApiService
 import com.example.g46_kotlin.features.house.data.repository.DefaultHouseRepository
 import com.example.g46_kotlin.features.house.domain.repository.HouseRepository
 import com.example.g46_kotlin.features.house.domain.usecase.GetHouseUseCase

@@ -102,6 +102,13 @@ data class LoginParams(
 )
 
 sealed class AuthResult {
-    data class Success(val user: User) : AuthResult()
+    data class Success(val session: AuthSession) : AuthResult()
     data class Error(val message: String) : AuthResult()
 }
+
+data class AuthSession(
+    val accessToken: String,
+    val refreshToken: String?,
+    val expiresInSeconds: Long?,
+    val user: User
+)
