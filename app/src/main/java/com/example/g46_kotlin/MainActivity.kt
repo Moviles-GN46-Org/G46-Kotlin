@@ -72,6 +72,8 @@ fun G46KotlinApp() {
                 AppDestinations.MAP -> {
                     MapScreen(
                         onBack = { currentDestination = AppDestinations.HOME },
+                        //TODO: implementar que dirija a detail de apartment con el id: String
+                        onApartmentClick = { currentDestination = AppDestinations.HOME }
                     )
                 }
                 AppDestinations.FAVORITES -> {

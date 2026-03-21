@@ -1,5 +1,6 @@
 package com.example.g46_kotlin.features.map.di
 
+import com.example.g46_kotlin.features.map.data.repository.DefaultMapRepository
 import com.example.g46_kotlin.features.map.data.repository.FakeMapRepository
 import com.example.g46_kotlin.features.map.domain.repository.MapRepository
 import com.example.g46_kotlin.features.map.domain.usecase.GetNearbyApartmentsUseCase
@@ -15,7 +16,9 @@ object MapModule {
 
     @Provides
     @Singleton
-    fun provideMapRepository(): MapRepository = FakeMapRepository()
+    fun provideMapRepository(
+        defaultMapRepository: DefaultMapRepository
+    ): MapRepository = defaultMapRepository
 
     @Provides
     @Singleton

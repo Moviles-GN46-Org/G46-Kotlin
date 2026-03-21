@@ -1,6 +1,6 @@
 package com.example.g46_kotlin.features.map.presentation
 
-data class ApartmentPinUi (
+data class PropertyPinUi (
     val id: String,
     val title: String,
     val description: String,
@@ -18,6 +18,7 @@ data class UserLocationUI(
 data class MapUiState(
     val isLoading: Boolean = false,
     val userLocation: UserLocationUI? = null,
-    val apartments: List<ApartmentPinUi> = emptyList(),
+    val apartments: List<PropertyPinUi> = emptyList(),
     val errorMessage: String? = null,
+    val selectedApartmentId: String? = null,
 )
