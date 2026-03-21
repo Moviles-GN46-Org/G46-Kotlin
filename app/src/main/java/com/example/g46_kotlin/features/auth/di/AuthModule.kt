@@ -1,7 +1,9 @@
 package com.example.g46_kotlin.features.auth.di
 
 
-import com.example.g46_kotlin.features.auth.data.repository.FakeAuthRepository
+import com.example.g46_kotlin.features.auth.data.local.SharedPrefsTokenStorage
+import com.example.g46_kotlin.features.auth.data.local.TokenStorage
+import com.example.g46_kotlin.features.auth.data.repository.DefaultAuthRepository
 import com.example.g46_kotlin.features.auth.domain.repository.AuthRepository
 import com.example.g46_kotlin.features.auth.domain.usecase.LoginWithEmailUseCase
 import dagger.Module
@@ -16,11 +18,19 @@ object AuthModule {
 
     @Provides
     @Singleton
-    fun provideAuthRepository(): AuthRepository = FakeAuthRepository()
+    fun provideAuthRepository(
+        defaultAuthRepository: DefaultAuthRepository
+    ): AuthRepository = defaultAuthRepository
 
     @Provides
     @Singleton
     fun provideLoginWithEmailUseCase(
         repository: AuthRepository
     ): LoginWithEmailUseCase = LoginWithEmailUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideTokenStorage(
+        sharedPrefsTokenStorage: SharedPrefsTokenStorage
+    ): TokenStorage = sharedPrefsTokenStorage
 }

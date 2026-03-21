@@ -1,6 +1,7 @@
 package com.example.g46_kotlin.core.di
 
 import com.example.g46_kotlin.BuildConfig
+import com.example.g46_kotlin.features.auth.data.remote.AuthApiService
 import com.example.g46_kotlin.features.house.data.remote.HouseApiService
 import com.example.g46_kotlin.features.map.data.remote.MapApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -14,6 +15,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
+import com.example.g46_kotlin.core.network.AuthHeaderInterceptor
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -32,7 +34,10 @@ object CoreModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
+    fun provideOkHttpClient(
+        authHeaderInterceptor: AuthHeaderInterceptor
+    ): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(authHeaderInterceptor)
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
@@ -59,5 +64,10 @@ object CoreModule {
     @Singleton
     fun provideHouseApiService(retrofit: Retrofit): HouseApiService =
         retrofit.create(HouseApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAuthApiService(retrofit: Retrofit): AuthApiService =
+        retrofit.create(AuthApiService::class.java)
 
 }
