@@ -1,6 +1,6 @@
 package com.example.g46_kotlin.features.house.data.repository
 
-import com.example.g46_kotlin.features.house.domain.model.Property
+import com.example.g46_kotlin.features.house.domain.model.PropertyDetail
 import com.example.g46_kotlin.features.house.domain.model.PropertyStatus
 import com.example.g46_kotlin.features.house.domain.model.PropertyType
 import com.example.g46_kotlin.features.house.domain.repository.HouseRepository
@@ -8,11 +8,11 @@ import kotlinx.coroutines.delay
 
 class FakeHouseRepository : HouseRepository {
 
-    override suspend fun getProperties(): List<Property> {
+    override suspend fun getProperties(): List<PropertyDetail> {
         delay(400)
 
         return listOf(
-            Property(
+            PropertyDetail(
                 id = "p1",
                 landlordId = "l1",
                 title = "The spot",
@@ -42,7 +42,7 @@ class FakeHouseRepository : HouseRepository {
                 createdAt = "2026-03-10T10:00:00Z",
                 updatedAt = "2026-03-18T09:30:00Z"
             ),
-            Property(
+            PropertyDetail(
                 id = "p2",
                 landlordId = "l2",
                 title = "City U",
@@ -72,7 +72,7 @@ class FakeHouseRepository : HouseRepository {
                 createdAt = "2026-03-11T14:00:00Z",
                 updatedAt = "2026-03-18T08:10:00Z"
             ),
-            Property(
+            PropertyDetail(
                 id = "p3",
                 landlordId = "l3",
                 title = "Puerti Bahia",
@@ -102,6 +102,39 @@ class FakeHouseRepository : HouseRepository {
                 createdAt = "2026-03-05T12:00:00Z",
                 updatedAt = "2026-03-15T18:25:00Z"
             )
+        )
+    }
+
+    override suspend fun getPropertyById(id: String): PropertyDetail {
+        return PropertyDetail(
+            id = "p3",
+            landlordId = "l3",
+            title = "Puerto Bahia",
+            description = "Casa comoda para compartir con roommates.",
+            propertyType = PropertyType.HOUSE,
+            status = PropertyStatus.RENTED,
+            monthlyRent = 1050.0,
+            depositAmount = 600.0,
+            includesUtilities = false,
+            address = "Calle 23 #68-50",
+            neighborhood = "Salitre",
+            city = "Bogota",
+            latitude = 4.6491874824642885,
+            longitude = -74.10820730030592,
+            sizeM2 = 95.0,
+            bedrooms = 3,
+            bathrooms = 2,
+            furnished = true,
+            petFriendly = true,
+            hasParking = true,
+            hasLaundry = true,
+            hasWifi = true,
+            imageUrls = emptyList(),
+            publishedAt = "2026-03-05T12:00:00Z",
+            lastActiveAt = "2026-03-15T18:25:00Z",
+            expirationNotice = null,
+            createdAt = "2026-03-05T12:00:00Z",
+            updatedAt = "2026-03-15T18:25:00Z"
         )
     }
 }
