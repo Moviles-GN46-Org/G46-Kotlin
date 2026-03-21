@@ -35,6 +35,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import com.example.g46_kotlin.features.auth.presentation.signup.SignupScreen
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,32 +56,46 @@ fun G46KotlinApp() {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    if (currentDestination == AppDestinations.LOGIN) {
+    if (currentDestination == AppDestinations.LOGIN || currentDestination == AppDestinations.SIGNUP) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                LoginScreen(
-                    onLoginSuccess = { currentDestination = AppDestinations.HOME },
-                    onSignUpClick = {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Sign up pending")
-                        }
-                    },
-                    onShowMessage = { message ->
-                        scope.launch {
-                            snackbarHostState.showSnackbar(message)
-                        }
+                when (currentDestination) {
+                    AppDestinations.LOGIN -> {
+                        LoginScreen(
+                            onLoginSuccess = { currentDestination = AppDestinations.HOME },
+                            onSignUpClick = { currentDestination = AppDestinations.SIGNUP },
+                            onShowMessage = { message ->
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(message)
+                                }
+                            }
+                        )
                     }
-                )
+
+                    AppDestinations.SIGNUP -> {
+                        SignupScreen(
+                            onBackClick = { currentDestination = AppDestinations.LOGIN },
+                            onSignupFinished = { currentDestination = AppDestinations.LOGIN },
+                            onShowMessage = { message ->
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(message)
+                                }
+                            }
+                        )
+                    }
+
+                    else -> Unit
+                }
             }
         }
     } else {
         NavigationSuiteScaffold(
             navigationSuiteItems = {
                 AppDestinations.entries
-                    .filter { it != AppDestinations.LOGIN }
+                    .filter { it != AppDestinations.LOGIN && it != AppDestinations.SIGNUP }
                     .forEach {
                         item(
                             icon = {
@@ -120,6 +135,8 @@ fun G46KotlinApp() {
                     }
 
                     AppDestinations.LOGIN -> Unit
+
+                    AppDestinations.SIGNUP -> Unit
                 }
             }
         }
@@ -131,6 +148,7 @@ enum class AppDestinations(
     val icon: ImageVector,
 ) {
     LOGIN("Login", Icons.Default.AccountBox),
+    SIGNUP("Sign up", Icons.Default.AccountBox),
     HOME("Houses", Icons.Default.Home),
     MAP("Map", Icons.Default.LocationOn),
     FAVORITES("Favorites", Icons.Default.Favorite),
