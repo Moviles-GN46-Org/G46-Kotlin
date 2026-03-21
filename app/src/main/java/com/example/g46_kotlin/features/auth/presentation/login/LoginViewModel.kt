@@ -104,7 +104,7 @@ class LoginViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            loggedUser = result.user
+                            loggedUser = result.session.user
                         )
                     }
                     _effects.emit(LoginEffect.NavigateToHome)
