@@ -28,8 +28,11 @@ class DefaultAuthRepository @Inject constructor(
             )
 
             val data = response.data
-            tokenStorage.saveAccessToken(data.accessToken)
-            tokenStorage.saveRefreshToken(data.refreshToken)
+            tokenStorage.saveSession(
+                accessToken = data.accessToken,
+                refreshToken = data.refreshToken,
+                persistent = params.rememberMe
+            )
 
             val user = data.user.toDomainUser()
             val session = AuthSession(
