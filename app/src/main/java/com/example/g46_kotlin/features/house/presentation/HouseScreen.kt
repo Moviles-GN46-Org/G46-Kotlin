@@ -45,7 +45,9 @@ private val roomTypeOptions = listOf("APARTMENT", "ROOM", "STUDIO", "HOUSE", "SH
 private val amenitiesOptions = emptyList<String>()
 
 @Composable
-fun HouseScreen() {
+fun HouseScreen(
+    onMapClick: () -> Unit = {}
+) {
     val viewModel: HouseViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -60,7 +62,8 @@ fun HouseScreen() {
         onNotificationIconClick = viewModel::onNotificationIconClick,
         onDismissNotificationsPanel = viewModel::onDismissNotificationsPanel,
         onClearNotifications = viewModel::onClearNotifications,
-        onBackFromDetail = viewModel::onBackFromDetail
+        onBackFromDetail = viewModel::onBackFromDetail,
+        onMapClick = onMapClick
     )
 }
 
@@ -76,7 +79,8 @@ private fun HouseContent(
     onNotificationIconClick: () -> Unit,
     onDismissNotificationsPanel: () -> Unit,
     onClearNotifications: () -> Unit,
-    onBackFromDetail: () -> Unit
+    onBackFromDetail: () -> Unit,
+    onMapClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.showPropertyDetail && state.selectedPropertyDetail != null) {
@@ -94,7 +98,8 @@ private fun HouseContent(
                             state = state,
                             onNotificationIconClick = onNotificationIconClick,
                             onDismissNotificationsPanel = onDismissNotificationsPanel,
-                            onClearNotifications = onClearNotifications
+                            onClearNotifications = onClearNotifications,
+                            onMapClick = onMapClick
                         )
                     }
 
@@ -199,7 +204,8 @@ private fun HouseHeader(
     state: HouseUiState,
     onNotificationIconClick: () -> Unit,
     onDismissNotificationsPanel: () -> Unit,
-    onClearNotifications: () -> Unit
+    onClearNotifications: () -> Unit,
+    onMapClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -255,7 +261,7 @@ private fun HouseHeader(
                 }
             }
 
-            IconButton(onClick = {}) {
+            IconButton(onClick = onMapClick) {
                 Icon(
                     imageVector = Icons.Outlined.Place,
                     contentDescription = "Location",
@@ -284,7 +290,8 @@ private fun HouseContentPreview() {
             onNotificationIconClick = {},
             onDismissNotificationsPanel = {},
             onClearNotifications = {},
-            onBackFromDetail = {}
+            onBackFromDetail = {},
+            onMapClick = {}
         )
     }
 }

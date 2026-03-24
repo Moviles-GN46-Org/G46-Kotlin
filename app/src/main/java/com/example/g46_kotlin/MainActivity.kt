@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.example.g46_kotlin.features.auth.presentation.login.LoginScreen
 import com.example.g46_kotlin.features.house.presentation.HouseScreen
 import com.example.g46_kotlin.features.map.presentation.MapScreen
@@ -32,40 +31,93 @@ import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.g46_kotlin.features.auth.presentation.session.AppSplashScreen
+import com.example.g46_kotlin.features.auth.presentation.session.SessionUiState
+import com.example.g46_kotlin.features.auth.presentation.session.SessionViewModel
 import kotlinx.coroutines.launch
 import com.example.g46_kotlin.features.auth.presentation.signup.SignupScreen
+import androidx.activity.viewModels
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+
+
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val sessionViewModel: SessionViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val splashScreen = installSplashScreen()
+        splashScreen.setKeepOnScreenCondition {
+            sessionViewModel.uiState.value is SessionUiState.Loading
+        }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             G46KotlinTheme {
-                G46KotlinApp()
+                G46KotlinApp(sessionViewModel = sessionViewModel)
             }
         }
     }
 }
 
-@PreviewScreenSizes
 @Composable
-fun G46KotlinApp() {
+fun G46KotlinApp(
+    sessionViewModel: SessionViewModel
+) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.LOGIN) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val sessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
 
-    if (currentDestination == AppDestinations.LOGIN || currentDestination == AppDestinations.SIGNUP) {
+    if (sessionState is SessionUiState.Loading) {
+        AppSplashScreen()
+        return
+    }
+
+    val destinationToRender = when (sessionState) {
+        SessionUiState.Authenticated -> {
+            if (currentDestination == AppDestinations.LOGIN || currentDestination == AppDestinations.SIGNUP) {
+                AppDestinations.HOME
+            } else {
+                currentDestination
+            }
+        }
+        SessionUiState.Unauthenticated -> {
+            if (currentDestination != AppDestinations.LOGIN && currentDestination != AppDestinations.SIGNUP) {
+                AppDestinations.LOGIN
+            } else {
+                currentDestination
+            }
+        }
+        SessionUiState.Loading -> currentDestination
+    }
+
+    LaunchedEffect(sessionState) {
+        if (currentDestination != destinationToRender) {
+            currentDestination = destinationToRender
+        }
+    }
+
+
+    if (destinationToRender == AppDestinations.LOGIN || destinationToRender == AppDestinations.SIGNUP) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                when (currentDestination) {
+                when (destinationToRender) {
                     AppDestinations.LOGIN -> {
                         LoginScreen(
-                            onLoginSuccess = { currentDestination = AppDestinations.HOME },
+                            onLoginSuccess = {
+                                sessionViewModel.checkSession()
+                                currentDestination = AppDestinations.HOME
+                            },
                             onSignUpClick = { currentDestination = AppDestinations.SIGNUP },
                             onShowMessage = { message ->
                                 scope.launch {
@@ -115,9 +167,11 @@ fun G46KotlinApp() {
                 modifier = Modifier.fillMaxSize(),
                 snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
             ) { innerPadding ->
-                when (currentDestination) {
+                when (destinationToRender) {
                     AppDestinations.HOME -> {
-                        HouseScreen()
+                        HouseScreen(
+                            onMapClick = { currentDestination = AppDestinations.MAP }
+                        )
                     }
 
                     AppDestinations.MAP -> {
@@ -134,9 +188,7 @@ fun G46KotlinApp() {
                         Text("Profile", modifier = Modifier.padding(innerPadding))
                     }
 
-                    AppDestinations.LOGIN -> Unit
-
-                    AppDestinations.SIGNUP -> Unit
+                    else -> Unit
                 }
             }
         }
@@ -152,7 +204,7 @@ enum class AppDestinations(
     HOME("Houses", Icons.Default.Home),
     MAP("Map", Icons.Default.LocationOn),
     FAVORITES("Favorites", Icons.Default.Favorite),
-    PROFILE("Profile", Icons.Default.AccountBox),
+    PROFILE("Profile", Icons.Default.AccountBox)
 }
 
 @Composable
