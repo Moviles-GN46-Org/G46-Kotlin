@@ -41,6 +41,7 @@ import com.example.g46_kotlin.features.auth.presentation.session.SessionViewMode
 import kotlinx.coroutines.launch
 import com.example.g46_kotlin.features.auth.presentation.signup.SignupScreen
 import androidx.activity.viewModels
+import androidx.compose.material3.Button
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 
@@ -185,7 +186,12 @@ fun G46KotlinApp(
                     }
 
                     AppDestinations.PROFILE -> {
-                        Text("Profile", modifier = Modifier.padding(innerPadding))
+                        Button(
+                            onClick = { sessionViewModel.logout() },
+                            modifier = Modifier.padding(innerPadding)
+                        ) {
+                            Text("Log out")
+                        }
                     }
 
                     else -> Unit
