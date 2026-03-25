@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- Existing base colors (si los necesitas aún) -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- G46 palette -->
     <color name="light_bronze">#DA9958</color>
+    <color name="deep_mocha">#3C2E26</color>
+    <color name="ash_brown">#58463A</color>
+    <color name="dusty_taupe">#8B7364</color>
+    <color name="linen">#FBF3EB</color>
+    <color name="warm_white">#FDFBF9</color>
+
+    <!-- Dark variants -->
+    <color name="dark_background">#2B211B</color>
+    <color name="dark_surface">#3A2E26</color>
 </resources>
