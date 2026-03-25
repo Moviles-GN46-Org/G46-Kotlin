@@ -11,6 +11,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
+
 private val DarkColorScheme = darkColorScheme(
     primary = LightBronze,
     onPrimary = WarmWhite,
@@ -44,10 +45,10 @@ private val LightColorScheme = lightColorScheme(
     background = Linen,
     onBackground = AshBrown,
 
-    surface = WarmWhite,
+    surface = Linen,
     onSurface = AshBrown,
 
-    surfaceVariant = Linen,
+    surfaceVariant = WarmLinen,
     onSurfaceVariant = DustyTaupe,
 
     tertiary = DeepMocha

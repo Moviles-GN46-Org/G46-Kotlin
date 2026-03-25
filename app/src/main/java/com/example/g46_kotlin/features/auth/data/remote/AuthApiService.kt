@@ -2,6 +2,7 @@ package com.example.g46_kotlin.features.auth.data.remote
 
 import com.example.g46_kotlin.features.auth.data.remote.dto.LoginRequestDto
 import com.example.g46_kotlin.features.auth.data.remote.dto.LoginResponseDto
+import com.example.g46_kotlin.features.auth.data.remote.dto.RefreshTokenRequestDto
 import retrofit2.http.Body
 import retrofit2.http.POST
 
