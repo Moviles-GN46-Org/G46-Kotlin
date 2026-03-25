@@ -43,7 +43,14 @@ import com.example.g46_kotlin.features.auth.presentation.signup.SignupScreen
 import androidx.activity.viewModels
 import androidx.compose.material3.Button
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import kotlin.div
+import kotlin.unaryMinus
 
 
 @AndroidEntryPoint
@@ -99,106 +106,121 @@ fun G46KotlinApp(
         SessionUiState.Loading -> currentDestination
     }
 
-    LaunchedEffect(sessionState) {
+    val appPhase = if (
+        destinationToRender == AppDestinations.LOGIN ||
+        destinationToRender == AppDestinations.SIGNUP
+    ) "AUTH" else "APP"
+
+
+    LaunchedEffect(destinationToRender) {
         if (currentDestination != destinationToRender) {
             currentDestination = destinationToRender
         }
     }
 
-
-    if (destinationToRender == AppDestinations.LOGIN || destinationToRender == AppDestinations.SIGNUP) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-        ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
-                when (destinationToRender) {
-                    AppDestinations.LOGIN -> {
-                        LoginScreen(
-                            onLoginSuccess = {
-                                sessionViewModel.checkSession()
-                                currentDestination = AppDestinations.HOME
-                            },
-                            onSignUpClick = { currentDestination = AppDestinations.SIGNUP },
-                            onShowMessage = { message ->
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(message)
-                                }
-                            }
-                        )
-                    }
-
-                    AppDestinations.SIGNUP -> {
-                        SignupScreen(
-                            onBackClick = { currentDestination = AppDestinations.LOGIN },
-                            onSignupFinished = { currentDestination = AppDestinations.LOGIN },
-                            onShowMessage = { message ->
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(message)
-                                }
-                            }
-                        )
-                    }
-
-                    else -> Unit
-                }
-            }
-        }
-    } else {
-        NavigationSuiteScaffold(
-            navigationSuiteItems = {
-                AppDestinations.entries
-                    .filter { it != AppDestinations.LOGIN && it != AppDestinations.SIGNUP }
-                    .forEach {
-                        item(
-                            icon = {
-                                Icon(
-                                    it.icon,
-                                    contentDescription = it.label
-                                )
-                            },
-                            label = { Text(it.label) },
-                            selected = it == currentDestination,
-                            onClick = { currentDestination = it }
-                        )
-                    }
-            }
-        ) {
+    AnimatedContent(
+        targetState = appPhase,
+        transitionSpec = {
+            (fadeIn() + slideInVertically { it / 12 })
+                .togetherWith(fadeOut() + slideOutVertically { -it / 12 })
+        },
+        label = "AuthAppTransition"
+    ) { phase ->
+        if (phase == "AUTH") {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
             ) { innerPadding ->
-                when (destinationToRender) {
-                    AppDestinations.HOME -> {
-                        HouseScreen(
-                            onMapClick = { currentDestination = AppDestinations.MAP }
-                        )
-                    }
-
-                    AppDestinations.MAP -> {
-                        MapScreen(
-                            onBack = { currentDestination = AppDestinations.HOME },
-                        )
-                    }
-
-                    AppDestinations.FAVORITES -> {
-                        Text("Favorites", modifier = Modifier.padding(innerPadding))
-                    }
-
-                    AppDestinations.PROFILE -> {
-                        Button(
-                            onClick = { sessionViewModel.logout() },
-                            modifier = Modifier.padding(innerPadding)
-                        ) {
-                            Text("Log out")
+                Column(modifier = Modifier.padding(innerPadding)) {
+                    when (destinationToRender) {
+                        AppDestinations.LOGIN -> {
+                            LoginScreen(
+                                onLoginSuccess = {
+                                    sessionViewModel.checkSession()
+                                    currentDestination = AppDestinations.HOME
+                                },
+                                onSignUpClick = { currentDestination = AppDestinations.SIGNUP },
+                                onShowMessage = { message ->
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(message)
+                                    }
+                                }
+                            )
                         }
-                    }
 
-                    else -> Unit
+                        AppDestinations.SIGNUP -> {
+                            SignupScreen(
+                                onBackClick = { currentDestination = AppDestinations.LOGIN },
+                                onSignupFinished = { currentDestination = AppDestinations.LOGIN },
+                                onShowMessage = { message ->
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(message)
+                                    }
+                                }
+                            )
+                        }
+
+                        else -> Unit
+                    }
+                }
+            }
+        } else {
+            NavigationSuiteScaffold(
+                navigationSuiteItems = {
+                    AppDestinations.entries
+                        .filter { it != AppDestinations.LOGIN && it != AppDestinations.SIGNUP }
+                        .forEach {
+                            item(
+                                icon = {
+                                    Icon(
+                                        it.icon,
+                                        contentDescription = it.label
+                                    )
+                                },
+                                label = { Text(it.label) },
+                                selected = it == currentDestination,
+                                onClick = { currentDestination = it }
+                            )
+                        }
+                }
+            ) {
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+                ) { innerPadding ->
+                    when (destinationToRender) {
+                        AppDestinations.HOME -> {
+                            HouseScreen(
+                                onMapClick = { currentDestination = AppDestinations.MAP }
+                            )
+                        }
+
+                        AppDestinations.MAP -> {
+                            MapScreen(
+                                onBack = { currentDestination = AppDestinations.HOME },
+                            )
+                        }
+
+                        AppDestinations.FAVORITES -> {
+                            Text("Favorites", modifier = Modifier.padding(innerPadding))
+                        }
+
+                        AppDestinations.PROFILE -> {
+                            Button(
+                                onClick = { sessionViewModel.logout() },
+                                modifier = Modifier.padding(innerPadding)
+                            ) {
+                                Text("Log out")
+                            }
+                        }
+
+                        else -> Unit
+                    }
                 }
             }
         }
     }
+
 }
 
 enum class AppDestinations(
