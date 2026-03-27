@@ -209,7 +209,7 @@ private fun DrawerContent(
 fun MapScreen(
     onBack: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
-    onApartmentClick: (id: String) -> Unit = {}
+    onPropertyClick: (id: String) -> Unit = {}
 ) {
     val viewModel: MapViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -233,7 +233,7 @@ fun MapScreen(
 
     val onApartmentTapped: (String) -> Unit = { apartmentId ->
         viewModel.onApartmentSelected(apartmentId)
-        onApartmentClick(apartmentId)
+        onPropertyClick(apartmentId)
     }
 
     LaunchedEffect(Unit) {
