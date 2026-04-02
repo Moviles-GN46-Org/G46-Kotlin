@@ -74,7 +74,8 @@ fun MapRoute(
         onBack = onBackClick,
         onSettingsClick = {},
         onPropertyClick = onPropertyClick,
-        onApartmentSelected = viewModel::onApartmentSelected
+        onApartmentSelected = viewModel::onApartmentSelected,
+        onCameraChanged = viewModel::onCameraChanged
     )
 }
 

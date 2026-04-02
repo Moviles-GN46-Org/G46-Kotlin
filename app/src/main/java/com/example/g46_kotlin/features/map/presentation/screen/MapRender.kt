@@ -15,10 +15,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +29,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.g46_kotlin.features.map.presentation.MapMarkerFactory
 import com.example.g46_kotlin.features.map.presentation.PropertyPinUi
 import com.example.g46_kotlin.features.map.presentation.UserLocationUI
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
@@ -40,10 +43,12 @@ import android.graphics.Color as AndroidColor
 @Composable
 fun MapRender(
     userLocation: UserLocationUI?,
+    cameraCenter: UserLocationUI?,
+    cameraZoom: Double,
     apartments: List<PropertyPinUi>,
-    onApartmentClick: (id: String) -> Unit = {}
+    onApartmentClick: (id: String) -> Unit = {},
+    onCameraChanged: (UserLocationUI, Double) -> Unit
 ) {
-    var initialized by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
 
     val userMarkerColor = MaterialTheme.colorScheme.primary.toArgb()
@@ -52,12 +57,39 @@ fun MapRender(
     }
 
     var mapRef by remember { mutableStateOf<MapView?>(null)}
+    var initialCameraApplied by remember { mutableStateOf(false) }
+    var zoomAnimator by remember { mutableStateOf<ValueAnimator?>(null) }
 
     val minZoom = 15.0
     val maxZoom = 25.0
     val zoomStep = 1.0
 
-    var zoomAnimator by remember { mutableStateOf<ValueAnimator?>(null) }
+
+    fun reportCamera(mapView: MapView) {
+        val center = mapView.mapCenter
+        onCameraChanged(
+            UserLocationUI(
+                lat = center.latitude,
+                lon = center.longitude
+            ),
+            mapView.zoomLevelDouble
+        )
+    }
+
+    val mapListener = remember {
+        object : MapListener {
+            override fun onScroll(event: ScrollEvent?): Boolean {
+                mapRef?.let { reportCamera(it) }
+                return true
+            }
+
+            override fun onZoom(p0: ZoomEvent?): Boolean {
+                mapRef?.let { reportCamera(it) }
+                return true
+            }
+        }
+    }
+
 
 
     fun animateZoomBy(delta: Double) {
@@ -78,8 +110,23 @@ fun MapRender(
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (mapRef != null && mapRef?.overlays?.none {it is MapListener } == true) {
+            mapRef?.addMapListener(mapListener)
+        }
+    }
+
+    LaunchedEffect(cameraCenter) {
+        if (cameraCenter != null && mapRef != null) {
+            initialCameraApplied = false
+        }
+    }
+
     DisposableEffect(Unit) {
-        onDispose { zoomAnimator?.cancel() }
+        onDispose {
+            mapRef?.removeMapListener(mapListener)
+            zoomAnimator?.cancel()
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -89,29 +136,33 @@ fun MapRender(
                 MapView(context).apply {
                     setTileSource(TileSourceFactory.MAPNIK)
                     setMultiTouchControls(true)
-                    controller.setZoom(19.0)
-
                     minZoomLevel = minZoom
                     maxZoomLevel = maxZoom
-
                     zoomController.setVisibility(
                         CustomZoomButtonsController.Visibility.NEVER
                     )
-
                     mapRef = this
                 }
             },
             update = { mapView ->
-                mapRef = mapView
-                mapView.overlays.clear()
-
-                if (!initialized && userLocation != null) {
-                    val userPoint = GeoPoint(userLocation.lat, userLocation.lon)
-                    mapView.controller.setCenter(userPoint)
-                    initialized = true
+                if (mapRef == null) {
+                    mapRef = mapView
                 }
 
-                //Apartments markers
+                if (!initialCameraApplied) {
+                    val initialCenter = cameraCenter ?: userLocation
+                    if (initialCenter != null) {
+                        mapView.controller.setCenter(
+                            GeoPoint(initialCenter.lat, initialCenter.lon)
+                        )
+                        mapView.controller.setZoom(cameraZoom)
+                        initialCameraApplied = true
+                    }
+                }
+
+                mapView.overlays.clear()
+
+                //Properties markers
                 apartments.forEach { apt ->
                     val marker = Marker(mapView).apply {
                         position = GeoPoint(apt.lat, apt.lon)
@@ -127,7 +178,7 @@ fun MapRender(
                     mapView.overlays.add(marker)
                 }
 
-                //User markers
+                //User marker
                 userLocation?.let { loc ->
                     val userMarker = Marker(mapView).apply {
                         position = GeoPoint(loc.lat, loc.lon)
