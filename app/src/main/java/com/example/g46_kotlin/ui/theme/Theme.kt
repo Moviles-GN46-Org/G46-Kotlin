@@ -16,6 +16,9 @@ private val DarkColorScheme = darkColorScheme(
     primary = LightBronze,
     onPrimary = WarmWhite,
 
+    primaryContainer = DeepMocha,
+    onPrimaryContainer = WarmWhite,
+
     secondary = DustyTaupe,
     onSecondary = WarmWhite,
 
@@ -35,6 +38,9 @@ private val DarkColorScheme = darkColorScheme(
 private val LightColorScheme = lightColorScheme(
     primary = LightBronze,
     onPrimary = WarmWhite,
+
+    primaryContainer = LightBronze.copy(alpha = 0.22f),
+    onPrimaryContainer = DeepMocha,
 
     secondary = DustyTaupe,
     onSecondary = WarmWhite,

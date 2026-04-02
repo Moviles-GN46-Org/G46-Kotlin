@@ -4,13 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.features.auth.data.local.TokenStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.text.clear
 
 @HiltViewModel
 class SessionViewModel @Inject constructor(
@@ -20,9 +18,9 @@ class SessionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SessionUiState>(SessionUiState.Loading)
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
 
-    init { checkSession() }
+    init { observeSession() }
 
-    fun checkSession() {
+    private fun observeSession() {
         viewModelScope.launch {
             tokenStorage.accessTokenFlow.collect { token ->
                 _uiState.value = if (token.isNullOrBlank()) {
@@ -30,16 +28,13 @@ class SessionViewModel @Inject constructor(
                 } else {
                     SessionUiState.Authenticated
                 }
-
             }
         }
     }
 
     fun logout() {
         viewModelScope.launch {
-            _uiState.value = SessionUiState.Loading
             tokenStorage.clear()
-            delay(300)
         }
     }
 }

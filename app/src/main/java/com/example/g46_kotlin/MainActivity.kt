@@ -4,34 +4,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.g46_kotlin.features.auth.presentation.login.LoginScreen
-import com.example.g46_kotlin.features.house.presentation.HouseScreen
-import com.example.g46_kotlin.features.map.presentation.MapScreen
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,16 +26,37 @@ import com.example.g46_kotlin.features.auth.presentation.session.SessionViewMode
 import kotlinx.coroutines.launch
 import com.example.g46_kotlin.features.auth.presentation.signup.SignupScreen
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
-import kotlin.div
-import kotlin.unaryMinus
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.g46_kotlin.navigation.AppRoutes
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.NavHost
+import androidx.compose.ui.res.painterResource
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.g46_kotlin.ui.theme.WarmLinen
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.unit.dp
+import com.example.g46_kotlin.features.auth.presentation.login.route.LoginRoute
+import com.example.g46_kotlin.features.house.presentation.route.HouseRoute
+import com.example.g46_kotlin.features.house.presentation.route.PropertyDetailRoute
+import com.example.g46_kotlin.features.map.presentation.route.MapRoute
+import com.example.g46_kotlin.ui.theme.DustyTaupe
+import com.example.g46_kotlin.ui.theme.LightBronze
 
 
 @AndroidEntryPoint
@@ -78,175 +84,225 @@ class MainActivity : ComponentActivity() {
 fun G46KotlinApp(
     sessionViewModel: SessionViewModel
 ) {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.LOGIN) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val sessionState by sessionViewModel.uiState.collectAsStateWithLifecycle()
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
 
     if (sessionState is SessionUiState.Loading) {
         AppSplashScreen()
         return
     }
 
-    val destinationToRender = when (sessionState) {
-        SessionUiState.Authenticated -> {
-            if (currentDestination == AppDestinations.LOGIN || currentDestination == AppDestinations.SIGNUP) {
-                AppDestinations.HOME
-            } else {
-                currentDestination
+    // Navigation for unauthenticated users
+    if (sessionState is SessionUiState.Unauthenticated) {
+
+        NavHost(
+            navController = navController,
+            startDestination = AppRoutes.Login
+        ) {
+            composable(AppRoutes.Login) {
+                LoginRoute(
+                    onSignUpClick = { navController.navigate(AppRoutes.Signup) },
+                    onShowMessage = { message ->
+                        scope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    }
+                )
+            }
+
+            composable(AppRoutes.Signup) {
+                SignupScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onSignupFinished = { navController.popBackStack() },
+                    onShowMessage = { message ->
+                        scope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    }
+                )
             }
         }
-        SessionUiState.Unauthenticated -> {
-            if (currentDestination != AppDestinations.LOGIN && currentDestination != AppDestinations.SIGNUP) {
-                AppDestinations.LOGIN
-            } else {
-                currentDestination
-            }
-        }
-        SessionUiState.Loading -> currentDestination
+        return
     }
 
-    val appPhase = if (
-        destinationToRender == AppDestinations.LOGIN ||
-        destinationToRender == AppDestinations.SIGNUP
-    ) "AUTH" else "APP"
-
-
-    LaunchedEffect(destinationToRender) {
-        if (currentDestination != destinationToRender) {
-            currentDestination = destinationToRender
-        }
-    }
-
-    AnimatedContent(
-        targetState = appPhase,
-        transitionSpec = {
-            (fadeIn() + slideInVertically { it / 12 })
-                .togetherWith(fadeOut() + slideOutVertically { -it / 12 })
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets(0,0,0,0),
+        bottomBar = {
+            CasandesBottomBar(
+                currentRoute = currentRoute,
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                    }
+                }
+            )
         },
-        label = "AuthAppTransition"
-    ) { phase ->
-        if (phase == "AUTH") {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-            ) { innerPadding ->
-                Column(modifier = Modifier.padding(innerPadding)) {
-                    when (destinationToRender) {
-                        AppDestinations.LOGIN -> {
-                            LoginScreen(
-                                onLoginSuccess = {
-                                    sessionViewModel.checkSession()
-                                    currentDestination = AppDestinations.HOME
-                                },
-                                onSignUpClick = { currentDestination = AppDestinations.SIGNUP },
-                                onShowMessage = { message ->
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(message)
-                                    }
-                                }
-                            )
+        containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = if (sessionState is SessionUiState.Authenticated) AppRoutes.Home else AppRoutes.Login,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(AppRoutes.Home) {
+                HouseRoute(
+                    onMapClick = {
+                        navController.navigate(AppRoutes.Map) {
+                            launchSingleTop = true
                         }
-
-                        AppDestinations.SIGNUP -> {
-                            SignupScreen(
-                                onBackClick = { currentDestination = AppDestinations.LOGIN },
-                                onSignupFinished = { currentDestination = AppDestinations.LOGIN },
-                                onShowMessage = { message ->
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(message)
-                                    }
-                                }
-                            )
+                    },
+                    onPropertyClick = { id ->
+                        navController.navigate(AppRoutes.propertyDetail(id)) {
+                            launchSingleTop = true
                         }
-
-                        else -> Unit
                     }
-                }
+                )
             }
-        } else {
-            NavigationSuiteScaffold(
-                navigationSuiteItems = {
-                    AppDestinations.entries
-                        .filter { it != AppDestinations.LOGIN && it != AppDestinations.SIGNUP }
-                        .forEach {
-                            item(
-                                icon = {
-                                    Icon(
-                                        it.icon,
-                                        contentDescription = it.label
-                                    )
-                                },
-                                label = { Text(it.label) },
-                                selected = it == currentDestination,
-                                onClick = { currentDestination = it }
-                            )
-                        }
-                }
-            ) {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-                ) { innerPadding ->
-                    when (destinationToRender) {
-                        AppDestinations.HOME -> {
-                            HouseScreen(
-                                onMapClick = { currentDestination = AppDestinations.MAP }
-                            )
-                        }
 
-                        AppDestinations.MAP -> {
-                            MapScreen(
-                                onBack = { currentDestination = AppDestinations.HOME },
-                            )
+            composable(AppRoutes.Map) {
+                MapRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onPropertyClick = { id ->
+                        navController.navigate(AppRoutes.propertyDetail(id)) {
+                            launchSingleTop = true
                         }
-
-                        AppDestinations.FAVORITES -> {
-                            Text("Favorites", modifier = Modifier.padding(innerPadding))
-                        }
-
-                        AppDestinations.PROFILE -> {
-                            Button(
-                                onClick = { sessionViewModel.logout() },
-                                modifier = Modifier.padding(innerPadding)
-                            ) {
-                                Text("Log out")
-                            }
-                        }
-
-                        else -> Unit
                     }
-                }
+                )
+            }
+            //TODO: Implementar view de profile mas adelante, quitar logout
+            composable(AppRoutes.Profile) {
+                Button(onClick = {
+                    sessionViewModel.logout()
+                }) { Text("Log out") }
+            }
+
+            //TODO: Implementar vista de chats
+            composable(AppRoutes.Chats){
+                Text(text = "Chats")
+            }
+
+            //TODO: Implementar vista de feed
+            composable(AppRoutes.Feed){
+                Text(text = "Feed")
+            }
+
+            //TODO: Implementar vista de Roomies
+            composable(AppRoutes.Roomies){
+                Text(text = "Roomies")
+            }
+
+            composable(
+                route = AppRoutes.PropertyDetail,
+                arguments = listOf(navArgument("propertyId") {type = NavType.StringType})
+            ) { _ ->
+                @Suppress("UNUSED_VARIABLE")
+                PropertyDetailRoute(
+                    onBackClick = { navController.popBackStack() },
+                )
             }
         }
     }
-
 }
 
-enum class AppDestinations(
-    val label: String,
-    val icon: ImageVector,
+@Suppress("SameParameterValue")
+@Composable
+private fun AuthenticatedShellPreviewContent(
+    currentRoute: String = AppRoutes.Home,
+    onNavigate: (String) -> Unit = {}
 ) {
-    LOGIN("Login", Icons.Default.AccountBox),
-    SIGNUP("Sign up", Icons.Default.AccountBox),
-    HOME("Houses", Icons.Default.Home),
-    MAP("Map", Icons.Default.LocationOn),
-    FAVORITES("Favorites", Icons.Default.Favorite),
-    PROFILE("Profile", Icons.Default.AccountBox)
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = {
+            CasandesBottomBar(
+                currentRoute = currentRoute,
+                onNavigate = onNavigate
+            )
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            Text("Home")
+        }
+    }
 }
 
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hola $name.",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
+private fun HomeWithBottomBarPreview() {
     G46KotlinTheme {
-        Greeting("G46")
+        AuthenticatedShellPreviewContent(currentRoute = AppRoutes.Home)
+    }
+}
+
+@Composable
+private fun CasandesBottomBar(
+    currentRoute: String?,
+    onNavigate: (String) -> Unit
+) {
+    val barShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 3.dp,
+                shape = barShape,
+                clip = false
+            )
+            .clip(barShape)
+            .background(WarmLinen)
+    ) {
+        NavigationBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 34.dp, top = 8.dp, end = 34.dp, bottom = 4.dp),
+            containerColor = Color.Transparent,
+            tonalElevation = 0.dp
+        ) {
+            val items = listOf(
+                Triple(AppRoutes.Home, R.drawable.ic_house, "Home"),
+                Triple(AppRoutes.Chats, R.drawable.ic_messages_square, "Chats"),
+                Triple(AppRoutes.Feed, R.drawable.ic_images, "Feed"),
+                Triple(AppRoutes.Roomies, R.drawable.ic_heart_handshake, "Roomies"),
+                Triple(AppRoutes.Profile, R.drawable.ic_circle_user_round, "Profile")
+            )
+
+            items.forEach { (route, iconRes, labelText) ->
+                val selected = currentRoute == route
+                NavigationBarItem(
+                    selected = selected,
+                    onClick = { onNavigate(route) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(iconRes),
+                            contentDescription = labelText,
+                            modifier = Modifier.size(35.dp),
+                            tint = if (selected) LightBronze else DustyTaupe
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = labelText,
+                            color = if (selected) LightBronze else DustyTaupe
+                        )
+                    },
+                    alwaysShowLabel = true,
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = Color.Transparent
+                    )
+                )
+            }
+        }
     }
 }

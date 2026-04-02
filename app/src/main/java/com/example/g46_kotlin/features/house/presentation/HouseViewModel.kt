@@ -1,5 +1,6 @@
 package com.example.g46_kotlin.features.house.presentation
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.cards.HousingCardUi
@@ -179,44 +180,6 @@ class HouseViewModel @Inject constructor(
         }
     }
 
-    fun onHouseClick(propertyId: String) {
-        val property = _uiState.value.allProperties.firstOrNull { it.id == propertyId } ?: return
-        _uiState.update {
-            it.copy(
-                showPropertyDetail = true,
-                selectedPropertyDetail = PropertyDetailUi(
-                    id = property.id,
-                    title = property.title,
-                    description = property.description,
-                    monthlyRent = property.monthlyRent.toInt(),
-                    depositAmount = property.depositAmount?.toInt(),
-                    neighborhood = property.neighborhood,
-                    address = property.address,
-                    bedrooms = property.bedrooms,
-                    bathrooms = property.bathrooms,
-                    sizeM2 = property.sizeM2,
-                    furnished = property.furnished,
-                    petFriendly = property.petFriendly,
-                    hasParking = property.hasParking,
-                    hasLaundry = property.hasLaundry,
-                    hasWifi = property.hasWifi,
-                    includesUtilities = property.includesUtilities,
-                    propertyType = property.propertyType.name.replace("_", " "),
-                    imageUrl = property.imageUrls.firstOrNull()
-                )
-            )
-        }
-    }
-
-    fun onBackFromDetail() {
-        _uiState.update {
-            it.copy(
-                showPropertyDetail = false,
-                selectedPropertyDetail = null
-            )
-        }
-    }
-
     fun onAvailabilityClick(houseName: String) {
         _uiState.update {
             it.copy(lastActionMessage = "Ver disponibilidad de $houseName")
@@ -238,6 +201,7 @@ class HouseViewModel @Inject constructor(
         )
     }
 
+    @SuppressLint("DefaultLocale")
     private fun formatDistance(distanceMeters: Int): String {
         return if (distanceMeters < 1000) {
             "${distanceMeters} m"
