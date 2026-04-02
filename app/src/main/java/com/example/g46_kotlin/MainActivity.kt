@@ -9,14 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.g46_kotlin.features.auth.presentation.login.LoginScreen
-import com.example.g46_kotlin.features.house.presentation.HouseScreen
-import com.example.g46_kotlin.features.map.presentation.MapScreen
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.material3.SnackbarHost
@@ -35,15 +31,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.NavigationRailItemDefaults
-import androidx.compose.material3.Surface
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -55,11 +48,13 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.g46_kotlin.ui.theme.WarmLinen
 import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
+import com.example.g46_kotlin.features.auth.presentation.login.route.LoginRoute
+import com.example.g46_kotlin.features.house.presentation.route.HouseRoute
+import com.example.g46_kotlin.features.house.presentation.route.PropertyDetailRoute
+import com.example.g46_kotlin.features.map.presentation.route.MapRoute
 import com.example.g46_kotlin.ui.theme.DustyTaupe
 import com.example.g46_kotlin.ui.theme.LightBronze
 
@@ -110,10 +105,7 @@ fun G46KotlinApp(
             startDestination = AppRoutes.Login
         ) {
             composable(AppRoutes.Login) {
-                LoginScreen(
-                    onLoginSuccess = {
-                        sessionViewModel.checkSession()
-                    },
+                LoginRoute(
                     onSignUpClick = { navController.navigate(AppRoutes.Signup) },
                     onShowMessage = { message ->
                         scope.launch {
@@ -138,23 +130,6 @@ fun G46KotlinApp(
         return
     }
 
-    val navItemColors = NavigationSuiteDefaults.itemColors(
-        navigationBarItemColors = NavigationBarItemDefaults.colors(
-            indicatorColor = Color.Transparent,
-            selectedIconColor = LightBronze,
-            unselectedIconColor = DustyTaupe,
-            selectedTextColor = LightBronze,
-            unselectedTextColor = DustyTaupe
-        ),
-        navigationRailItemColors = NavigationRailItemDefaults.colors(
-            indicatorColor = Color.Transparent,
-            selectedIconColor = LightBronze,
-            unselectedIconColor = DustyTaupe,
-            selectedTextColor = LightBronze,
-            unselectedTextColor = DustyTaupe
-        )
-    )
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(0,0,0,0),
@@ -177,9 +152,14 @@ fun G46KotlinApp(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(AppRoutes.Home) {
-                HouseScreen(
+                HouseRoute(
                     onMapClick = {
                         navController.navigate(AppRoutes.Map) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onPropertyClick = { id ->
+                        navController.navigate(AppRoutes.propertyDetail(id)) {
                             launchSingleTop = true
                         }
                     }
@@ -187,12 +167,12 @@ fun G46KotlinApp(
             }
 
             composable(AppRoutes.Map) {
-                MapScreen(
-                    onBack = { navController.popBackStack() },
-                    onPropertyClick = {
-                            id -> navController.navigate(AppRoutes.propertyDetail(id)) {
-                        launchSingleTop = true
-                    }
+                MapRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onPropertyClick = { id ->
+                        navController.navigate(AppRoutes.propertyDetail(id)) {
+                            launchSingleTop = true
+                        }
                     }
                 )
             }
@@ -221,11 +201,11 @@ fun G46KotlinApp(
             composable(
                 route = AppRoutes.PropertyDetail,
                 arguments = listOf(navArgument("propertyId") {type = NavType.StringType})
-            ) { backStackEntry ->
+            ) { _ ->
                 @Suppress("UNUSED_VARIABLE")
-                val propertyId = backStackEntry.arguments?.getString("propertyId")
-                // TODO: Implementar view para que funcione solamente con el id
-                // PropertyDetailScreen(propertyId = propertyId)
+                PropertyDetailRoute(
+                    onBackClick = { navController.popBackStack() },
+                )
             }
         }
     }
