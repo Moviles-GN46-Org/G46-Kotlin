@@ -2,11 +2,8 @@ package com.example.g46_kotlin.features.map.presentation.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -39,19 +36,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import com.example.g46_kotlin.features.map.presentation.MapMarkerFactory
 import com.example.g46_kotlin.features.map.presentation.MapUiState
 import com.example.g46_kotlin.features.map.presentation.PropertyPinUi
@@ -59,8 +47,6 @@ import com.example.g46_kotlin.features.map.presentation.UserLocationUI
 import com.example.g46_kotlin.features.map.presentation.components.DrawerContent
 import com.example.g46_kotlin.features.map.presentation.components.DrawerHandleHeader
 import com.example.g46_kotlin.features.map.presentation.components.MapSettingsOverlay
-import com.example.g46_kotlin.features.map.presentation.components.MiniHouseCard
-import com.example.g46_kotlin.features.map.presentation.components.MiniHouseCardUi
 
 @Composable
 fun MapScreen(
@@ -68,7 +54,8 @@ fun MapScreen(
     onBack: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onApartmentSelected: (String) -> Unit = {},
-    onPropertyClick: (id: String) -> Unit = {}
+    onPropertyClick: (id: String) -> Unit = {},
+    onCameraChanged: (UserLocationUI, Double) -> Unit
 ) {
     var showSettingsOverlay by rememberSaveable { mutableStateOf(false) }
 
@@ -89,7 +76,10 @@ fun MapScreen(
             MapRender(
                 userLocation = uiState.userLocation,
                 apartments = uiState.apartments,
-                onApartmentClick = onApartmentTapped
+                onApartmentClick = onApartmentTapped,
+                onCameraChanged = onCameraChanged,
+                cameraCenter = uiState.cameraCenter,
+                cameraZoom = uiState.cameraZoom
             )
         }
     )

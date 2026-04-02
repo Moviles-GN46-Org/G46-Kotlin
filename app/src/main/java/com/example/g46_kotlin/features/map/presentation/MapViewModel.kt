@@ -82,10 +82,11 @@ class MapViewModel @Inject constructor(
     fun onLocationResolved(lat: Double, lon: Double) {
         val newLocation = UserLocationUI(lat, lon)
 
-        _uiState.update {
-            it.copy(
+        _uiState.update { current ->
+            current.copy(
                 userLocation = newLocation,
-                errorMessage = null
+                errorMessage = null,
+                cameraCenter = current.cameraCenter ?: newLocation
             )
         }
 
@@ -173,5 +174,14 @@ class MapViewModel @Inject constructor(
     override fun onCleared() {
         stopLocationTracking()
         super.onCleared()
+    }
+
+    fun onCameraChanged(center: UserLocationUI, zoom: Double) {
+        _uiState.update {
+            it.copy(
+                cameraCenter = center,
+                cameraZoom = zoom
+            )
+        }
     }
 }
