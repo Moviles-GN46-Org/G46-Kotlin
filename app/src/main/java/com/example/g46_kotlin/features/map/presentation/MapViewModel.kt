@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.core.location.CurrentLocationSource
 import com.example.g46_kotlin.features.map.domain.usecase.GetNearbyApartmentsUseCase
+import com.example.g46_kotlin.features.map.presentation.mapper.PropertyPinUiMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import javax.inject.Inject
@@ -20,7 +21,8 @@ import kotlin.math.sqrt
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val getNearbyApartmentsUseCase: GetNearbyApartmentsUseCase,
-    private val currentLocationSource: CurrentLocationSource
+    private val currentLocationSource: CurrentLocationSource,
+    private val propertyPinUiMapper: PropertyPinUiMapper
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -119,18 +121,8 @@ class MapViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        apartments = apartments.map { apt ->
-                            PropertyPinUi(
-                                id = apt.id,
-                                title = shortenTitleForMap(apt.title, maxWords = 3),
-                                description = apt.description,
-                                rating = apt.rating,
-                                lat = apt.lat,
-                                lon = apt.lon,
-                                price = formatCopToThousandsLabel(apt.price),
-                                imageUrl = apt.image
-                            )
-                        }
+                        apartments = apartments.map(propertyPinUiMapper::toUi),
+                        errorMessage = null
                     )
                 }
             }.onFailure { e ->
