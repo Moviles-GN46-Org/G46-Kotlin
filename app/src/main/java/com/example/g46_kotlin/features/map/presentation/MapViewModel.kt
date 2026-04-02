@@ -17,12 +17,16 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
+import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
+
+
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val getNearbyApartmentsUseCase: GetNearbyApartmentsUseCase,
     private val currentLocationSource: CurrentLocationSource,
-    private val propertyPinUiMapper: PropertyPinUiMapper
+    private val propertyPinUiMapper: PropertyPinUiMapper,
+    private val analyticsRepository: AnalyticsRepository
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -35,6 +39,7 @@ class MapViewModel @Inject constructor(
         const val ANDES_LAT = 4.6016042953614225
         const val ANDES_LON = -74.06614174023011
         const val APARTMENTS_RELOAD_MIN_DISTANCE_METERS = 120.0
+        const val DEFAULT_RADIUS_KM = 7.0
     }
 
     fun onApartmentSelected(id: String) {
@@ -114,6 +119,16 @@ class MapViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            launch {
+                runCatching {
+                    analyticsRepository.trackMapSearch(
+                        lat = lat,
+                        lng = lon,
+                        radiusKm = DEFAULT_RADIUS_KM
+                    )
+                }
+            }
 
             runCatching {
                 getNearbyApartmentsUseCase(lat, lon)

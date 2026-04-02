@@ -16,17 +16,26 @@ import com.example.g46_kotlin.core.location.CurrentLocationSource
 import com.example.g46_kotlin.features.house.domain.model.PropertyDetail
 import com.example.g46_kotlin.features.house.domain.usecase.GetNearestAvailablePropertyUseCase
 import java.util.UUID
+import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 
 
 @HiltViewModel
 class HouseViewModel @Inject constructor(
     private val getHouseUseCase: GetHouseUseCase,
     private val currentLocationSource: CurrentLocationSource,
-    private val getNearestAvailablePropertyUseCase: GetNearestAvailablePropertyUseCase
+    private val getNearestAvailablePropertyUseCase: GetNearestAvailablePropertyUseCase,
+    private val analyticsRepository: AnalyticsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HouseUiState())
     val uiState: StateFlow<HouseUiState> = _uiState.asStateFlow()
+    private var searchTrackJob: Job? = null
+
+    private companion object {
+        const val SEARCH_TRACK_DEBOUNCE_MS = 700L
+    }
 
     init {
         loadHouses()
@@ -90,6 +99,15 @@ class HouseViewModel @Inject constructor(
     fun onQueryChange(value: String) {
         _uiState.update { it.copy(query = value) }
         applyUiOnlyFilters()
+        scheduleHouseSearchTracking()
+    }
+
+    private fun scheduleHouseSearchTracking() {
+        searchTrackJob?.cancel()
+        searchTrackJob = viewModelScope.launch {
+            delay(SEARCH_TRACK_DEBOUNCE_MS)
+            trackHouseSearchSafely()
+        }
     }
 
     fun onBudgetClick(option: String) {
@@ -97,6 +115,20 @@ class HouseViewModel @Inject constructor(
             it.copy(selectedBudget = if (it.selectedBudget == option) null else option)
         }
         applyUiOnlyFilters()
+    }
+
+    private fun trackHouseSearchSafely() {
+        val state = _uiState.value
+        viewModelScope.launch {
+            runCatching {
+                analyticsRepository.trackHouseSearch(
+                    query = state.query,
+                    budget = state.selectedBudget,
+                    roomType = state.selectedRoomType,
+                    amenities = state.selectedAmenities
+                )
+            }
+        }
     }
 
     fun onRoomTypeClick(option: String) {

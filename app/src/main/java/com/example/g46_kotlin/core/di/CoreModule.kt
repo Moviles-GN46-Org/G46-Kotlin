@@ -19,6 +19,9 @@ import com.example.g46_kotlin.core.network.AuthHeaderInterceptor
 import com.example.g46_kotlin.core.network.TokenAuthenticator
 import com.example.g46_kotlin.features.auth.data.remote.AuthRefreshApiService
 import javax.inject.Named
+import com.example.g46_kotlin.features.analytics.data.remote.AnalyticsApiService
+
+
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -69,6 +72,11 @@ object CoreModule {
     @Singleton
     fun provideHouseApiService(retrofit: Retrofit): HouseApiService =
         retrofit.create(HouseApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAnalyticsApiService(retrofit: Retrofit): AnalyticsApiService =
+        retrofit.create(AnalyticsApiService::class.java)
 
     @Provides
     @Singleton
