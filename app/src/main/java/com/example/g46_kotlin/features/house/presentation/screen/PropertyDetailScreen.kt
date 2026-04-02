@@ -1,4 +1,4 @@
-package com.example.g46_kotlin.features.house.presentation
+package com.example.g46_kotlin.features.house.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
 import com.example.g46_kotlin.R
 import androidx.compose.foundation.layout.statusBarsPadding
+import com.example.g46_kotlin.features.house.presentation.PropertyDetailUi
 
 @Composable
 fun PropertyDetailScreen(
