@@ -11,12 +11,9 @@ data class HouseUiState(
     val selectedRoomType: String? = null,
     val selectedAmenities: Set<String> = emptySet(),
     val errorMessage: String? = null,
-    val selectedHouseName: String? = null,
     val lastActionMessage: String? = null,
     val notifications: List<HouseInAppNotification> = emptyList(),
     val showNotificationsPanel: Boolean = false,
-    val selectedPropertyDetail: PropertyDetailUi? = null,
-    val showPropertyDetail: Boolean = false,
     val allProperties: List<PropertyDetail> = emptyList()
 )
 

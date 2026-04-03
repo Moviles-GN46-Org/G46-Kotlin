@@ -1,4 +1,4 @@
-package com.example.g46_kotlin.features.house.presentation
+package com.example.g46_kotlin.features.house.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +33,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
+import com.example.g46_kotlin.R
+import androidx.compose.foundation.layout.statusBarsPadding
+import com.example.g46_kotlin.features.house.presentation.PropertyDetailUi
 
 @Composable
 fun PropertyDetailScreen(
@@ -42,7 +49,7 @@ fun PropertyDetailScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 12.dp)
+            contentPadding = PaddingValues(bottom = 12.dp)
         ) {
             item {
                 PropertyDetailHeader(
@@ -51,7 +58,7 @@ fun PropertyDetailScreen(
             }
 
             item {
-                PropertyImageSection()
+                PropertyImageSection(detail = detail)
             }
 
             item {
@@ -81,36 +88,44 @@ fun PropertyDetailScreen(
 private fun PropertyDetailHeader(
     onBackClick: () -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primary)
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .statusBarsPadding()
     ) {
-        IconButton(onClick = onBackClick) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                contentDescription = "Back",
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(24.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(66.dp)
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Text(
+                text = "Property Details",
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
             )
+
+            Spacer(modifier = Modifier.size(48.dp))
         }
-
-        Text(
-            text = "Property Details",
-            color = MaterialTheme.colorScheme.onPrimary,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.size(48.dp))
     }
 }
 
+
 @Composable
-private fun PropertyImageSection() {
+private fun PropertyImageSection(detail: PropertyDetailUi) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -118,14 +133,21 @@ private fun PropertyImageSection() {
             .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                "Property Image",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp
+        if (detail.imageUrl.isNullOrBlank()) {
+            Image(
+                painter = painterResource(id = R.drawable.house_example),
+                contentDescription = "Property image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            AsyncImage(
+                model = detail.imageUrl,
+                contentDescription = "Property image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(id = R.drawable.house_example),
+                error = painterResource(id = R.drawable.house_example)
             )
         }
 
@@ -357,12 +379,12 @@ private fun AmenityChip(
             else
                 MaterialTheme.colorScheme.surfaceVariant
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // <- clave
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(horizontal = 10.dp, vertical = 9.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -377,6 +399,7 @@ private fun AmenityChip(
         }
     }
 }
+
 
 @Composable
 private fun ContactLandlordSection() {
@@ -427,7 +450,8 @@ private fun PropertyDetailScreenPreview() {
                 hasLaundry = true,
                 hasWifi = true,
                 includesUtilities = true,
-                propertyType = "STUDIO"
+                propertyType = "STUDIO",
+                imageUrl = null
             ),
             onBackClick = {}
         )

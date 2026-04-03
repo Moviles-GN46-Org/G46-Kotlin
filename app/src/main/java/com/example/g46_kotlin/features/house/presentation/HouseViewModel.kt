@@ -1,5 +1,6 @@
 package com.example.g46_kotlin.features.house.presentation
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.cards.HousingCardUi
@@ -15,17 +16,26 @@ import com.example.g46_kotlin.core.location.CurrentLocationSource
 import com.example.g46_kotlin.features.house.domain.model.PropertyDetail
 import com.example.g46_kotlin.features.house.domain.usecase.GetNearestAvailablePropertyUseCase
 import java.util.UUID
+import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 
 
 @HiltViewModel
 class HouseViewModel @Inject constructor(
     private val getHouseUseCase: GetHouseUseCase,
     private val currentLocationSource: CurrentLocationSource,
-    private val getNearestAvailablePropertyUseCase: GetNearestAvailablePropertyUseCase
+    private val getNearestAvailablePropertyUseCase: GetNearestAvailablePropertyUseCase,
+    private val analyticsRepository: AnalyticsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HouseUiState())
     val uiState: StateFlow<HouseUiState> = _uiState.asStateFlow()
+    private var searchTrackJob: Job? = null
+
+    private companion object {
+        const val SEARCH_TRACK_DEBOUNCE_MS = 700L
+    }
 
     init {
         loadHouses()
@@ -89,6 +99,15 @@ class HouseViewModel @Inject constructor(
     fun onQueryChange(value: String) {
         _uiState.update { it.copy(query = value) }
         applyUiOnlyFilters()
+        scheduleHouseSearchTracking()
+    }
+
+    private fun scheduleHouseSearchTracking() {
+        searchTrackJob?.cancel()
+        searchTrackJob = viewModelScope.launch {
+            delay(SEARCH_TRACK_DEBOUNCE_MS)
+            trackHouseSearchSafely()
+        }
     }
 
     fun onBudgetClick(option: String) {
@@ -96,6 +115,20 @@ class HouseViewModel @Inject constructor(
             it.copy(selectedBudget = if (it.selectedBudget == option) null else option)
         }
         applyUiOnlyFilters()
+    }
+
+    private fun trackHouseSearchSafely() {
+        val state = _uiState.value
+        viewModelScope.launch {
+            runCatching {
+                analyticsRepository.trackHouseSearch(
+                    query = state.query,
+                    budget = state.selectedBudget,
+                    roomType = state.selectedRoomType,
+                    amenities = state.selectedAmenities
+                )
+            }
+        }
     }
 
     fun onRoomTypeClick(option: String) {
@@ -147,43 +180,6 @@ class HouseViewModel @Inject constructor(
         }
     }
 
-    fun onHouseClick(propertyId: String) {
-        val property = _uiState.value.allProperties.firstOrNull { it.id == propertyId } ?: return
-        _uiState.update {
-            it.copy(
-                showPropertyDetail = true,
-                selectedPropertyDetail = PropertyDetailUi(
-                    id = property.id,
-                    title = property.title,
-                    description = property.description,
-                    monthlyRent = property.monthlyRent.toInt(),
-                    depositAmount = property.depositAmount?.toInt(),
-                    neighborhood = property.neighborhood,
-                    address = property.address,
-                    bedrooms = property.bedrooms,
-                    bathrooms = property.bathrooms,
-                    sizeM2 = property.sizeM2,
-                    furnished = property.furnished,
-                    petFriendly = property.petFriendly,
-                    hasParking = property.hasParking,
-                    hasLaundry = property.hasLaundry,
-                    hasWifi = property.hasWifi,
-                    includesUtilities = property.includesUtilities,
-                    propertyType = property.propertyType.name.replace("_", " ")
-                )
-            )
-        }
-    }
-
-    fun onBackFromDetail() {
-        _uiState.update {
-            it.copy(
-                showPropertyDetail = false,
-                selectedPropertyDetail = null
-            )
-        }
-    }
-
     fun onAvailabilityClick(houseName: String) {
         _uiState.update {
             it.copy(lastActionMessage = "Ver disponibilidad de $houseName")
@@ -201,9 +197,11 @@ class HouseViewModel @Inject constructor(
             rating = 0.0,
             neighborhood = neighborhood,
             propertyType = "$typeLabel · $roomLabel",
+            imageUrl = imageUrls.firstOrNull()
         )
     }
 
+    @SuppressLint("DefaultLocale")
     private fun formatDistance(distanceMeters: Int): String {
         return if (distanceMeters < 1000) {
             "${distanceMeters} m"

@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.example.g46_kotlin.R
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import androidx.compose.foundation.Image
+import coil.compose.AsyncImage
 
 data class MiniHouseCardUi(
     val name: String,
@@ -39,7 +40,7 @@ data class MiniHouseCardUi(
     val rating: Double,
     val distanceToCampus: String,
     val propertyType: String,
-    val imageResId: Int = R.drawable.house_example
+    val imageUrl: String? = null    
 )
 
 @Composable
@@ -67,14 +68,27 @@ fun MiniHouseCard(
                         .clip(RoundedCornerShape(topStart = 20.dp, bottomStart = 20.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    Image(
-                        painter = painterResource(id = ui.imageResId),
-                        contentDescription = "Imagen de ${ui.name}",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(),
-                        contentScale = ContentScale.Crop
-                    )
+                    if (ui.imageUrl.isNullOrBlank()) {
+                        Image(
+                            painter = painterResource(id = R.drawable.house_example),
+                            contentDescription = "Imagen de ${ui.name}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        AsyncImage(
+                            model = ui.imageUrl,
+                            contentDescription = "Imagen de ${ui.name}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(),
+                            contentScale = ContentScale.Crop,
+                            error = painterResource(id = R.drawable.house_example),
+                            placeholder = painterResource(id = R.drawable.house_example)
+                        )
+                    }
                 }
 
                 Column(

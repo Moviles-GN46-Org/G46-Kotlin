@@ -8,6 +8,7 @@ data class PropertyPinUi (
     val lat: Double,
     val lon: Double,
     val price: String,
+    val imageUrl: String
 )
 
 data class UserLocationUI(
@@ -18,6 +19,8 @@ data class UserLocationUI(
 data class MapUiState(
     val isLoading: Boolean = false,
     val userLocation: UserLocationUI? = null,
+    val cameraCenter: UserLocationUI? = null,
+    val cameraZoom: Double = 19.0,
     val apartments: List<PropertyPinUi> = emptyList(),
     val errorMessage: String? = null,
     val selectedApartmentId: String? = null,
