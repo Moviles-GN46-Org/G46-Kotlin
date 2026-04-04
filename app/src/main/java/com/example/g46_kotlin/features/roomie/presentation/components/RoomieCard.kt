@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import com.example.g46_kotlin.features.roomie.domain.model.PreferenceCategory
 import com.example.g46_kotlin.features.roomie.presentation.model.PreferenceRegistry
 import com.example.g46_kotlin.features.roomie.presentation.model.PreferenceUiSpec
+import coil.compose.AsyncImage
 
 data class RoomieCardUi(
     val name: String,
@@ -78,14 +79,27 @@ fun RoomieCard(
                 .height(imageHeight)
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.im_example_roomie),
-                contentDescription = "Roomie preview image",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(imageHeight),
-                contentScale = ContentScale.Crop
-            )
+            if (ui.profilePicture.isNullOrBlank()) {
+                Image(
+                    painter = painterResource(id = R.drawable.im_example_roomie),
+                    contentDescription = "Roomie preview image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(imageHeight),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                AsyncImage(
+                    model = ui.profilePicture,
+                    contentDescription = "Roomie preview image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(imageHeight),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = R.drawable.im_example_roomie),
+                    error = painterResource(id = R.drawable.im_example_roomie)
+                )
+            }
 
             Box(
                 modifier = Modifier
