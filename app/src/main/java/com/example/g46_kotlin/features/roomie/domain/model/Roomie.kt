@@ -16,5 +16,9 @@ data class Roomie(
     val preferredArea: String,
     val bio: String,
     val isActive: Boolean,
-    val createdAt: String
+    val createdAt: String,
+    val age: Int,
+    val matchRate: Double,
+    val job: String,
+    val university: String
 )

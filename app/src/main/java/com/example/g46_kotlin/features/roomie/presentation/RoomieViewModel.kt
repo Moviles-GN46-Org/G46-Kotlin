@@ -156,11 +156,11 @@ class RoomieViewModel @Inject constructor(
 
         return RoomieCardUi(
             name = "${roomie.firstName} ${roomie.lastName}",
-            age = 0, // TODO: cuando backend lo exponga
-            matchRate = 0, // TODO: cuando tengas algoritmo/endpoint
+            age = roomie.age,
+            matchRate = roomie.age,
             budget = roomie.budgetMax,
-            job = "N/A", // TODO: no viene en Roomie
-            university = "N/A", // TODO: no viene en Roomie
+            job = roomie.job,
+            university = roomie.university,
             about = roomie.bio,
             habitsPreferences = prefs,
             profilePicture = roomie.profilePictureUrl
