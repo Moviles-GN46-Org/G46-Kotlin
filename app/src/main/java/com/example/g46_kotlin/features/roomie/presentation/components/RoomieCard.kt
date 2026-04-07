@@ -55,9 +55,6 @@ data class RoomieCardUi(
     val profilePicture: String? = null
 )
 
-// Todo: put the font with the general theme
-// use the library for the icons instead of my web
-
 @Composable
 fun RoomieCard(
     ui: RoomieCardUi,
