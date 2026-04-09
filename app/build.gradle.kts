@@ -77,6 +77,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.foundation.layout)
+    implementation(libs.androidx.tv.material)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.compose.material.icons.core)
