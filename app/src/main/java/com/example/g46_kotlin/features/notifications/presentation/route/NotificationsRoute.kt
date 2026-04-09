@@ -19,6 +19,7 @@ fun NotificationsRoute(
 
     NotificationsScreen(
         uiState = uiState,
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
+        onRetryClick = {}
     )
 }
