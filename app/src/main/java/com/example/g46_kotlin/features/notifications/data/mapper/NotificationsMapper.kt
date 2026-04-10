@@ -87,7 +87,27 @@ class NotificationsMapper @Inject constructor() {
                 }
             }
 
+            NotificationType.PROPERTY_MATCH -> {
+                val propertyId = data.s("propertyId")
+                val landlordId = data.s("landlordId")
+                val neighborhood = data.s("neighborhood")
+                val monthlyRentL = data.s("monthlyRentL")?.toLongOrNull()
+                if (propertyId != null && landlordId != null && neighborhood != null && monthlyRentL != null) {
+                    NotificationPayload.PropertyMatch(
+                        propertyId = propertyId,
+                        landlordId = landlordId,
+                        neighborhood = neighborhood,
+                        monthlyRentL = monthlyRentL
+                    )
+                } else {
+                    unknown(rawType, data)
+                }
+            }
+
             NotificationType.UNKNOWN -> unknown(rawType, data)
+            else -> {
+                unknown(rawType, data)
+            }
         }
     }
 
