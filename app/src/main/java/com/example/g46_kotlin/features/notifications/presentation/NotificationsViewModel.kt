@@ -152,7 +152,7 @@ class NotificationsViewModel @Inject constructor(
                 propertyId = payload.propertyId,
                 landlordId = payload.landlordId,
                 neighborhood = payload.neighborhood,
-                monthlyRentL = payload.monthlyRentL
+                monthlyRent = payload.monthlyRent
             )
 
             else -> NotificationCardModel.Generic(

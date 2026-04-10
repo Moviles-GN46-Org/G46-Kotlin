@@ -24,4 +24,5 @@ data class MapUiState(
     val apartments: List<PropertyPinUi> = emptyList(),
     val errorMessage: String? = null,
     val selectedApartmentId: String? = null,
+    val isFollowingUser: Boolean = true
 )

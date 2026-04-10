@@ -70,7 +70,7 @@ sealed interface NotificationCardModel {
         val propertyId: String,
         val landlordId: String,
         val neighborhood: String,
-        val monthlyRentL: Long
+        val monthlyRent: Long?
     ): NotificationCardModel {
         override fun markAsRead(): NotificationCardModel = copy(isRead = true)
     }

@@ -1,5 +1,6 @@
 package com.example.g46_kotlin.features.map.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.core.location.CurrentLocationSource
@@ -20,7 +21,6 @@ import kotlin.math.sqrt
 import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
 
 
-
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val getNearbyApartmentsUseCase: GetNearbyApartmentsUseCase,
@@ -35,11 +35,14 @@ class MapViewModel @Inject constructor(
     private var locationTrackingJob: Job? = null
     private var lastApartmentsRequestLocation: UserLocationUI? = null
 
+
     private companion object {
         const val ANDES_LAT = 4.6016042953614225
         const val ANDES_LON = -74.06614174023011
         const val APARTMENTS_RELOAD_MIN_DISTANCE_METERS = 120.0
         const val DEFAULT_RADIUS_KM = 7.0
+        const val STOP_FOLLOW_DISTANCE_METERS = 80.0
+        private const val TAG = "MapViewModel"
     }
 
     fun onApartmentSelected(id: String) {
@@ -49,6 +52,8 @@ class MapViewModel @Inject constructor(
     fun startLocationTracking(hasLocationPermission: Boolean) {
         if (locationTrackingJob?.isActive == true) return
 
+        Log.d(TAG, "startLocationTracking(hasPermission=$hasLocationPermission)")
+
         if (!hasLocationPermission) {
             setFallbackIfNeeded()
             return
@@ -56,6 +61,7 @@ class MapViewModel @Inject constructor(
 
         locationTrackingJob = viewModelScope.launch {
             val first = currentLocationSource.getCurrentLocationOrNull()
+            Log.d(TAG, "firstLocation=${first?.lat},${first?.lon}")
             if (first != null) {
                 onLocationResolved(first.lat, first.lon)
             } else {
@@ -63,6 +69,7 @@ class MapViewModel @Inject constructor(
             }
 
             currentLocationSource.observeLocationUpdates().collect { loc ->
+                Log.d(TAG, "locationUpdate=${loc.lat},${loc.lon}")
                 onLocationResolved(loc.lat, loc.lon)
             }
         }
@@ -81,12 +88,16 @@ class MapViewModel @Inject constructor(
 
     fun onLocationResolved(lat: Double, lon: Double) {
         val newLocation = UserLocationUI(lat, lon)
-
+        Log.d(TAG, "onLocationResolved lat=$lat lon=$lon follow=${_uiState.value.isFollowingUser} cam=${_uiState.value.cameraCenter}")
         _uiState.update { current ->
             current.copy(
                 userLocation = newLocation,
                 errorMessage = null,
-                cameraCenter = current.cameraCenter ?: newLocation
+                cameraCenter = if (current.isFollowingUser) {
+                    newLocation
+                } else {
+                    current.cameraCenter ?: newLocation
+                }
             )
         }
 
@@ -176,11 +187,35 @@ class MapViewModel @Inject constructor(
         super.onCleared()
     }
 
-    fun onCameraChanged(center: UserLocationUI, zoom: Double) {
-        _uiState.update {
-            it.copy(
+    //TODO: para evitar bugs similares, agregar funcion y boton para volver a centrar usuario
+
+    fun onCameraChanged(center: UserLocationUI, zoom: Double, fromUserGesture: Boolean) {
+        _uiState.update { current ->
+            if (current.isFollowingUser && !fromUserGesture) {
+                Log.d(TAG, "onCameraChanged ignored (programmatic while following) center=${center.lat},${center.lon} zoom=$zoom")
+                return@update current
+            }
+
+            val movedAwayFromUser = current.userLocation != null &&
+                    distanceMeters(
+                        lat1 = current.userLocation.lat,
+                        lon1 = current.userLocation.lon,
+                        lat2 = center.lat,
+                        lon2 = center.lon
+                    ) > STOP_FOLLOW_DISTANCE_METERS
+
+            val shouldStopFollowing = current.isFollowingUser &&
+                    movedAwayFromUser
+
+            Log.d(
+                TAG,
+                "onCameraChanged center=${center.lat},${center.lon} zoom=$zoom fromUser=$fromUserGesture movedAway=$movedAwayFromUser stopFollow=$shouldStopFollowing"
+            )
+
+            current.copy(
                 cameraCenter = center,
-                cameraZoom = zoom
+                cameraZoom = zoom,
+                isFollowingUser = if (shouldStopFollowing) false else current.isFollowingUser
             )
         }
     }
