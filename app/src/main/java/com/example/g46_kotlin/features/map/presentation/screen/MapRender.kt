@@ -4,6 +4,8 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.util.Log
+import android.view.MotionEvent
 import android.view.animation.DecelerateInterpolator
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,9 +49,12 @@ fun MapRender(
     cameraZoom: Double,
     apartments: List<PropertyPinUi>,
     onApartmentClick: (id: String) -> Unit = {},
-    onCameraChanged: (UserLocationUI, Double) -> Unit
+    onCameraChanged: (UserLocationUI, Double, Boolean) -> Unit
 ) {
     val context = LocalContext.current
+    val tag = "MapRender"
+    var isApplyingProgrammaticCamera by remember { mutableStateOf(false) }
+    var hasUserInteracted by remember { mutableStateOf(false) }
 
     val userMarkerColor = MaterialTheme.colorScheme.primary.toArgb()
     val userMarkerIcon = remember(userMarkerColor) {
@@ -65,26 +70,30 @@ fun MapRender(
     val zoomStep = 1.0
 
 
-    fun reportCamera(mapView: MapView) {
+    fun reportCamera(mapView: MapView, fromUserGesture: Boolean) {
         val center = mapView.mapCenter
+        Log.d(tag, "reportCamera center=${center.latitude},${center.longitude} zoom=${mapView.zoomLevelDouble} fromUser=$fromUserGesture prog=$isApplyingProgrammaticCamera")
         onCameraChanged(
             UserLocationUI(
                 lat = center.latitude,
                 lon = center.longitude
             ),
-            mapView.zoomLevelDouble
+            mapView.zoomLevelDouble,
+            fromUserGesture
         )
     }
 
     val mapListener = remember {
         object : MapListener {
             override fun onScroll(event: ScrollEvent?): Boolean {
-                mapRef?.let { reportCamera(it) }
+                val fromUser = hasUserInteracted && !isApplyingProgrammaticCamera
+                mapRef?.let { reportCamera(it, fromUser) }
                 return true
             }
 
             override fun onZoom(p0: ZoomEvent?): Boolean {
-                mapRef?.let { reportCamera(it) }
+                val fromUser = hasUserInteracted && !isApplyingProgrammaticCamera
+                mapRef?.let { reportCamera(it, fromUser) }
                 return true
             }
         }
@@ -141,6 +150,18 @@ fun MapRender(
                     zoomController.setVisibility(
                         CustomZoomButtonsController.Visibility.NEVER
                     )
+                    setOnTouchListener { view, event ->
+                        when (event.actionMasked) {
+                            MotionEvent.ACTION_DOWN,
+                            MotionEvent.ACTION_MOVE -> {
+                                hasUserInteracted = true
+                            }
+                            MotionEvent.ACTION_UP -> {
+                                view.performClick()
+                            }
+                        }
+                        false
+                    }
                     mapRef = this
                 }
             },
@@ -152,11 +173,13 @@ fun MapRender(
                 if (!initialCameraApplied) {
                     val initialCenter = cameraCenter ?: userLocation
                     if (initialCenter != null) {
-                        mapView.controller.setCenter(
-                            GeoPoint(initialCenter.lat, initialCenter.lon)
-                        )
+                        isApplyingProgrammaticCamera = true
+                        mapView.controller.setCenter(GeoPoint(initialCenter.lat, initialCenter.lon))
                         mapView.controller.setZoom(cameraZoom)
                         initialCameraApplied = true
+                        isApplyingProgrammaticCamera = false
+                        hasUserInteracted = false
+                        Log.d(tag, "programmaticInitialCamera=${initialCenter.lat},${initialCenter.lon} zoom=$cameraZoom")
                     }
                 }
 
