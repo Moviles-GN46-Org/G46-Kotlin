@@ -20,6 +20,11 @@ fun NotificationsRoute(
     NotificationsScreen(
         uiState = uiState,
         onBackClick = onBackClick,
-        onRetryClick = {}
+        onRetryClick = viewModel::onRetry,
+        onReadNotification = viewModel::onReadNotification,
+        onReadAll = viewModel::onReadAll,
+        onPropertyClick = onPropertyClick,
+        onChatClick = onChatClick,
+        onRoomieClick = onRoomieClick,
     )
 }

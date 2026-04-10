@@ -55,6 +55,7 @@ import com.example.g46_kotlin.features.auth.presentation.login.route.LoginRoute
 import com.example.g46_kotlin.features.house.presentation.route.HouseRoute
 import com.example.g46_kotlin.features.house.presentation.route.PropertyDetailRoute
 import com.example.g46_kotlin.features.map.presentation.route.MapRoute
+import com.example.g46_kotlin.features.notifications.presentation.route.NotificationsRoute
 import com.example.g46_kotlin.ui.theme.DustyTaupe
 import com.example.g46_kotlin.ui.theme.LightBronze
 
@@ -162,6 +163,9 @@ fun G46KotlinApp(
                         navController.navigate(AppRoutes.propertyDetail(id)) {
                             launchSingleTop = true
                         }
+                    },
+                    onNotificationsClick = {
+                        navController.navigate(AppRoutes.Notifications)
                     }
                 )
             }
@@ -205,6 +209,25 @@ fun G46KotlinApp(
                 @Suppress("UNUSED_VARIABLE")
                 PropertyDetailRoute(
                     onBackClick = { navController.popBackStack() },
+                )
+            }
+
+            composable(
+                route = AppRoutes.Notifications,
+            ) {
+                NotificationsRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onPropertyClick = { propertyId ->
+                        navController.navigate(AppRoutes.propertyDetail(propertyId)) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onChatClick = { chatId ->
+                        {}
+                    },
+                    onRoomieClick = { roomieId ->
+                        {}
+                    },
                 )
             }
         }

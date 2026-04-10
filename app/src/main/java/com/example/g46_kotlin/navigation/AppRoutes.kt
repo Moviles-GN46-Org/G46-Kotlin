@@ -13,6 +13,6 @@ object AppRoutes {
     const val Chats = "chats"
     const val Feed = "feed"
     const val Roomies = "roomies"
-
+    const val Notifications = "notifications"
     fun propertyDetail(propertyId: String) = "propertyDetail/$propertyId"
 }

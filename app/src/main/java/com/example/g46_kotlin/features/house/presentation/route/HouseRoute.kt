@@ -11,6 +11,7 @@ import com.example.g46_kotlin.features.house.presentation.screen.HouseScreen
 fun HouseRoute(
     onMapClick: () -> Unit,
     onPropertyClick: (String) -> Unit,
+    onNotificationsClick: () -> Unit,
     viewModel: HouseViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -22,10 +23,8 @@ fun HouseRoute(
         onRoomTypeClick = viewModel::onRoomTypeClick,
         onAmenityClick = viewModel::onAmenityClick,
         onAvailabilityClick = viewModel::onAvailabilityClick,
-        onNotificationIconClick = viewModel::onNotificationIconClick,
-        onDismissNotificationsPanel = viewModel::onDismissNotificationsPanel,
-        onClearNotifications = viewModel::onClearNotifications,
         onMapClick = onMapClick,
-        onPropertyClick = onPropertyClick
+        onPropertyClick = onPropertyClick,
+        onNotificationsClick = onNotificationsClick
     )
 }
