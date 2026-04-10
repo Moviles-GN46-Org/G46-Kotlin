@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.core.location.CurrentLocationSource
 import com.example.g46_kotlin.features.map.domain.usecase.GetNearbyApartmentsUseCase
+import com.example.g46_kotlin.features.map.presentation.mapper.PropertyPinUiMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import javax.inject.Inject
@@ -16,11 +17,16 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
+import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
+
+
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val getNearbyApartmentsUseCase: GetNearbyApartmentsUseCase,
-    private val currentLocationSource: CurrentLocationSource
+    private val currentLocationSource: CurrentLocationSource,
+    private val propertyPinUiMapper: PropertyPinUiMapper,
+    private val analyticsRepository: AnalyticsRepository
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -33,6 +39,7 @@ class MapViewModel @Inject constructor(
         const val ANDES_LAT = 4.6016042953614225
         const val ANDES_LON = -74.06614174023011
         const val APARTMENTS_RELOAD_MIN_DISTANCE_METERS = 120.0
+        const val DEFAULT_RADIUS_KM = 7.0
     }
 
     fun onApartmentSelected(id: String) {
@@ -75,10 +82,11 @@ class MapViewModel @Inject constructor(
     fun onLocationResolved(lat: Double, lon: Double) {
         val newLocation = UserLocationUI(lat, lon)
 
-        _uiState.update {
-            it.copy(
+        _uiState.update { current ->
+            current.copy(
                 userLocation = newLocation,
-                errorMessage = null
+                errorMessage = null,
+                cameraCenter = current.cameraCenter ?: newLocation
             )
         }
 
@@ -113,24 +121,24 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+            launch {
+                runCatching {
+                    analyticsRepository.trackMapSearch(
+                        lat = lat,
+                        lng = lon,
+                        radiusKm = DEFAULT_RADIUS_KM
+                    )
+                }
+            }
+
             runCatching {
                 getNearbyApartmentsUseCase(lat, lon)
             }.onSuccess { apartments ->
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        apartments = apartments.map { apt ->
-                            PropertyPinUi(
-                                id = apt.id,
-                                title = shortenTitleForMap(apt.title, maxWords = 3),
-                                description = apt.description,
-                                rating = apt.rating,
-                                lat = apt.lat,
-                                lon = apt.lon,
-                                price = formatCopToThousandsLabel(apt.price),
-                                imageUrl = apt.image
-                            )
-                        }
+                        apartments = apartments.map(propertyPinUiMapper::toUi),
+                        errorMessage = null
                     )
                 }
             }.onFailure { e ->
@@ -166,5 +174,14 @@ class MapViewModel @Inject constructor(
     override fun onCleared() {
         stopLocationTracking()
         super.onCleared()
+    }
+
+    fun onCameraChanged(center: UserLocationUI, zoom: Double) {
+        _uiState.update {
+            it.copy(
+                cameraCenter = center,
+                cameraZoom = zoom
+            )
+        }
     }
 }

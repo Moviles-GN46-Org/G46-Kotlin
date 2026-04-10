@@ -66,28 +66,6 @@ class LoginViewModel @Inject constructor(
         val email = state.email.trim()
         val password = state.password
 
-        val emailError = when {
-            email.isBlank() -> "Email is required"
-            !isValidEmail(email) -> "Enter a valid email"
-            else -> null
-        }
-
-        val passwordError = when {
-            password.isBlank() -> "Password is required"
-            password.length < 6 -> "Password must have at least 6 characters"
-            else -> null
-        }
-
-        if (emailError != null || passwordError != null) {
-            _uiState.update {
-                it.copy(
-                    emailError = emailError,
-                    passwordError = passwordError
-                )
-            }
-            return
-        }
-
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -100,21 +78,23 @@ class LoginViewModel @Inject constructor(
             )
 
             when (result) {
-                is AuthResult.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            loggedUser = result.session.user
-                        )
-                    }
-                    _effects.emit(LoginEffect.NavigateToHome)
-                }
-
                 is AuthResult.Error -> {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             errorMessage = result.message
+                        )
+                    }
+                }
+
+                is AuthResult.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = null,
+                            emailError = null,
+                            passwordError = null,
+                            password = ""
                         )
                     }
                 }
@@ -126,10 +106,5 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _effects.emit(effect)
         }
-    }
-
-    private fun isValidEmail(value: String): Boolean {
-        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
-        return emailRegex.matches(value)
     }
 }

@@ -1,8 +1,10 @@
 package com.example.g46_kotlin.features.house.presentation
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.cards.HousingCardUi
+import com.example.g46_kotlin.core.domain.contract.NotificationPublisher
 import com.example.g46_kotlin.features.house.domain.usecase.GetHouseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -14,18 +16,28 @@ import kotlinx.coroutines.launch
 import com.example.g46_kotlin.core.location.CurrentLocationSource
 import com.example.g46_kotlin.features.house.domain.model.PropertyDetail
 import com.example.g46_kotlin.features.house.domain.usecase.GetNearestAvailablePropertyUseCase
-import java.util.UUID
+import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 
 
 @HiltViewModel
 class HouseViewModel @Inject constructor(
+    private val notificationPublisher: NotificationPublisher,
     private val getHouseUseCase: GetHouseUseCase,
     private val currentLocationSource: CurrentLocationSource,
-    private val getNearestAvailablePropertyUseCase: GetNearestAvailablePropertyUseCase
+    private val getNearestAvailablePropertyUseCase: GetNearestAvailablePropertyUseCase,
+    private val analyticsRepository: AnalyticsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HouseUiState())
     val uiState: StateFlow<HouseUiState> = _uiState.asStateFlow()
+    private var searchTrackJob: Job? = null
+    private var lastNotifiedPropertyId: String? = null
+
+    private companion object {
+        const val SEARCH_TRACK_DEBOUNCE_MS = 700L
+    }
 
     init {
         loadHouses()
@@ -43,36 +55,41 @@ class HouseViewModel @Inject constructor(
                     getNearestAvailablePropertyUseCase(location, properties)
                 }
 
-                val newNotification = nearest?.let { result ->
-                    HouseInAppNotification(
-                        id = UUID.randomUUID().toString(),
-                        title = "Propiedad cerca de ti",
-                        message = "${result.property.title} en ${result.property.neighborhood} a ${formatDistance(result.distanceMeters)}",
-                        createdAtMillis = System.currentTimeMillis(),
-                        isRead = false
-                    )
+                nearest?.let { result ->
+                    val shouldNotify = lastNotifiedPropertyId != result.property.id
+
+                    if (shouldNotify) {
+                        runCatching {
+                            notificationPublisher.publishContextAware(
+                                propertyTitle = result.property.title,
+                                neighborhood = result.property.neighborhood,
+                                distanceMeters = result.distanceMeters,
+                                propertyId = result.property.id,
+                                propertyImage = result.property.imageUrls.firstOrNull() ?: ""
+                            )
+                        }.onSuccess { published ->
+                            if (published) {
+                                lastNotifiedPropertyId = result.property.id
+                            }
+                        }
+                    }
                 }
 
                 val mapped = properties.map { property -> property.toHousingCardUi() }
 
                 _uiState.update { state ->
-                    val updatedNotifications = if (newNotification != null) {
-                        listOf(newNotification) + state.notifications
-                    } else {
-                        state.notifications
-                    }
-
                     state.copy(
                         isLoading = false,
                         houses = mapped,
                         visibleHouses = mapped,
                         allProperties = properties,
-                        notifications = updatedNotifications,
+                        errorMessage = null,
                         lastActionMessage = nearest?.let { result ->
                             "Cerca de ti: ${result.property.title} a ${formatDistance(result.distanceMeters)}"
                         }
                     )
                 }
+
             }.onFailure { error ->
                 _uiState.update {
                     it.copy(
@@ -89,6 +106,15 @@ class HouseViewModel @Inject constructor(
     fun onQueryChange(value: String) {
         _uiState.update { it.copy(query = value) }
         applyUiOnlyFilters()
+        scheduleHouseSearchTracking()
+    }
+
+    private fun scheduleHouseSearchTracking() {
+        searchTrackJob?.cancel()
+        searchTrackJob = viewModelScope.launch {
+            delay(SEARCH_TRACK_DEBOUNCE_MS)
+            trackHouseSearchSafely()
+        }
     }
 
     fun onBudgetClick(option: String) {
@@ -96,6 +122,20 @@ class HouseViewModel @Inject constructor(
             it.copy(selectedBudget = if (it.selectedBudget == option) null else option)
         }
         applyUiOnlyFilters()
+    }
+
+    private fun trackHouseSearchSafely() {
+        val state = _uiState.value
+        viewModelScope.launch {
+            runCatching {
+                analyticsRepository.trackHouseSearch(
+                    query = state.query,
+                    budget = state.selectedBudget,
+                    roomType = state.selectedRoomType,
+                    amenities = state.selectedAmenities
+                )
+            }
+        }
     }
 
     fun onRoomTypeClick(option: String) {
@@ -147,44 +187,6 @@ class HouseViewModel @Inject constructor(
         }
     }
 
-    fun onHouseClick(propertyId: String) {
-        val property = _uiState.value.allProperties.firstOrNull { it.id == propertyId } ?: return
-        _uiState.update {
-            it.copy(
-                showPropertyDetail = true,
-                selectedPropertyDetail = PropertyDetailUi(
-                    id = property.id,
-                    title = property.title,
-                    description = property.description,
-                    monthlyRent = property.monthlyRent.toInt(),
-                    depositAmount = property.depositAmount?.toInt(),
-                    neighborhood = property.neighborhood,
-                    address = property.address,
-                    bedrooms = property.bedrooms,
-                    bathrooms = property.bathrooms,
-                    sizeM2 = property.sizeM2,
-                    furnished = property.furnished,
-                    petFriendly = property.petFriendly,
-                    hasParking = property.hasParking,
-                    hasLaundry = property.hasLaundry,
-                    hasWifi = property.hasWifi,
-                    includesUtilities = property.includesUtilities,
-                    propertyType = property.propertyType.name.replace("_", " "),
-                    imageUrl = property.imageUrls.firstOrNull()
-                )
-            )
-        }
-    }
-
-    fun onBackFromDetail() {
-        _uiState.update {
-            it.copy(
-                showPropertyDetail = false,
-                selectedPropertyDetail = null
-            )
-        }
-    }
-
     fun onAvailabilityClick(houseName: String) {
         _uiState.update {
             it.copy(lastActionMessage = "Ver disponibilidad de $houseName")
@@ -206,28 +208,12 @@ class HouseViewModel @Inject constructor(
         )
     }
 
+    @SuppressLint("DefaultLocale")
     private fun formatDistance(distanceMeters: Int): String {
         return if (distanceMeters < 1000) {
-            "${distanceMeters} m"
+            "$distanceMeters m"
         } else {
             String.format("%.1f km", distanceMeters / 1000.0)
         }
-    }
-
-    fun onNotificationIconClick() {
-        _uiState.update { state ->
-            state.copy(
-                showNotificationsPanel = true,
-                notifications = state.notifications.map { it.copy(isRead = true) }
-            )
-        }
-    }
-
-    fun onDismissNotificationsPanel() {
-        _uiState.update { it.copy(showNotificationsPanel = false) }
-    }
-
-    fun onClearNotifications() {
-        _uiState.update { it.copy(notifications = emptyList(), showNotificationsPanel = false) }
     }
 }

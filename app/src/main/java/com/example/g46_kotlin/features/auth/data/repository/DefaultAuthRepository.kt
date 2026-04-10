@@ -11,6 +11,8 @@ import com.example.g46_kotlin.features.auth.domain.model.LoginParams
 import com.example.g46_kotlin.features.auth.domain.model.User
 import com.example.g46_kotlin.features.auth.domain.model.UserRole
 import com.example.g46_kotlin.features.auth.domain.repository.AuthRepository
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 class DefaultAuthRepository @Inject constructor(
@@ -19,7 +21,7 @@ class DefaultAuthRepository @Inject constructor(
 ) : AuthRepository {
 
     override suspend fun loginWithEmail(params: LoginParams): AuthResult {
-        return runCatching {
+        return try {
             val response = api.login(
                 body = LoginRequestDto(
                     email = params.email,
@@ -28,8 +30,11 @@ class DefaultAuthRepository @Inject constructor(
             )
 
             val data = response.data
-            tokenStorage.saveAccessToken(data.accessToken)
-            tokenStorage.saveRefreshToken(data.refreshToken)
+            tokenStorage.saveSession(
+                accessToken = data.accessToken,
+                refreshToken = data.refreshToken,
+                persistent = params.rememberMe
+            )
 
             val user = data.user.toDomainUser()
             val session = AuthSession(
@@ -39,7 +44,15 @@ class DefaultAuthRepository @Inject constructor(
                 user = user
             )
             AuthResult.Success(session)
-        }.getOrElse { e ->
+        } catch (e: HttpException) {
+            if (e.code() == 401) {
+                AuthResult.Error("Invalid credentials")
+            } else {
+                AuthResult.Error("Something went wrong (${e.code()})")
+            }
+        } catch (e: IOException) {
+            AuthResult.Error("Network error, check your connection")
+        } catch (e: Exception) {
             AuthResult.Error(e.message ?: "Login failed")
         }
     }
