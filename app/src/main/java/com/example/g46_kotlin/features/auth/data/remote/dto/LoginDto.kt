@@ -38,22 +38,3 @@ data class UserDto(
     val createdAt: String
 
 )
-
-@Serializable
-data class RefreshTokenRequestDto(
-    val refreshToken: String?
-)
-
-@Serializable
-data class RefreshTokenResponseDto(
-    val success: Boolean,
-    val data: RefreshTokenDataDto
-)
-
-@Serializable
-data class RefreshTokenDataDto (
-    val accessToken: String?,
-    val refreshToken: String?
-)
-
-
