@@ -38,7 +38,7 @@ data class PropertyDetailDto(
     val city: String,
     val latitude: Double,
     val longitude: Double,
-    val sizeM2: Int,
+    val sizeM2: Double,
     val bedrooms: Int,
     val bathrooms: Int,
     val furnished: Boolean,
