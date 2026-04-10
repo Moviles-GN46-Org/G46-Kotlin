@@ -77,7 +77,7 @@ fun NotificationCardFactory(
             notificationUi = model,
             onClick = {
                 onReadNotification(model.id)
-                onPropertyClick(model.propertyId)
+                onPropertyClick(it)
             }
         )
     }
@@ -88,7 +88,7 @@ fun PropertyMatchNotification(
     onClick: (String) -> Unit,
     notificationUi: NotificationCardModel.PropertyMatch
 ) {
-    val rentText = "${formatCopThousands(notificationUi.monthlyRentL)}/mo"
+    val rentText = "${formatCopThousands(notificationUi.monthlyRent)}/mo"
     val enrichedMessage = "${notificationUi.message}\n${notificationUi.neighborhood} · $rentText"
 
     BaseNotificationCard(
@@ -111,8 +111,8 @@ fun PropertyMatchNotification(
     )
 }
 
-private fun formatCopThousands(value: Long): String {
-    val thousands = (value / 1000).toString()
+private fun formatCopThousands(value: Long?): String {
+    val thousands = (value?.div(1000)).toString()
     val grouped = thousands.reversed().chunked(3).joinToString("'").reversed()
     return "$$grouped"
 }
