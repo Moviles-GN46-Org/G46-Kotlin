@@ -51,10 +51,8 @@ fun HouseScreen(
     onAmenityClick: (String) -> Unit,
     onPropertyClick: (String) -> Unit,
     onAvailabilityClick: (String) -> Unit,
-    onNotificationIconClick: () -> Unit,
-    onDismissNotificationsPanel: () -> Unit,
-    onClearNotifications: () -> Unit,
-    onMapClick: () -> Unit
+    onMapClick: () -> Unit,
+    onNotificationsClick: () -> Unit
 ) {
 
     HouseContent(
@@ -64,11 +62,9 @@ fun HouseScreen(
         onRoomTypeClick = onRoomTypeClick,
         onAmenityClick = onAmenityClick,
         onAvailabilityClick = onAvailabilityClick,
-        onNotificationIconClick = onNotificationIconClick,
-        onDismissNotificationsPanel = onDismissNotificationsPanel,
-        onClearNotifications = onClearNotifications,
         onMapClick = onMapClick,
         onPropertyClick = onPropertyClick,
+        onNotificationsClick = onNotificationsClick
     )
 }
 
@@ -81,10 +77,8 @@ private fun HouseContent(
     onAmenityClick: (String) -> Unit,
     onPropertyClick: (String) -> Unit,
     onAvailabilityClick: (String) -> Unit,
-    onNotificationIconClick: () -> Unit,
-    onDismissNotificationsPanel: () -> Unit,
-    onClearNotifications: () -> Unit,
-    onMapClick: () -> Unit
+    onMapClick: () -> Unit,
+    onNotificationsClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -94,10 +88,8 @@ private fun HouseContent(
             item {
                 HouseHeader(
                     state = state,
-                    onNotificationIconClick = onNotificationIconClick,
-                    onDismissNotificationsPanel = onDismissNotificationsPanel,
-                    onClearNotifications = onClearNotifications,
-                    onMapClick = onMapClick
+                    onMapClick = onMapClick,
+                    onNotificationsClick = onNotificationsClick
                 )
             }
 
@@ -201,10 +193,8 @@ private fun HouseContent(
 @Composable
 private fun HouseHeader(
     state: HouseUiState,
-    onNotificationIconClick: () -> Unit,
-    onDismissNotificationsPanel: () -> Unit,
-    onClearNotifications: () -> Unit,
-    onMapClick: () -> Unit
+    onMapClick: () -> Unit,
+    onNotificationsClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -223,40 +213,12 @@ private fun HouseHeader(
 
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
             Box {
-                IconButton(onClick = onNotificationIconClick) {
+                IconButton(onClick = onNotificationsClick) {
                     Icon(
                         imageVector = Icons.Outlined.NotificationsNone,
                         contentDescription = "Notifications",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-
-                DropdownMenu(
-                    expanded = state.showNotificationsPanel,
-                    onDismissRequest = onDismissNotificationsPanel
-                ) {
-                    if (state.notifications.isEmpty()) {
-                        DropdownMenuItem(
-                            text = { Text("No notifications") },
-                            onClick = {}
-                        )
-                    } else {
-                        state.notifications.take(5).forEach { notification ->
-                            val prefix = if (notification.isRead) "" else "[new] "
-                            DropdownMenuItem(
-                                text = { Text(prefix + notification.title) },
-                                onClick = {}
-                            )
-                            DropdownMenuItem(
-                                text = { Text(notification.message) },
-                                onClick = {}
-                            )
-                        }
-                        DropdownMenuItem(
-                            text = { Text("Clear all") },
-                            onClick = onClearNotifications
-                        )
-                    }
                 }
             }
 
@@ -286,10 +248,8 @@ private fun HouseContentPreview() {
             onAmenityClick = {},
             onPropertyClick = {},
             onAvailabilityClick = {},
-            onNotificationIconClick = {},
-            onDismissNotificationsPanel = {},
-            onClearNotifications = {},
-            onMapClick = {}
+            onMapClick = {},
+            onNotificationsClick = {}
         )
     }
 }

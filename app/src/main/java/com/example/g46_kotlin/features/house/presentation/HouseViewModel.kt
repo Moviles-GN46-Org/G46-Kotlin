@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.g46_kotlin.cards.HousingCardUi
+import com.example.g46_kotlin.core.domain.contract.NotificationPublisher
 import com.example.g46_kotlin.features.house.domain.usecase.GetHouseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -15,7 +16,6 @@ import kotlinx.coroutines.launch
 import com.example.g46_kotlin.core.location.CurrentLocationSource
 import com.example.g46_kotlin.features.house.domain.model.PropertyDetail
 import com.example.g46_kotlin.features.house.domain.usecase.GetNearestAvailablePropertyUseCase
-import java.util.UUID
 import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -23,6 +23,7 @@ import kotlinx.coroutines.delay
 
 @HiltViewModel
 class HouseViewModel @Inject constructor(
+    private val notificationPublisher: NotificationPublisher,
     private val getHouseUseCase: GetHouseUseCase,
     private val currentLocationSource: CurrentLocationSource,
     private val getNearestAvailablePropertyUseCase: GetNearestAvailablePropertyUseCase,
@@ -32,6 +33,7 @@ class HouseViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HouseUiState())
     val uiState: StateFlow<HouseUiState> = _uiState.asStateFlow()
     private var searchTrackJob: Job? = null
+    private var lastNotifiedPropertyId: String? = null
 
     private companion object {
         const val SEARCH_TRACK_DEBOUNCE_MS = 700L
@@ -53,36 +55,41 @@ class HouseViewModel @Inject constructor(
                     getNearestAvailablePropertyUseCase(location, properties)
                 }
 
-                val newNotification = nearest?.let { result ->
-                    HouseInAppNotification(
-                        id = UUID.randomUUID().toString(),
-                        title = "Propiedad cerca de ti",
-                        message = "${result.property.title} en ${result.property.neighborhood} a ${formatDistance(result.distanceMeters)}",
-                        createdAtMillis = System.currentTimeMillis(),
-                        isRead = false
-                    )
+                nearest?.let { result ->
+                    val shouldNotify = lastNotifiedPropertyId != result.property.id
+
+                    if (shouldNotify) {
+                        runCatching {
+                            notificationPublisher.publishContextAware(
+                                propertyTitle = result.property.title,
+                                neighborhood = result.property.neighborhood,
+                                distanceMeters = result.distanceMeters,
+                                propertyId = result.property.id,
+                                propertyImage = result.property.imageUrls.firstOrNull() ?: ""
+                            )
+                        }.onSuccess { published ->
+                            if (published) {
+                                lastNotifiedPropertyId = result.property.id
+                            }
+                        }
+                    }
                 }
 
                 val mapped = properties.map { property -> property.toHousingCardUi() }
 
                 _uiState.update { state ->
-                    val updatedNotifications = if (newNotification != null) {
-                        listOf(newNotification) + state.notifications
-                    } else {
-                        state.notifications
-                    }
-
                     state.copy(
                         isLoading = false,
                         houses = mapped,
                         visibleHouses = mapped,
                         allProperties = properties,
-                        notifications = updatedNotifications,
+                        errorMessage = null,
                         lastActionMessage = nearest?.let { result ->
                             "Cerca de ti: ${result.property.title} a ${formatDistance(result.distanceMeters)}"
                         }
                     )
                 }
+
             }.onFailure { error ->
                 _uiState.update {
                     it.copy(
@@ -204,26 +211,9 @@ class HouseViewModel @Inject constructor(
     @SuppressLint("DefaultLocale")
     private fun formatDistance(distanceMeters: Int): String {
         return if (distanceMeters < 1000) {
-            "${distanceMeters} m"
+            "$distanceMeters m"
         } else {
             String.format("%.1f km", distanceMeters / 1000.0)
         }
-    }
-
-    fun onNotificationIconClick() {
-        _uiState.update { state ->
-            state.copy(
-                showNotificationsPanel = true,
-                notifications = state.notifications.map { it.copy(isRead = true) }
-            )
-        }
-    }
-
-    fun onDismissNotificationsPanel() {
-        _uiState.update { it.copy(showNotificationsPanel = false) }
-    }
-
-    fun onClearNotifications() {
-        _uiState.update { it.copy(notifications = emptyList(), showNotificationsPanel = false) }
     }
 }
