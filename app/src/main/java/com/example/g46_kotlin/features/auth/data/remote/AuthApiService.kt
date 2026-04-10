@@ -2,11 +2,15 @@ package com.example.g46_kotlin.features.auth.data.remote
 
 import com.example.g46_kotlin.features.auth.data.remote.dto.LoginRequestDto
 import com.example.g46_kotlin.features.auth.data.remote.dto.LoginResponseDto
-import com.example.g46_kotlin.features.auth.data.remote.dto.RefreshTokenRequestDto
+import com.example.g46_kotlin.features.auth.data.remote.dto.RegisterRequestDto
+import com.example.g46_kotlin.features.auth.data.remote.dto.RegisterResponseDto
 import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface AuthApiService {
     @POST("auth/login")
     suspend fun login(@Body body: LoginRequestDto): LoginResponseDto
+
+    @POST("auth/register")
+    suspend fun register(@Body body: RegisterRequestDto): RegisterResponseDto
 }
