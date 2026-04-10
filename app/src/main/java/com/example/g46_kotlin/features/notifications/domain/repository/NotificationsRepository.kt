@@ -9,4 +9,7 @@ interface NotificationsRepository {
     suspend fun readNotification(id: String): Boolean
 
     suspend fun readAllNotifications(): Boolean
+
+    //TODO: Ponerle un nombre mas creativo a esto
+    suspend fun createContextAwareNotification(title: String, body: String, propertyId: String, data: Map<String, String>, propertyImage: String): Boolean
 }
