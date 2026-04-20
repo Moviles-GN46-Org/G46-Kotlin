@@ -1,5 +1,6 @@
 package com.example.g46_kotlin.features.map.domain.repository
 
+import com.example.g46_kotlin.features.map.domain.model.NearbyPropertiesResult
 import com.example.g46_kotlin.features.map.domain.model.Property
 
 interface MapRepository {
@@ -7,5 +8,5 @@ interface MapRepository {
         userLat: Double,
         userLon: Double,
         radiusMeters: Int
-    ): List<Property>
+    ): NearbyPropertiesResult
 }

@@ -9,6 +9,7 @@ interface MapApiService {
     suspend fun getNearbyProperties(
         @Query("lat") userLat: Double,
         @Query("lng") userLon: Double,
-        @Query("radiusKm") radiusKm: Double
+        @Query("radiusKm") radiusKm: Double,
+        @Query("includeAveragePrice") includeAveragePrice: Boolean = true
     ): PropertiesResponse
 }

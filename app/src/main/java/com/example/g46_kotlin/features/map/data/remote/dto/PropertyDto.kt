@@ -1,5 +1,6 @@
 package com.example.g46_kotlin.features.map.data.remote.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
@@ -13,7 +14,9 @@ data class PropertiesData(
     val properties: List<PropertyDto>,
     val total: Int,
     val page: Int,
-    val limit: Int
+    val limit: Int,
+    @SerialName("averageMonthlyRent")
+    val avgRent: Double? = null
 )
 
 @Serializable
