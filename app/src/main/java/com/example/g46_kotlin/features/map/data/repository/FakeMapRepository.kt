@@ -1,47 +1,54 @@
 package com.example.g46_kotlin.features.map.data.repository
 
+import com.example.g46_kotlin.features.map.domain.model.NearbyPropertiesResult
 import com.example.g46_kotlin.features.map.domain.model.Property
 import com.example.g46_kotlin.features.map.domain.repository.MapRepository
 import kotlinx.coroutines.delay
 
-class FakeMapRepository: MapRepository {
+class FakeMapRepository : MapRepository {
     override suspend fun getNearbyApartments(
         userLat: Double,
         userLon: Double,
         radiusMeters: Int
-    ): List<Property> {
+    ): NearbyPropertiesResult {
         delay(500)
-        return listOf(
+
+        val properties = listOf(
             Property(
-                "a1",
-                "Apto Central",
-                "2 habitaciones",
-                4.6,
-                userLat + 0.0020,
-                userLon + 0.0015,
-                "$1000",
+                id = "a1",
+                title = "Apto Central",
+                description = "2 habitaciones",
+                rating = 4.6,
+                lat = userLat + 0.0020,
+                lon = userLon + 0.0015,
+                price = "$1'000",
                 image = ""
             ),
             Property(
-                "a2",
-                "Studio Norte",
-                "1 habitacion",
-                4.2,
-                userLat - 0.0012,
-                userLon + 0.0022,
-                "$1500",
+                id = "a2",
+                title = "Studio Norte",
+                description = "1 habitacion",
+                rating = 4.2,
+                lat = userLat - 0.0012,
+                lon = userLon + 0.0022,
+                price = "$1'500",
                 image = ""
             ),
             Property(
-                "a3",
-                "Loft Universitario",
-                "Cerca al campus",
-                4.8,
-                userLat + 0.0010,
-                userLon - 0.0018,
-                "$2000",
+                id = "a3",
+                title = "Loft Universitario",
+                description = "Cerca al campus",
+                rating = 4.8,
+                lat = userLat + 0.0010,
+                lon = userLon - 0.0018,
+                price = "$2'000",
                 image = ""
             )
+        )
+
+        return NearbyPropertiesResult(
+            properties = properties,
+            avgRent = 1500.0
         )
     }
 }

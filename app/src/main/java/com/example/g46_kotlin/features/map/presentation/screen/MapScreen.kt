@@ -117,11 +117,7 @@ private fun MapScreenLayout(
     )
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
     val isExpanded = sheetState.currentValue == SheetValue.Expanded
-    val avgRent = uiState.apartments
-        .mapNotNull { it.price.toCopIntOrNull() }
-        .takeIf { it.isNotEmpty() }
-        ?.average()
-        ?.toInt()
+    val avgRent = uiState.avgRent
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -156,7 +152,7 @@ private fun MapScreenLayout(
 
             avgRent?.let { rent ->
                 AverageRentCard(
-                    avgRent = rent,
+                    avgRent = rent.toInt(),
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(start = 12.dp, top = 12.dp)

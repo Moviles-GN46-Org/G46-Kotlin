@@ -144,12 +144,13 @@ class MapViewModel @Inject constructor(
 
             runCatching {
                 getNearbyApartmentsUseCase(lat, lon)
-            }.onSuccess { apartments ->
+            }.onSuccess { apartmentsResult ->
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        apartments = apartments.map(propertyPinUiMapper::toUi),
-                        errorMessage = null
+                        apartments = apartmentsResult.properties.map(propertyPinUiMapper::toUi),
+                        errorMessage = null,
+                        avgRent = apartmentsResult.avgRent
                     )
                 }
             }.onFailure { e ->
