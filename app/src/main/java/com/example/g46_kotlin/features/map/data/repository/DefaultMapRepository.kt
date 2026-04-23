@@ -3,7 +3,7 @@ package com.example.g46_kotlin.features.map.data.repository
 import com.example.g46_kotlin.features.map.data.mapper.PropertyMapper
 import com.example.g46_kotlin.features.map.data.remote.MapApiService
 import com.example.g46_kotlin.features.map.domain.model.NearbyPropertiesResult
-import com.example.g46_kotlin.features.map.domain.model.Property
+import com.example.g46_kotlin.features.map.domain.model.PopularSize
 import com.example.g46_kotlin.features.map.domain.repository.MapRepository
 import javax.inject.Inject
 
@@ -21,4 +21,11 @@ class DefaultMapRepository @Inject constructor(
 
         return propertyMapper.toNearbyPropertiesResult(response.data)
     }
+
+    override suspend fun getTopPropertySize(): PopularSize {
+        val response = mapApiService.getTopPropertySize()
+        return propertyMapper.toPopularSize(response.data.popularSize)
+    }
+
+
 }

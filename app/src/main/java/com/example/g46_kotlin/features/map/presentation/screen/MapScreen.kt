@@ -40,6 +40,7 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.ui.Alignment
+import com.example.g46_kotlin.features.map.domain.model.PopularSize
 import com.example.g46_kotlin.features.map.presentation.MapMarkerFactory
 import com.example.g46_kotlin.features.map.presentation.MapUiState
 import com.example.g46_kotlin.features.map.presentation.PropertyPinUi
@@ -48,6 +49,7 @@ import com.example.g46_kotlin.features.map.presentation.components.AverageRentCa
 import com.example.g46_kotlin.features.map.presentation.components.DrawerContent
 import com.example.g46_kotlin.features.map.presentation.components.DrawerHandleHeader
 import com.example.g46_kotlin.features.map.presentation.components.MapSettingsOverlay
+import com.example.g46_kotlin.features.map.presentation.components.MostPopularAptSizeCard
 
 @Composable
 fun MapScreen(
@@ -118,6 +120,7 @@ private fun MapScreenLayout(
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
     val isExpanded = sheetState.currentValue == SheetValue.Expanded
     val avgRent = uiState.avgRent
+    val topSize = uiState.topPropertySize
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -156,6 +159,15 @@ private fun MapScreenLayout(
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(start = 12.dp, top = 12.dp)
+                )
+            }
+
+            topSize?.let { size ->
+                MostPopularAptSizeCard(
+                    size = size,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = 12.dp, top = 12.dp)
                 )
             }
 
@@ -238,7 +250,14 @@ fun MapScreenPreview() {
                 imageUrl = ""
             )
         ),
-        selectedApartmentId = null
+        selectedApartmentId = null,
+        topPropertySize = PopularSize(
+            minM2 = 25,
+            maxM2 = 30,
+            count = 10,
+            avgSizeM2 = 28.2
+        ),
+        avgRent = 1200000.0
     )
 
     G46KotlinTheme {

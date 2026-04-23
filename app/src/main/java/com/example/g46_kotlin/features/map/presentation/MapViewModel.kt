@@ -19,11 +19,15 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
+import com.example.g46_kotlin.features.map.domain.usecase.GetTopPropertySizeUseCase
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val getNearbyApartmentsUseCase: GetNearbyApartmentsUseCase,
+    private val getTopPropertySizeUseCase: GetTopPropertySizeUseCase,
     private val currentLocationSource: CurrentLocationSource,
     private val propertyPinUiMapper: PropertyPinUiMapper,
     private val analyticsRepository: AnalyticsRepository
@@ -143,14 +147,23 @@ class MapViewModel @Inject constructor(
             }
 
             runCatching {
-                getNearbyApartmentsUseCase(lat, lon)
-            }.onSuccess { apartmentsResult ->
+                coroutineScope {
+                    val apartmentsDeferred = async { getNearbyApartmentsUseCase(lat, lon) }
+                    val topSizeDeferred = async { getTopPropertySizeUseCase() }
+
+                    val apartmentsResult = apartmentsDeferred.await()
+                    val topSizeResult = topSizeDeferred.await()
+
+                    apartmentsResult to topSizeResult
+                }
+            }.onSuccess { (apartmentsResult, topSize) ->
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         apartments = apartmentsResult.properties.map(propertyPinUiMapper::toUi),
                         errorMessage = null,
-                        avgRent = apartmentsResult.avgRent
+                        avgRent = apartmentsResult.avgRent,
+                        topPropertySize = topSize
                     )
                 }
             }.onFailure { e ->

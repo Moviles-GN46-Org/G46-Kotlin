@@ -1,6 +1,7 @@
 package com.example.g46_kotlin.features.map.data.repository
 
 import com.example.g46_kotlin.features.map.domain.model.NearbyPropertiesResult
+import com.example.g46_kotlin.features.map.domain.model.PopularSize
 import com.example.g46_kotlin.features.map.domain.model.Property
 import com.example.g46_kotlin.features.map.domain.repository.MapRepository
 import kotlinx.coroutines.delay
@@ -27,7 +28,7 @@ class FakeMapRepository : MapRepository {
             Property(
                 id = "a2",
                 title = "Studio Norte",
-                description = "1 habitacion",
+                description = "1 habitación",
                 rating = 4.2,
                 lat = userLat - 0.0012,
                 lon = userLon + 0.0022,
@@ -49,6 +50,16 @@ class FakeMapRepository : MapRepository {
         return NearbyPropertiesResult(
             properties = properties,
             avgRent = 1500.0
+        )
+    }
+
+    override suspend fun getTopPropertySize(): PopularSize {
+        delay(500)
+        return PopularSize(
+            minM2 = 20,
+            maxM2 = 30,
+            count = 10,
+            avgSizeM2 = 25.0
         )
     }
 }
