@@ -15,13 +15,17 @@ fun HouseRoute(
     viewModel: HouseViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     HouseScreen(
         uiState = uiState,
-        onQueryChange = viewModel::onQueryChange,
+        onNeighborhoodChange = viewModel::onNeighborhoodChange,
         onBudgetClick = viewModel::onBudgetClick,
-        onRoomTypeClick = viewModel::onRoomTypeClick,
-        onAmenityClick = viewModel::onAmenityClick,
+        onMinBedroomsClick = viewModel::onMinBedroomsClick,
+        onFurnishedToggle = viewModel::onFurnishedToggle,
+        onPetFriendlyToggle = viewModel::onPetFriendlyToggle,
+        onSortByDistanceToggle = viewModel::onSortByDistanceToggle,
+        onRadiusKmChange = viewModel::onRadiusKmChange,
+        onSearchSubmitted = viewModel::onSearchSubmitted,
+        onApplyDistanceRecommendation = viewModel::onApplyDistanceRecommendation,
         onAvailabilityClick = viewModel::onAvailabilityClick,
         onMapClick = onMapClick,
         onPropertyClick = onPropertyClick,

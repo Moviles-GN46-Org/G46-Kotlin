@@ -5,11 +5,11 @@ import com.example.g46_kotlin.features.house.domain.model.PropertyStatus
 import com.example.g46_kotlin.features.house.domain.model.PropertyType
 import com.example.g46_kotlin.features.house.domain.repository.HouseRepository
 import kotlinx.coroutines.delay
+import com.example.g46_kotlin.features.house.domain.model.SearchPropertiesFilters
 
 class FakeHouseRepository : HouseRepository {
 
-    override suspend fun getProperties(): List<PropertyDetail> {
-        delay(400)
+    override suspend fun getProperties(filters: SearchPropertiesFilters): List<PropertyDetail> {        delay(400)
 
         return listOf(
             PropertyDetail(

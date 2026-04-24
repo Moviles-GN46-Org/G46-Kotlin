@@ -21,7 +21,12 @@ data class SearchEventRequestDto(
 data class SearchFiltersDto(
     val budget: BudgetDto? = null,
     val propertyType: String? = null,
-    val amenities: List<String> = emptyList()
+    val amenities: List<String> = emptyList(),
+    val maxPrice: Int? = null,
+    val minBedrooms: Int? = null,
+    val furnished: Boolean? = null,
+    val petFriendly: Boolean? = null,
+    val sortBy: String? = null
 )
 
 @Serializable
@@ -42,3 +47,18 @@ data class SearchEventDataDto(
     val deduped: Boolean
 )
 
+@Serializable
+data class PreferredMaxDistanceSummaryResponseDto(
+    val success: Boolean,
+    val data: PreferredMaxDistanceSummaryDataDto? = null
+)
+
+@Serializable
+data class PreferredMaxDistanceSummaryDataDto(
+    val preferredKm: Double? = null,
+    val recommendedMaxKm: Double? = null,
+    val maxObservedKm: Double? = null,
+    val samples: Int = 0,
+    val lastUpdatedAt: String? = null,
+    val message: String = ""
+)
