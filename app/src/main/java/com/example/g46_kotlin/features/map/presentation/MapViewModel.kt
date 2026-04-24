@@ -3,6 +3,7 @@ package com.example.g46_kotlin.features.map.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.g46_kotlin.core.domain.contract.NetworkMonitor
 import com.example.g46_kotlin.core.location.CurrentLocationSource
 import com.example.g46_kotlin.features.map.domain.usecase.GetNearbyApartmentsUseCase
 import com.example.g46_kotlin.features.map.presentation.mapper.PropertyPinUiMapper
@@ -19,14 +20,23 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
+import com.example.g46_kotlin.features.map.domain.usecase.GetTopPropertySizeUseCase
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
 
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val getNearbyApartmentsUseCase: GetNearbyApartmentsUseCase,
+    private val getTopPropertySizeUseCase: GetTopPropertySizeUseCase,
     private val currentLocationSource: CurrentLocationSource,
     private val propertyPinUiMapper: PropertyPinUiMapper,
-    private val analyticsRepository: AnalyticsRepository
+    private val analyticsRepository: AnalyticsRepository,
+    private val networkMonitor: NetworkMonitor
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -34,6 +44,15 @@ class MapViewModel @Inject constructor(
 
     private var locationTrackingJob: Job? = null
     private var lastApartmentsRequestLocation: UserLocationUI? = null
+
+    private var lastLoadFailed = false
+
+    val isConnected = networkMonitor.isConnected
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            true
+        )
 
 
     private companion object {
@@ -44,6 +63,10 @@ class MapViewModel @Inject constructor(
         const val DEFAULT_RADIUS_METERS = 7000
         const val STOP_FOLLOW_DISTANCE_METERS = 80.0
         private const val TAG = "MapViewModel"
+    }
+
+    init {
+        observeConnectivity()
     }
 
     fun onApartmentSelected(id: String) {
@@ -147,26 +170,36 @@ class MapViewModel @Inject constructor(
             }
 
             runCatching {
-                getNearbyApartmentsUseCase(
-                    userLat = lat,
-                    userLon = lon,
-                    radiusMeters = radiusMeters
-                )
-            }.onSuccess { apartmentsResult ->
+                coroutineScope {
+                    val apartmentsDeferred = async { getNearbyApartmentsUseCase(userLat = lat, userLon = lon, radiusMeters = radiusMeters) }
+                    val topSizeDeferred = async { getTopPropertySizeUseCase() }
+
+                    val apartmentsResult = apartmentsDeferred.await()
+                    val topSizeResult = topSizeDeferred.await()
+
+                    apartmentsResult to topSizeResult
+                }
+            }.onSuccess { (apartmentsResult, topSize) ->
+                lastLoadFailed = false
+
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         apartments = apartmentsResult.properties.map(propertyPinUiMapper::toUi),
                         errorMessage = null,
-                        avgRent = apartmentsResult.avgRent
+                        avgRent = apartmentsResult.avgRent,
+                        topPropertySize = topSize
                     )
                 }
             }.onFailure { e ->
+                lastLoadFailed = true
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         apartments = emptyList(),
-                        errorMessage = e.message ?: "Error cargando apartamentos cercanos"
+                        errorMessage = e.message ?: "Error loading nearby apartments"
                     )
                 }
             }
@@ -226,6 +259,19 @@ class MapViewModel @Inject constructor(
                 cameraZoom = zoom,
                 isFollowingUser = if (shouldStopFollowing) false else current.isFollowingUser
             )
+        }
+    }
+
+    private fun observeConnectivity() {
+        viewModelScope.launch {
+            isConnected
+                .filter { it }
+                .collect {
+                    if (lastLoadFailed) {
+                        Log.d(TAG, "Internet restored → retrying apartments")
+                        retryLoadApartments()
+                    }
+                }
         }
     }
 }

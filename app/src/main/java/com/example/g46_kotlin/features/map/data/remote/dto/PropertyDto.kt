@@ -58,3 +58,23 @@ data class LandlordDto(
     val profilePictureUrl: String? = null,
     val isVerified: Boolean
 )
+
+@Serializable
+data class PopularSizeResponse(
+    val success: Boolean,
+    val data: PopularSizePayload
+)
+
+@Serializable
+data class PopularSizePayload(
+    val popularSize: PopularSizeDto
+)
+
+@Serializable
+data class PopularSizeDto(
+    val sizeRange: String,
+    val bucketMinM2: Int,
+    val bucketMaxM2: Int,
+    val count: Int,
+    val averageSizeM2: Double
+)

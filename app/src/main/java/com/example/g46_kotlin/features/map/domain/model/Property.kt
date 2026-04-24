@@ -15,3 +15,10 @@ data class NearbyPropertiesResult(
     val properties: List<Property>,
     val avgRent: Double?
 )
+
+data class PopularSize(
+    val minM2: Int,
+    val maxM2: Int,
+    val count: Int,
+    val avgSizeM2: Double
+)

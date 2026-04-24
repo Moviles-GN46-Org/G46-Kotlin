@@ -19,6 +19,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.g46_kotlin.features.map.presentation.screen.MapScreen
 import com.example.g46_kotlin.features.map.presentation.MapViewModel
+import com.example.g46_kotlin.features.map.presentation.screen.MapNoInternetScreen
 
 @Composable
 fun MapRoute(
@@ -27,6 +28,8 @@ fun MapRoute(
     viewModel: MapViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
 
@@ -69,15 +72,21 @@ fun MapRoute(
         }
     }
 
-    //TODO: Implementar configuración/filtros del mapa
-    MapScreen(
-        uiState = uiState,
-        onBack = onBackClick,
-        onSettingsClick = {},
-        onPropertyClick = onPropertyClick,
-        onApartmentSelected = viewModel::onApartmentSelected,
-        onCameraChanged = viewModel::onCameraChanged
-    )
+    if (!isConnected) {
+        MapNoInternetScreen(
+            onBack = onBackClick,
+        )
+    } else {
+        //TODO: Implementar configuración/filtros del mapa
+        MapScreen(
+            uiState = uiState,
+            onBack = onBackClick,
+            onSettingsClick = {},
+            onPropertyClick = onPropertyClick,
+            onApartmentSelected = viewModel::onApartmentSelected,
+            onCameraChanged = viewModel::onCameraChanged
+        )
+    }
 }
 
 private fun hasLocationPermission(context: Context): Boolean {
