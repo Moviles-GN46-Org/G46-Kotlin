@@ -17,9 +17,10 @@ import com.example.g46_kotlin.features.house.presentation.PropertyDetailViewMode
 @Composable
 fun PropertyDetailRoute(
     onBackClick: () -> Unit,
-    viewModel: PropertyDetailViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    viewModel: PropertyDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
     val detail = uiState.detail
 
     //TODO: Implementar mejores pantallas en caso de error/loading
@@ -42,6 +43,8 @@ fun PropertyDetailRoute(
         detail != null -> {
             PropertyDetailScreen(
                 detail = detail,
+                isFavorite = isFavorite,
+                onToggleFavorite = viewModel::onToggleFavorite,
                 onBackClick = onBackClick
             )
         }

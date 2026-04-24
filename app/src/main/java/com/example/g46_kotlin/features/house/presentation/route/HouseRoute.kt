@@ -12,6 +12,7 @@ fun HouseRoute(
     onMapClick: () -> Unit,
     onPropertyClick: (String) -> Unit,
     onNotificationsClick: () -> Unit,
+    onFavoritesClick: () -> Unit,
     viewModel: HouseViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -29,6 +30,8 @@ fun HouseRoute(
         onAvailabilityClick = viewModel::onAvailabilityClick,
         onMapClick = onMapClick,
         onPropertyClick = onPropertyClick,
-        onNotificationsClick = onNotificationsClick
+        onNotificationsClick = onNotificationsClick,
+        onFavoritesClick = onFavoritesClick,
+        onToggleFavorite = viewModel::onToggleFavorite
     )
 }
