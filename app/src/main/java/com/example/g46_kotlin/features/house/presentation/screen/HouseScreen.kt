@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Search
@@ -55,7 +56,9 @@ fun HouseScreen(
     onPropertyClick: (String) -> Unit,
     onAvailabilityClick: (String) -> Unit,
     onMapClick: () -> Unit,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    onToggleFavorite: (String) -> Unit,
+    onFavoritesClick: () -> Unit
 ) {
     HouseContent(
         state = uiState,
@@ -71,7 +74,9 @@ fun HouseScreen(
         onAvailabilityClick = onAvailabilityClick,
         onMapClick = onMapClick,
         onPropertyClick = onPropertyClick,
-        onNotificationsClick = onNotificationsClick
+        onNotificationsClick = onNotificationsClick,
+        onFavoritesClick = onFavoritesClick,
+        onToggleFavorite = onToggleFavorite
     )
 }
 
@@ -90,7 +95,9 @@ private fun HouseContent(
     onPropertyClick: (String) -> Unit,
     onAvailabilityClick: (String) -> Unit,
     onMapClick: () -> Unit,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    onFavoritesClick: () -> Unit,
+    onToggleFavorite: (String) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -100,7 +107,8 @@ private fun HouseContent(
             item {
                 HouseHeader(
                     onMapClick = onMapClick,
-                    onNotificationsClick = onNotificationsClick
+                    onNotificationsClick = onNotificationsClick,
+                    onFavoritesClick = onFavoritesClick
                 )
             }
             if (state.globalDistanceInsight != null) {
@@ -269,6 +277,8 @@ private fun HouseContent(
                 HousingCard(
                     ui = house,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    isFavorite = house.id in state.favoriteIds,
+                    onToggleFavorite = { onToggleFavorite(house.id) },
                     onCardClick = { onPropertyClick(house.id) },
                     onAvailabilityClick = { onAvailabilityClick(house.name) }
                 )
@@ -294,7 +304,8 @@ private fun HouseContent(
 @Composable
 private fun HouseHeader(
     onMapClick: () -> Unit,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    onFavoritesClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -318,6 +329,14 @@ private fun HouseHeader(
                 Icon(
                     imageVector = Icons.Outlined.NotificationsNone,
                     contentDescription = "Notifications",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            IconButton(onClick = onFavoritesClick) {
+                Icon(
+                    imageVector = Icons.Default.FavoriteBorder,
+                    contentDescription = "Favoritos",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -353,7 +372,9 @@ private fun HouseContentPreview() {
             onPropertyClick = {},
             onAvailabilityClick = {},
             onMapClick = {},
-            onNotificationsClick = {}
+            onNotificationsClick = {},
+            onFavoritesClick = {},
+            onToggleFavorite = {}
         )
     }
 }

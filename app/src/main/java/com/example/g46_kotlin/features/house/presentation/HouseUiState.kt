@@ -29,5 +29,6 @@ data class HouseUiState(
     val allProperties: List<PropertyDetail> = emptyList(),
     val isGlobalDistanceInsightLoading: Boolean = false,
     val globalDistanceInsight: GlobalDistanceInsightUi? = null,
-    val globalDistanceInsightFallbackMessage: String? = null
+    val globalDistanceInsightFallbackMessage: String? = null,
+    val favoriteIds: Set<String> = emptySet()
 )

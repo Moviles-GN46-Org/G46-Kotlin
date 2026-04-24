@@ -14,5 +14,6 @@ object AppRoutes {
     const val Feed = "feed"
     const val Roomies = "roomies"
     const val Notifications = "notifications"
+    const val Favorites = "favorites"
     fun propertyDetail(propertyId: String) = "propertyDetail/$propertyId"
 }

@@ -12,6 +12,8 @@ import com.example.g46_kotlin.features.house.domain.model.PropertySortBy
 import com.example.g46_kotlin.features.house.domain.model.SearchPropertiesFilters
 import com.example.g46_kotlin.features.house.domain.usecase.GetHouseUseCase
 import com.example.g46_kotlin.features.house.domain.usecase.GetNearestAvailablePropertyUseCase
+import com.example.g46_kotlin.features.favorites.domain.usecase.GetFavoriteIdsUseCase
+import com.example.g46_kotlin.features.favorites.domain.usecase.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -24,13 +26,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+
 @HiltViewModel
 class HouseViewModel @Inject constructor(
     private val notificationPublisher: NotificationPublisher,
     private val getHouseUseCase: GetHouseUseCase,
     private val currentLocationSource: CurrentLocationSource,
     private val getNearestAvailablePropertyUseCase: GetNearestAvailablePropertyUseCase,
-    private val analyticsRepository: AnalyticsRepository
+    private val analyticsRepository: AnalyticsRepository,
+    private val getFavoriteIdsUseCase: GetFavoriteIdsUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HouseUiState())
     val uiState: StateFlow<HouseUiState> = _uiState.asStateFlow()
@@ -46,6 +51,11 @@ class HouseViewModel @Inject constructor(
     init {
         loadHouses()
         loadGlobalDistanceInsight()
+        viewModelScope.launch {
+            getFavoriteIdsUseCase().collect { ids ->
+                _uiState.update { it.copy(favoriteIds = ids) }
+            }
+        }
     }
 
     fun loadHouses() {
@@ -381,5 +391,11 @@ class HouseViewModel @Inject constructor(
         val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
         formatter.timeZone = TimeZone.getTimeZone("UTC")
         return formatter.format(Date(millis))
+    }
+
+    fun onToggleFavorite(propertyId: String) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase(propertyId)
+        }
     }
 }

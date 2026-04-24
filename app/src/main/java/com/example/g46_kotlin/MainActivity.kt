@@ -52,6 +52,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.example.g46_kotlin.features.auth.presentation.login.route.LoginRoute
+import com.example.g46_kotlin.features.favorites.presentation.route.FavoritesRoute
 import com.example.g46_kotlin.features.house.presentation.route.HouseRoute
 import com.example.g46_kotlin.features.house.presentation.route.PropertyDetailRoute
 import com.example.g46_kotlin.features.map.presentation.route.MapRoute
@@ -166,6 +167,9 @@ fun G46KotlinApp(
                     },
                     onNotificationsClick = {
                         navController.navigate(AppRoutes.Notifications)
+                    },
+                    onFavoritesClick = {
+                        navController.navigate(AppRoutes.Favorites)
                     }
                 )
             }
@@ -228,6 +232,16 @@ fun G46KotlinApp(
                     onRoomieClick = { roomieId ->
                         {}
                     },
+                )
+            }
+            composable(AppRoutes.Favorites) {
+                FavoritesRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onPropertyClick = { id ->
+                        navController.navigate(AppRoutes.propertyDetail(id)) {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
         }

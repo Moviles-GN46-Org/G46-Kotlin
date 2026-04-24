@@ -32,6 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.ui.graphics.Color
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
@@ -44,6 +47,8 @@ import com.example.g46_kotlin.features.house.presentation.PropertyDetailUi
 @Composable
 fun PropertyDetailScreen(
     detail: PropertyDetailUi,
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit,
     onBackClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -53,6 +58,8 @@ fun PropertyDetailScreen(
         ) {
             item {
                 PropertyDetailHeader(
+                    isFavorite = isFavorite,
+                    onToggleFavorite = onToggleFavorite,
                     onBackClick = onBackClick
                 )
             }
@@ -86,6 +93,8 @@ fun PropertyDetailScreen(
 
 @Composable
 private fun PropertyDetailHeader(
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit,
     onBackClick: () -> Unit
 ) {
     Box(
@@ -118,7 +127,14 @@ private fun PropertyDetailHeader(
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.size(48.dp))
+            IconButton(onClick = onToggleFavorite) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
+                    tint = if (isFavorite) Color(0xFFE53935) else MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
@@ -453,6 +469,8 @@ private fun PropertyDetailScreenPreview() {
                 propertyType = "STUDIO",
                 imageUrl = null
             ),
+            isFavorite = false,
+            onToggleFavorite = {},
             onBackClick = {}
         )
     }
