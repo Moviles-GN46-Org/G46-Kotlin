@@ -40,7 +40,8 @@ class MapViewModel @Inject constructor(
         const val ANDES_LAT = 4.6016042953614225
         const val ANDES_LON = -74.06614174023011
         const val APARTMENTS_RELOAD_MIN_DISTANCE_METERS = 120.0
-        const val DEFAULT_RADIUS_KM = 7.0
+
+        const val DEFAULT_RADIUS_METERS = 7000
         const val STOP_FOLLOW_DISTANCE_METERS = 80.0
         private const val TAG = "MapViewModel"
     }
@@ -132,18 +133,25 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+            val radiusMeters = DEFAULT_RADIUS_METERS
+            val radiusKm = radiusMeters / 1000.0
+
             launch {
                 runCatching {
                     analyticsRepository.trackMapSearch(
                         lat = lat,
                         lng = lon,
-                        radiusKm = DEFAULT_RADIUS_KM
+                        radiusKm = radiusKm
                     )
                 }
             }
 
             runCatching {
-                getNearbyApartmentsUseCase(lat, lon)
+                getNearbyApartmentsUseCase(
+                    userLat = lat,
+                    userLon = lon,
+                    radiusMeters = radiusMeters
+                )
             }.onSuccess { apartmentsResult ->
                 _uiState.update {
                     it.copy(
