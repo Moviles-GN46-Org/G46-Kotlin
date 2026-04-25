@@ -30,8 +30,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import kotlinx.serialization.Serializable
 
-
+@Serializable
 data class HousingCardUi(
     val id: String,
     val name: String,

@@ -25,6 +25,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.example.g46_kotlin.features.house.domain.model.PagedProperties
+import com.example.g46_kotlin.core.domain.contract.NetworkMonitor
+import com.example.g46_kotlin.features.house.data.local.SharedPrefsPageCache
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
+
 
 
 @HiltViewModel
@@ -35,10 +42,15 @@ class HouseViewModel @Inject constructor(
     private val getNearestAvailablePropertyUseCase: GetNearestAvailablePropertyUseCase,
     private val analyticsRepository: AnalyticsRepository,
     private val getFavoriteIdsUseCase: GetFavoriteIdsUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val networkMonitor: NetworkMonitor,
+    private val pageCache: SharedPrefsPageCache
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HouseUiState())
     val uiState: StateFlow<HouseUiState> = _uiState.asStateFlow()
+    val isConnected: StateFlow<Boolean> = networkMonitor.isConnected
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+    private var lastLoadFailed = false
 
     private var lastNotifiedPropertyId: String? = null
     private var lastTrackedRadiusKm: Double? = null
@@ -51,6 +63,8 @@ class HouseViewModel @Inject constructor(
     init {
         loadHouses()
         loadGlobalDistanceInsight()
+        observeConnectivity()
+
         viewModelScope.launch {
             getFavoriteIdsUseCase().collect { ids ->
                 _uiState.update { it.copy(favoriteIds = ids) }
@@ -138,6 +152,20 @@ class HouseViewModel @Inject constructor(
         searchHouses()
     }
 
+    fun onNextPage() {
+        if (_uiState.value.page < _uiState.value.totalPages) {
+            _uiState.update { it.copy(page = it.page + 1) }
+            searchHouses()
+        }
+    }
+
+    fun onPrevPage() {
+        if (_uiState.value.page > 1) {
+            _uiState.update { it.copy(page = it.page - 1) }
+            searchHouses()
+        }
+    }
+
     fun onApplyDistanceRecommendation() {
         val insight = _uiState.value.globalDistanceInsight ?: return
         val recommended = insight.recommendedMaxKm ?: return
@@ -169,14 +197,43 @@ class HouseViewModel @Inject constructor(
             val snapshot = _uiState.value
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+            if (!isConnected.value) {
+                val cached = pageCache.getPage(snapshot.page)
+                val cachedNums = pageCache.getCachedPageNumbers()
+                if (cached != null) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            houses = cached,
+                            isOffline = true,
+                            offlineMessage = "Sin conexión – mostrando las últimas ${cachedNums.size} páginas guardadas",
+                            cachedPageNumbers = cachedNums,
+                            errorMessage = null
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            isOffline = true,
+                            houses = emptyList(),
+                            offlineMessage = "Sin conexión – esta página no está guardada",
+                            cachedPageNumbers = cachedNums,
+                            errorMessage = null
+                        )
+                    }
+                }
+                return@launch
+            }
+
             val filters = buildFilters(snapshot)
 
             runCatching {
                 getHouseUseCase(filters)
-            }.onSuccess { properties ->
+            }.onSuccess { pagedResult ->
                 val userLocation = currentLocationSource.getCurrentLocationOrNull()
                 val nearest = userLocation?.let { location ->
-                    getNearestAvailablePropertyUseCase(location, properties)
+                    getNearestAvailablePropertyUseCase(location, pagedResult.properties)
                 }
 
                 nearest?.let { result ->
@@ -191,26 +248,32 @@ class HouseViewModel @Inject constructor(
                                 propertyImage = result.property.imageUrls.firstOrNull() ?: ""
                             )
                         }.onSuccess { published ->
-                            if (published) {
-                                lastNotifiedPropertyId = result.property.id
-                            }
+                            if (published) lastNotifiedPropertyId = result.property.id
                         }
                     }
                 }
 
-                val mapped = properties.map { property -> property.toHousingCardUi() }
+                val mapped = pagedResult.properties.map { property -> property.toHousingCardUi() }
+                pageCache.savePage(snapshot.page, mapped)
+                val cachedNums = pageCache.getCachedPageNumbers()
 
                 _uiState.update { state ->
                     state.copy(
                         isLoading = false,
                         houses = mapped,
-                        allProperties = properties,
+                        allProperties = pagedResult.properties,
+                        totalPages = pagedResult.totalPages,
+                        isOffline = false,
+                        offlineMessage = null,
+                        cachedPageNumbers = cachedNums,
                         errorMessage = null,
                         lastActionMessage = nearest?.let { result ->
                             "Cerca de ti: ${result.property.title} a ${formatDistance(result.distanceMeters)}"
                         }
                     )
                 }
+
+                lastLoadFailed = false
 
                 val currentRadiusKm = snapshot.radiusKmInput.toDoubleOrNull()?.takeIf { it > 0.0 }
 
@@ -237,13 +300,29 @@ class HouseViewModel @Inject constructor(
                     }
                 }
             }.onFailure { error ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        houses = emptyList(),
-                        allProperties = emptyList(),
-                        errorMessage = error.message ?: "Error cargando propiedades"
-                    )
+                lastLoadFailed = true
+                val cached = pageCache.getPage(snapshot.page)
+                val cachedNums = pageCache.getCachedPageNumbers()
+                if (cached != null) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            houses = cached,
+                            isOffline = true,
+                            offlineMessage = "Error de red – mostrando página guardada",
+                            cachedPageNumbers = cachedNums,
+                            errorMessage = null
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            houses = emptyList(),
+                            allProperties = emptyList(),
+                            errorMessage = error.message ?: "Error cargando propiedades"
+                        )
+                    }
                 }
             }
         }
@@ -393,9 +472,28 @@ class HouseViewModel @Inject constructor(
         return formatter.format(Date(millis))
     }
 
-    fun onToggleFavorite(propertyId: String) {
+    fun onToggleFavorite(card: HousingCardUi) {
         viewModelScope.launch {
-            toggleFavoriteUseCase(propertyId)
+            toggleFavoriteUseCase(card)
+        }
+    }
+
+    private fun observeConnectivity() {
+        viewModelScope.launch {
+            isConnected.collect { connected ->
+                if (!connected && !_uiState.value.isOffline) {
+                    val cachedNums = pageCache.getCachedPageNumbers()
+                    _uiState.update {
+                        it.copy(
+                            isOffline = true,
+                            offlineMessage = "Sin conexión – mostrando las últimas ${cachedNums.size} páginas guardadas",
+                            cachedPageNumbers = cachedNums
+                        )
+                    }
+                } else if (connected && _uiState.value.isOffline) {
+                    searchHouses()
+                }
+            }
         }
     }
 }

@@ -23,12 +23,16 @@ data class HouseUiState(
     val sortByDistance: Boolean = false,
     val radiusKmInput: String = "",
     val page: Int = 1,
-    val limit: Int = 20,
+    val limit: Int = 8,
+    val totalPages: Int = 1,
     val errorMessage: String? = null,
     val lastActionMessage: String? = null,
     val allProperties: List<PropertyDetail> = emptyList(),
     val isGlobalDistanceInsightLoading: Boolean = false,
     val globalDistanceInsight: GlobalDistanceInsightUi? = null,
     val globalDistanceInsightFallbackMessage: String? = null,
-    val favoriteIds: Set<String> = emptySet()
+    val favoriteIds: Set<String> = emptySet(),
+    val isOffline: Boolean = false,
+    val offlineMessage: String? = null,
+    val cachedPageNumbers: Set<Int> = emptySet()
 )

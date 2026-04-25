@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.g46_kotlin.cards.HousingCard
+import com.example.g46_kotlin.cards.HousingCardUi
 import com.example.g46_kotlin.features.favorites.presentation.FavoritesUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,6 +30,7 @@ import com.example.g46_kotlin.features.favorites.presentation.FavoritesUiState
 fun FavoritesScreen(
     uiState: FavoritesUiState,
     onBackClick: () -> Unit,
+    onToggleFavorite: (HousingCardUi) -> Unit,
     onPropertyClick: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -45,9 +47,7 @@ fun FavoritesScreen(
         )
 
         Box(modifier = Modifier.fillMaxSize()) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (uiState.favoriteCards.isEmpty()) {
+            if (uiState.favoriteCards.isEmpty()) {
                 Text(
                     text = "No tienes propiedades guardadas aún.",
                     modifier = Modifier
@@ -64,6 +64,8 @@ fun FavoritesScreen(
                         HousingCard(
                             ui = card,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            isFavorite = true,
+                            onToggleFavorite = { onToggleFavorite(card) },
                             onCardClick = { onPropertyClick(card.id) },
                             onAvailabilityClick = {}
                         )

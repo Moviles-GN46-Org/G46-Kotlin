@@ -57,8 +57,10 @@ fun HouseScreen(
     onAvailabilityClick: (String) -> Unit,
     onMapClick: () -> Unit,
     onNotificationsClick: () -> Unit,
-    onToggleFavorite: (String) -> Unit,
-    onFavoritesClick: () -> Unit
+    onToggleFavorite: (HousingCardUi) -> Unit,
+    onFavoritesClick: () -> Unit,
+    onNextPage: () -> Unit,
+    onPrevPage: () -> Unit
 ) {
     HouseContent(
         state = uiState,
@@ -76,7 +78,9 @@ fun HouseScreen(
         onPropertyClick = onPropertyClick,
         onNotificationsClick = onNotificationsClick,
         onFavoritesClick = onFavoritesClick,
-        onToggleFavorite = onToggleFavorite
+        onToggleFavorite = onToggleFavorite,
+        onNextPage = onNextPage,
+        onPrevPage = onPrevPage
     )
 }
 
@@ -97,7 +101,9 @@ private fun HouseContent(
     onMapClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onFavoritesClick: () -> Unit,
-    onToggleFavorite: (String) -> Unit
+    onToggleFavorite: (HousingCardUi) -> Unit,
+    onNextPage: () -> Unit,
+    onPrevPage: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -263,6 +269,25 @@ private fun HouseContent(
                 }
             }
 
+            state.offlineMessage?.let { msg ->
+                item {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Text(
+                            text = msg,
+                            modifier = Modifier.padding(12.dp),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
+
             if (!state.isLoading && state.errorMessage == null && state.houses.isEmpty()) {
                 item {
                     Text(
@@ -278,10 +303,38 @@ private fun HouseContent(
                     ui = house,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     isFavorite = house.id in state.favoriteIds,
-                    onToggleFavorite = { onToggleFavorite(house.id) },
+                    onToggleFavorite = { onToggleFavorite(house) },
                     onCardClick = { onPropertyClick(house.id) },
                     onAvailabilityClick = { onAvailabilityClick(house.name) }
                 )
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val prevEnabled = if (state.isOffline) {
+                        state.page > 1 && (state.page - 1) in state.cachedPageNumbers && !state.isLoading
+                    } else {
+                        state.page > 1 && !state.isLoading
+                    }
+                    val nextEnabled = if (state.isOffline) {
+                        (state.page + 1) in state.cachedPageNumbers && !state.isLoading
+                    } else {
+                        state.page < state.totalPages && !state.isLoading
+                    }
+
+                    Button(onClick = onPrevPage, enabled = prevEnabled) { Text("← Anterior") }
+                    Text(
+                        text = "Página ${state.page} de ${state.totalPages}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Button(onClick = onNextPage, enabled = nextEnabled) { Text("Siguiente →") }
+                }
             }
         }
 
@@ -374,7 +427,9 @@ private fun HouseContentPreview() {
             onMapClick = {},
             onNotificationsClick = {},
             onFavoritesClick = {},
-            onToggleFavorite = {}
+            onToggleFavorite = {},
+            onNextPage = {},
+            onPrevPage = {}
         )
     }
 }

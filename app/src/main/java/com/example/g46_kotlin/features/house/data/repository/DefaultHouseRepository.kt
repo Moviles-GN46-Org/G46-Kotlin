@@ -2,6 +2,7 @@ package com.example.g46_kotlin.features.house.data.repository
 
 import com.example.g46_kotlin.features.house.data.mapper.PropertyDetailMapper
 import com.example.g46_kotlin.features.house.data.remote.HouseApiService
+import com.example.g46_kotlin.features.house.domain.model.PagedProperties
 import com.example.g46_kotlin.features.house.domain.model.PropertySortBy
 import com.example.g46_kotlin.features.house.domain.model.PropertyDetail
 import com.example.g46_kotlin.features.house.domain.model.SearchPropertiesFilters
@@ -13,7 +14,7 @@ class DefaultHouseRepository @Inject constructor(
     private val propertyMapper: PropertyDetailMapper
 ) : HouseRepository {
 
-    override suspend fun getProperties(filters: SearchPropertiesFilters): List<PropertyDetail> {
+    override suspend fun getProperties(filters: SearchPropertiesFilters): PagedProperties {
         val sanitized = sanitize(filters)
 
         val response = houseApiService.getProperties(
@@ -32,7 +33,15 @@ class DefaultHouseRepository @Inject constructor(
             includeAveragePrice = sanitized.includeAveragePrice
         )
 
-        return response.data.properties.map { propertyMapper.toDomain(it) }
+        val totalPages = if (response.data.limit > 0)
+            (response.data.total + response.data.limit - 1) / response.data.limit
+        else 1
+
+        return PagedProperties(
+            properties = response.data.properties.map { propertyMapper.toDomain(it) },
+            totalPages = totalPages,
+            currentPage = response.data.page
+        )
     }
 
     override suspend fun getPropertyById(id: String): PropertyDetail {
