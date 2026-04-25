@@ -90,7 +90,7 @@ fun LoginHeaderSection(modifier: Modifier = Modifier) {
             Icon(
                 painter = painterResource(id = R.drawable.splash_logo),
                 contentDescription = "Casandes",
-                tint = LightBronze,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .height(31.dp)
                     .wrapContentHeight()
@@ -163,10 +163,10 @@ fun LoginEmailField(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             shape = inputShape,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                disabledContainerColor = Color.White,
-                focusedBorderColor = DustyTaupe,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                disabledContainerColor = MaterialTheme.colorScheme.surface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = Color.Transparent,
                 disabledBorderColor = Color.Transparent,
                 errorContainerColor = MaterialTheme.colorScheme.errorContainer,
@@ -245,10 +245,10 @@ fun LoginPasswordField(
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             shape = inputShape,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                disabledContainerColor = Color.White,
-                focusedBorderColor = DustyTaupe,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                disabledContainerColor = MaterialTheme.colorScheme.surface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = Color.Transparent,
                 disabledBorderColor = Color.Transparent,
                 errorContainerColor = MaterialTheme.colorScheme.errorContainer,
@@ -299,10 +299,10 @@ fun LoginRememberForgotRow(
                     enabled = !uiState.isLoading,
                     modifier = Modifier.size(20.dp),
                     colors = CheckboxDefaults.colors(
-                        checkedColor = LightBronze,
+                        checkedColor = MaterialTheme.colorScheme.primary,
                         uncheckedColor = Color.Transparent,
                         checkmarkColor = Color.White,
-                        disabledCheckedColor = LightBronze.copy(alpha = 0.4f),
+                        disabledCheckedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
                         disabledUncheckedColor = Color.Transparent,
                         disabledIndeterminateColor = Color.Transparent
                     )
@@ -354,7 +354,7 @@ fun LoginSubmitButton(
             enabled = !uiState.isLoading,
             shape = loginButtonShape,
             colors = ButtonDefaults.buttonColors(
-                containerColor = LightBronze,
+                containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White
             )
         ) {
@@ -385,7 +385,7 @@ fun LoginSocialSection(
     ) {
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.outline,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             thickness = 1.dp
         )
 
@@ -394,7 +394,7 @@ fun LoginSocialSection(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
-                .background(WarmLinen)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(horizontal = 12.dp)
         )
     }
@@ -414,10 +414,10 @@ fun LoginSocialSection(
             shape = loginButtonShape,
             border = BorderStroke(1.dp, LightBronze.copy(alpha = 0.45f)),
             colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = LightBronze.copy(alpha = 0.12f),
-                contentColor = LightBronze,
-                disabledContainerColor = LightBronze.copy(alpha = 0.08f),
-                disabledContentColor = LightBronze.copy(alpha = 0.45f)
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                contentColor = MaterialTheme.colorScheme.primary,
+                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
             )
         ) {
             Icon(
@@ -443,16 +443,16 @@ fun LoginSocialSection(
             shape = loginButtonShape,
             border = BorderStroke(1.dp, LightBronze.copy(alpha = 0.3f)),
             colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = LightBronze.copy(alpha = 0.12f),
-                contentColor = LightBronze,
-                disabledContainerColor = LightBronze.copy(alpha = 0.08f),
-                disabledContentColor = LightBronze.copy(alpha = 0.45f)
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                contentColor = MaterialTheme.colorScheme.primary,
+                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
             )
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_apple),
                 contentDescription = "Apple",
-                tint = LightBronze,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))

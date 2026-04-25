@@ -298,7 +298,7 @@ private fun CasandesBottomBar(
                 clip = false
             )
             .clip(barShape)
-            .background(WarmLinen)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         NavigationBar(
             modifier = Modifier
@@ -325,13 +325,13 @@ private fun CasandesBottomBar(
                             painter = painterResource(iconRes),
                             contentDescription = labelText,
                             modifier = Modifier.size(35.dp),
-                            tint = if (selected) LightBronze else DustyTaupe
+                            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     label = {
                         Text(
                             text = labelText,
-                            color = if (selected) LightBronze else DustyTaupe
+                            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     alwaysShowLabel = true,

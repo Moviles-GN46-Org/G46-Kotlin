@@ -15,3 +15,5 @@ val WarmLinen = Color (0xFFF6E5D4)
 // Opcional: variantes para dark theme
 val DarkBackground = Color(0xFF2B211B)
 val DarkSurface = Color(0xFF3A2E26)
+
+val DarkPrimary = Color(0xFFC27A3A)

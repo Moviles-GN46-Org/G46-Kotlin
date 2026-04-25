@@ -130,7 +130,7 @@ private fun SignupContent(
                 .fillMaxHeight()
                 .padding(top = topOffset),
             shape = panelShape,
-            colors = CardDefaults.cardColors(containerColor = WarmLinen),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
             elevation = CardDefaults.cardElevation(2.dp)
         ) {
             Column(
@@ -169,7 +169,7 @@ private fun SignupContent(
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                HorizontalDivider(color = LightBronze.copy(alpha = 0.25f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
@@ -186,12 +186,12 @@ private fun SignupContent(
                             .height(46.dp),
                         enabled = !uiState.isLoading,
                         shape = buttonShape,
-                        border = BorderStroke(1.dp, LightBronze.copy(alpha = 0.45f)),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = LightBronze.copy(alpha = 0.10f),
-                            contentColor = LightBronze,
-                            disabledContainerColor = LightBronze.copy(alpha = 0.08f),
-                            disabledContentColor = LightBronze.copy(alpha = 0.45f)
+                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                            disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
                         )
                     ) {
                         Text(
@@ -211,7 +211,7 @@ private fun SignupContent(
                         enabled = !uiState.isLoading,
                         shape = buttonShape,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = LightBronze,
+                            containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = Color.White
                         )
                     ) {
@@ -241,7 +241,7 @@ private fun SignupHeader(currentStep: Int) {
         Text(
             text = "Sign up",
             style = MaterialTheme.typography.headlineSmall.copy(
-                color = DeepMocha,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontWeight = FontWeight.Bold
             )
         )
@@ -250,7 +250,7 @@ private fun SignupHeader(currentStep: Int) {
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
-            color = DustyTaupe
+            color = MaterialTheme.colorScheme.secondary
         )
     }
 }
@@ -267,7 +267,7 @@ private fun SignupProgressDots(currentStep: Int, totalSteps: Int) {
                 modifier = Modifier
                     .size(10.dp)
                     .background(
-                        color = if (active) LightBronze else LightBronze.copy(alpha = 0.22f),
+                        color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
                         shape = CircleShape
                     )
             )
@@ -280,9 +280,9 @@ private fun SignupProgressDots(currentStep: Int, totalSteps: Int) {
                         .height(2.dp)
                         .background(
                             color = if (index < currentStep) {
-                                LightBronze.copy(alpha = 0.6f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                             } else {
-                                LightBronze.copy(alpha = 0.18f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
                             }
                         )
                 )
@@ -300,7 +300,7 @@ private fun StepRole(
     Text(
         text = "Let's get your account set up in just a few steps",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = DeepMocha
+        color = MaterialTheme.colorScheme.onPrimaryContainer
     )
 
     Spacer(modifier = Modifier.height(10.dp))
@@ -308,7 +308,7 @@ private fun StepRole(
     Text(
         text = "What brings you here today?",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = DeepMocha
+        color = MaterialTheme.colorScheme.onPrimaryContainer
     )
     Spacer(modifier = Modifier.height(10.dp))
 
@@ -335,7 +335,7 @@ private fun StepRole(
         Text(
             text = "Landlord option is visible but disabled for now.",
             style = MaterialTheme.typography.bodySmall,
-            color = DustyTaupe
+            color = MaterialTheme.colorScheme.secondary
         )
     }
 }
@@ -348,8 +348,8 @@ private fun RoleOptionCard(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    val borderColor = if (selected) LightBronze else LightBronze.copy(alpha = 0.30f)
-    val cardColor = if (selected) LightBronze.copy(alpha = 0.16f) else Color.White
+    val borderColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
+    val cardColor = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f) else Color.White
 
     Card(
         modifier = Modifier
@@ -363,13 +363,13 @@ private fun RoleOptionCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                color = DeepMocha
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = DustyTaupe
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -385,7 +385,7 @@ private fun StepAccountBasics(
     Text(
         text = "Let's get your account set up as a student",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = DeepMocha
+        color = MaterialTheme.colorScheme.onPrimaryContainer
     )
 
     Spacer(modifier = Modifier.height(12.dp))
@@ -446,7 +446,7 @@ private fun StepHousingNeeds(
     Text(
         text = "To show you the most relevant listings",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = DeepMocha
+        color = MaterialTheme.colorScheme.onPrimaryContainer
     )
 
     Spacer(modifier = Modifier.height(12.dp))
@@ -492,7 +492,7 @@ private fun StepHousingNeeds(
     Text(
         text = "$${sliderBudget.toInt()}",
         style = MaterialTheme.typography.titleLarge.copy(
-            color = DeepMocha,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
             fontWeight = FontWeight.Bold
         )
     )
@@ -631,7 +631,7 @@ private fun StepLifestyle(
     Text(
         text = "Help potential roommate and landlords know what to expect",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = DeepMocha
+        color = MaterialTheme.colorScheme.onPrimaryContainer
     )
 
     Spacer(modifier = Modifier.height(12.dp))
@@ -760,7 +760,7 @@ private fun StepProfile(
     Text(
         text = "Let other know a bit more about you!",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = DeepMocha
+        color = MaterialTheme.colorScheme.onPrimaryContainer
     )
 
     Spacer(modifier = Modifier.height(4.dp))
@@ -768,7 +768,7 @@ private fun StepProfile(
     Text(
         text = "Final details for your profile",
         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-        color = DeepMocha
+        color = MaterialTheme.colorScheme.onPrimaryContainer
     )
 
     Spacer(modifier = Modifier.height(12.dp))
@@ -785,7 +785,7 @@ private fun StepProfile(
                     .background(Color.White)
                     .border(
                         width = 1.dp,
-                        color = LightBronze.copy(alpha = 0.35f),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -793,7 +793,7 @@ private fun StepProfile(
                 Text(
                     text = "+",
                     style = MaterialTheme.typography.headlineMedium.copy(
-                        color = LightBronze,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     )
                 )
@@ -804,7 +804,7 @@ private fun StepProfile(
             Text(
                 text = "Profile picture (optional)",
                 style = MaterialTheme.typography.bodySmall,
-                color = DustyTaupe,
+                color = MaterialTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center
             )
         }
@@ -861,7 +861,7 @@ private fun SectionLabel(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-        color = DeepMocha
+        color = MaterialTheme.colorScheme.onPrimaryContainer
     )
 }
 
@@ -880,7 +880,7 @@ private fun SignupChoiceChip(
             shape = chipShape,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
-                containerColor = LightBronze,
+                containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White
             )
         ) {
@@ -896,10 +896,10 @@ private fun SignupChoiceChip(
             modifier = modifier.height(40.dp),
             shape = chipShape,
             enabled = enabled,
-            border = BorderStroke(1.dp, LightBronze.copy(alpha = 0.45f)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)),
             colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = Color.White,
-                contentColor = DustyTaupe
+                contentColor = MaterialTheme.colorScheme.secondary
             )
         ) {
             Text(
@@ -926,13 +926,13 @@ private fun SignupTagChip(
         shape = RoundedCornerShape(999.dp),
         border = BorderStroke(
             width = 1.dp,
-            color = if (selected) LightBronze else Color.Transparent
+            color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent
         ),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = if (selected) Color(0xFFF9EADB) else Color(0xFFE7DDD1),
-            contentColor = if (selected) LightBronze else DustyTaupe,
+            contentColor = if (selected) MaterialTheme.colorScheme.primary else DustyTaupe,
             disabledContainerColor = Color(0xFFE7DDD1).copy(alpha = 0.6f),
-            disabledContentColor = DustyTaupe.copy(alpha = 0.45f)
+            disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f)
         ),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(
             horizontal = 6.dp,
@@ -967,7 +967,7 @@ private fun SignupTextField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-            color = DeepMocha
+            color = MaterialTheme.colorScheme.onPrimaryContainer
         )
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -983,7 +983,7 @@ private fun SignupTextField(
                     Text(
                         text = placeholder,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = DustyTaupe.copy(alpha = 0.55f)
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.55f)
                     )
                 }
             },
@@ -994,10 +994,10 @@ private fun SignupTextField(
             shape = inputShape,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                disabledContainerColor = Color.White,
-                focusedBorderColor = DustyTaupe,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                disabledContainerColor = MaterialTheme.colorScheme.surface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = Color.Transparent,
                 disabledBorderColor = Color.Transparent,
                 errorContainerColor = MaterialTheme.colorScheme.errorContainer,
@@ -1027,7 +1027,7 @@ private fun SignupPasswordField(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-            color = DeepMocha
+            color = MaterialTheme.colorScheme.onPrimaryContainer
         )
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -1042,7 +1042,7 @@ private fun SignupPasswordField(
                 Text(
                     text = placeholder,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = DustyTaupe.copy(alpha = 0.55f)
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.55f)
                 )
             },
             trailingIcon = {
@@ -1050,7 +1050,7 @@ private fun SignupPasswordField(
                     text = if (passwordVisible) "Hide" else "Show",
                     modifier = Modifier.clickable(enabled = enabled, onClick = onTogglePasswordVisibility),
                     style = MaterialTheme.typography.bodySmall.copy(
-                        color = LightBronze,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     )
                 )
@@ -1061,10 +1061,10 @@ private fun SignupPasswordField(
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             shape = inputShape,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                disabledContainerColor = Color.White,
-                focusedBorderColor = DustyTaupe,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                disabledContainerColor = MaterialTheme.colorScheme.surface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = Color.Transparent,
                 disabledBorderColor = Color.Transparent,
                 errorContainerColor = MaterialTheme.colorScheme.errorContainer,
