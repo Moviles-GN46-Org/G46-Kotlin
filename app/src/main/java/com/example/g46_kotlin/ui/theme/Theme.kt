@@ -12,13 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPrimary,
     onPrimary = WarmWhite,
-
-    primaryContainer = DeepMocha,
-    onPrimaryContainer = WarmWhite,
 
     secondary = DustyTaupe,
     onSecondary = WarmWhite,
@@ -40,9 +36,6 @@ private val LightColorScheme = lightColorScheme(
     primary = LightBronze,
     onPrimary = WarmWhite,
 
-    primaryContainer = LightBronze.copy(alpha = 0.22f),
-    onPrimaryContainer = DeepMocha,
-
     secondary = DustyTaupe,
     onSecondary = WarmWhite,
 
@@ -52,10 +45,10 @@ private val LightColorScheme = lightColorScheme(
     background = Linen,
     onBackground = AshBrown,
 
-    surface = Linen,
+    surface = WarmWhite,
     onSurface = AshBrown,
 
-    surfaceVariant = WarmLinen,
+    surfaceVariant = Linen,
     onSurfaceVariant = DustyTaupe,
 
     tertiary = DeepMocha

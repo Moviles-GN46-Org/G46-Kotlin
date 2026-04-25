@@ -1,4 +1,3 @@
-package com.example.g46_kotlin.features.analytics.data.remote
 
 import com.example.g46_kotlin.features.analytics.data.remote.dto.PreferredMaxDistanceSummaryResponseDto
 import com.example.g46_kotlin.features.analytics.data.remote.dto.SearchEventRequestDto

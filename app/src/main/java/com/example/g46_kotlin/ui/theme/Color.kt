@@ -10,8 +10,6 @@ val DustyTaupe = Color(0xFF8B7364)    // Secondary text
 val Linen = Color(0xFFFBF3EB)         // Background
 val WarmWhite = Color(0xFFFDFBF9)     // Surfaces / cards
 
-val WarmLinen = Color (0xFFF6E5D4)
-
 // Opcional: variantes para dark theme
 val DarkBackground = Color(0xFF2B211B)
 val DarkSurface = Color(0xFF3A2E26)
