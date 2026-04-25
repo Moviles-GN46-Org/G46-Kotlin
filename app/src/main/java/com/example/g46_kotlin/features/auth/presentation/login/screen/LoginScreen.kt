@@ -72,7 +72,7 @@ fun LoginScreen(
                 .fillMaxHeight()
                 .padding(top = topOffset),
             shape = RoundedCornerShape(topStart = 25.dp, topEnd = 25.dp),
-            colors = CardDefaults.cardColors(containerColor = WarmLinen),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
             elevation = CardDefaults.cardElevation(2.dp)
         ) {
             Column(
