@@ -2,6 +2,7 @@ package com.example.g46_kotlin.features.favorites.di
 
 import com.example.g46_kotlin.features.favorites.data.repository.DefaultFavoritesRepository
 import com.example.g46_kotlin.features.favorites.domain.repository.FavoritesRepository
+import com.example.g46_kotlin.features.favorites.domain.usecase.GetFavoriteCardsUseCase
 import com.example.g46_kotlin.features.favorites.domain.usecase.GetFavoriteIdsUseCase
 import com.example.g46_kotlin.features.favorites.domain.usecase.ToggleFavoriteUseCase
 import dagger.Module
@@ -19,6 +20,12 @@ object FavoritesModule {
     fun provideFavoritesRepository(
         defaultFavoritesRepository: DefaultFavoritesRepository
     ): FavoritesRepository = defaultFavoritesRepository
+
+    @Provides
+    @Singleton
+    fun provideGetFavoriteCardsUseCase(
+        repository: FavoritesRepository
+    ): GetFavoriteCardsUseCase = GetFavoriteCardsUseCase(repository)
 
     @Provides
     @Singleton

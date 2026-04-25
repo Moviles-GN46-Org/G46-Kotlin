@@ -17,6 +17,7 @@ fun FavoritesRoute(
     FavoritesScreen(
         uiState = uiState,
         onBackClick = onBackClick,
-        onPropertyClick = onPropertyClick
+        onPropertyClick = onPropertyClick,
+        onToggleFavorite = viewModel::onToggleFavorite
     )
 }

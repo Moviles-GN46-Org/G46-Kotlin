@@ -2,6 +2,7 @@ package com.example.g46_kotlin.features.favorites.data.local
 
 import android.content.Context
 import androidx.core.content.edit
+import com.example.g46_kotlin.cards.HousingCardUi
 import com.example.g46_kotlin.core.utils.JwtUtils
 import com.example.g46_kotlin.features.auth.data.local.TokenStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -11,8 +12,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,11 +27,14 @@ class SharedPrefsFavoritesSource @Inject constructor(
 ) {
     private val prefs = context.getSharedPreferences("favorites_prefs", Context.MODE_PRIVATE)
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val json = Json { ignoreUnknownKeys = true }
 
-    private fun keyForUser(userId: String) = "favorite_ids_$userId"
+    private fun keyForUser(userId: String) = "favorite_cards_$userId"
 
-    private fun loadFavoritesForUser(userId: String): MutableSet<String> =
-        prefs.getStringSet(keyForUser(userId), emptySet())?.toMutableSet() ?: mutableSetOf()
+    private fun loadForUser(userId: String): Map<String, HousingCardUi> {
+        val raw = prefs.getString(keyForUser(userId), null) ?: return emptyMap()
+        return runCatching { json.decodeFromString<Map<String, HousingCardUi>>(raw) }.getOrDefault(emptyMap())
+    }
 
     private val initialUserId: String = run {
         val authPrefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
@@ -37,8 +44,10 @@ class SharedPrefsFavoritesSource @Inject constructor(
 
     @Volatile private var currentUserId: String = initialUserId
 
-    private val _favoriteIds = MutableStateFlow(loadFavoritesForUser(initialUserId))
-    val favoriteIds: Flow<Set<String>> = _favoriteIds.asStateFlow()
+    private val _favoriteCards = MutableStateFlow(loadForUser(initialUserId))
+
+    val favoriteCards: Flow<List<HousingCardUi>> = _favoriteCards.asStateFlow().map { it.values.toList() }
+    val favoriteIds: Flow<Set<String>> = _favoriteCards.asStateFlow().map { it.keys }
 
     init {
         scope.launch {
@@ -46,18 +55,18 @@ class SharedPrefsFavoritesSource @Inject constructor(
                 val newUserId = token?.let { JwtUtils.extractUserId(it) } ?: "guest"
                 if (newUserId != currentUserId) {
                     currentUserId = newUserId
-                    _favoriteIds.value = loadFavoritesForUser(newUserId)
+                    _favoriteCards.value = loadForUser(newUserId)
                 }
             }
         }
     }
 
-    suspend fun toggleFavorite(propertyId: String) = withContext(Dispatchers.IO) {
-        val current = _favoriteIds.value.toMutableSet()
-        if (current.contains(propertyId)) current.remove(propertyId) else current.add(propertyId)
-        prefs.edit { putStringSet(keyForUser(currentUserId), current) }
-        _favoriteIds.value = current
+    suspend fun toggleFavorite(card: HousingCardUi) = withContext(Dispatchers.IO) {
+        val current = _favoriteCards.value.toMutableMap()
+        if (current.containsKey(card.id)) current.remove(card.id) else current[card.id] = card
+        prefs.edit { putString(keyForUser(currentUserId), json.encodeToString(current)) }
+        _favoriteCards.value = current
     }
 
-    fun isFavorite(propertyId: String): Boolean = _favoriteIds.value.contains(propertyId)
+    fun isFavorite(propertyId: String): Boolean = _favoriteCards.value.containsKey(propertyId)
 }

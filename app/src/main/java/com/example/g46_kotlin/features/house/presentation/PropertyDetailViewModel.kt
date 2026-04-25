@@ -3,6 +3,7 @@ package com.example.g46_kotlin.features.house.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.g46_kotlin.cards.HousingCardUi
 import com.example.g46_kotlin.features.favorites.domain.repository.FavoritesRepository
 import com.example.g46_kotlin.features.house.domain.usecase.GetPropertyByIdUseCase
 import com.example.g46_kotlin.features.house.presentation.mapper.PropertyDetailUiMapper
@@ -16,12 +17,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.g46_kotlin.core.domain.contract.NetworkMonitor
+import kotlinx.coroutines.flow.filter
 
 @HiltViewModel
 class PropertyDetailViewModel @Inject constructor(
     private val getPropertyByIdUseCase: GetPropertyByIdUseCase,
     private val propertyDetailUiMapper: PropertyDetailUiMapper,
     private val favoritesRepository: FavoritesRepository,
+    private val networkMonitor: NetworkMonitor,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -31,6 +35,9 @@ class PropertyDetailViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(PropertyDetailUiState(isLoading = true))
     val uiState: StateFlow<PropertyDetailUiState> = _uiState.asStateFlow()
+
+    val isConnected: StateFlow<Boolean> = networkMonitor.isConnected
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     val isFavorite: StateFlow<Boolean> = favoritesRepository.getFavoriteIds()
         .map { ids -> propertyId in ids }
@@ -46,7 +53,7 @@ class PropertyDetailViewModel @Inject constructor(
 
     fun loadProperty() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             runCatching { getPropertyByIdUseCase(propertyId) }
                 .onSuccess { detail ->
                     _uiState.update {
@@ -62,8 +69,18 @@ class PropertyDetailViewModel @Inject constructor(
     }
 
     fun onToggleFavorite() {
+        val detail = _uiState.value.detail ?: return
         viewModelScope.launch {
-            favoritesRepository.toggleFavorite(propertyId)
+            val card = HousingCardUi(
+                id = propertyId,
+                name = detail.title,
+                pricePerMonth = detail.monthlyRent,
+                rating = 0.0,
+                neighborhood = detail.neighborhood,
+                propertyType = detail.propertyType,
+                imageUrl = detail.imageUrl
+            )
+            favoritesRepository.toggleFavorite(card)
         }
     }
 }
