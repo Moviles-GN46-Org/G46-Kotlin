@@ -57,6 +57,8 @@ import com.example.g46_kotlin.features.house.presentation.route.HouseRoute
 import com.example.g46_kotlin.features.house.presentation.route.PropertyDetailRoute
 import com.example.g46_kotlin.features.map.presentation.route.MapRoute
 import com.example.g46_kotlin.features.notifications.presentation.route.NotificationsRoute
+import com.example.g46_kotlin.features.roomie.domain.model.Roomie
+import com.example.g46_kotlin.features.roomie.presentation.route.RoomieRoute
 import com.example.g46_kotlin.ui.theme.DustyTaupe
 import com.example.g46_kotlin.ui.theme.LightBronze
 
@@ -192,8 +194,23 @@ fun G46KotlinApp(
             }
 
             //TODO: Implementar vista de chats
-            composable(AppRoutes.Chats){
-                Text(text = "Chats")
+            composable(
+                route = AppRoutes.Chats,
+                arguments = listOf(
+                    navArgument("chatId") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
+            ){ navBackStackEntry ->
+
+                val chatId = navBackStackEntry.arguments?.getString("chatId")
+                if (chatId != null) {
+                    Text(text = "Chat $chatId")
+                } else {
+                    Text(text = "No specific chat provided")
+                }
             }
 
             //TODO: Implementar vista de feed
@@ -201,9 +218,16 @@ fun G46KotlinApp(
                 Text(text = "Feed")
             }
 
-            //TODO: Implementar vista de Roomies
             composable(AppRoutes.Roomies){
-                Text(text = "Roomies")
+                RoomieRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onChatClick = { chatId ->
+                        navController.navigate(AppRoutes.chats(chatId))
+                    },
+                    onRoomieClick = { roomieId ->
+                        {}
+                    },
+                )
             }
 
             composable(

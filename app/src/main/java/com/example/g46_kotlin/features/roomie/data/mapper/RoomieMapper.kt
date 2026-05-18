@@ -17,8 +17,10 @@ class RoomieMapper @Inject constructor() {
             lastName = dto.user.lastName,
             profilePictureUrl = dto.user.profilePictureUrl,
             sleepSchedule = SleepSchedule.fromValue(dto.sleepSchedule) ?: SleepSchedule.FLEXIBLE,
-            cleanlinessLevel = CleanlinessLevel.fromValue(dto.cleanlinessLevel) ?: CleanlinessLevel.MODERATE,
-            noisePreference = NoisePreference.fromValue(dto.noisePreference) ?: NoisePreference.MODERATE,
+            cleanlinessLevel = CleanlinessLevel.fromValue(dto.cleanlinessLevel)
+                ?: CleanlinessLevel.MODERATE,
+            noisePreference = NoisePreference.fromValue(dto.noisePreference)
+                ?: NoisePreference.MODERATE,
             smokes = dto.smokes,
             hasPets = dto.hasPets,
             budgetMin = dto.budgetMin,
@@ -26,7 +28,11 @@ class RoomieMapper @Inject constructor() {
             preferredArea = dto.preferredArea,
             bio = dto.bio,
             isActive = dto.isActive,
-            createdAt = dto.createdAt
+            createdAt = dto.createdAt,
+            age = dto.age,
+            matchRate = dto.matchRate,
+            job = dto.job,
+            university = dto.university
         )
     }
 }

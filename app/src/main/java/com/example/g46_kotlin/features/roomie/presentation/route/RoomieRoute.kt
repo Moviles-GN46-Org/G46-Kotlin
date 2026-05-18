@@ -9,7 +9,10 @@ import com.example.g46_kotlin.features.roomie.presentation.screen.RoomieScreen
 
 @Composable
 fun RoomieRoute(
-    viewModel: RoomieViewModel = hiltViewModel()
+    viewModel: RoomieViewModel = hiltViewModel(),
+    onBackClick: () -> Unit,
+    onChatClick: (String) -> Unit,
+    onRoomieClick: (String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

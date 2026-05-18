@@ -18,7 +18,12 @@ data class RoomieDto(
     val preferredArea: String,
     val bio: String,
     val isActive: Boolean,
-    val createdAt: String
+    val createdAt: String,
+    val age: Int,
+    val matchRate: Double,
+    val compatibilityScore: Double,
+    val job: String,
+    val university: String
 )
 
 @Serializable
