@@ -20,7 +20,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -40,13 +39,17 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.ui.Alignment
+import com.example.g46_kotlin.features.map.domain.model.PopularSize
 import com.example.g46_kotlin.features.map.presentation.MapMarkerFactory
 import com.example.g46_kotlin.features.map.presentation.MapUiState
 import com.example.g46_kotlin.features.map.presentation.PropertyPinUi
 import com.example.g46_kotlin.features.map.presentation.UserLocationUI
+import com.example.g46_kotlin.features.map.presentation.components.AverageRentCard
 import com.example.g46_kotlin.features.map.presentation.components.DrawerContent
 import com.example.g46_kotlin.features.map.presentation.components.DrawerHandleHeader
 import com.example.g46_kotlin.features.map.presentation.components.MapSettingsOverlay
+import com.example.g46_kotlin.features.map.presentation.components.MostPopularAptSizeCard
 
 @Composable
 fun MapScreen(
@@ -55,7 +58,7 @@ fun MapScreen(
     onSettingsClick: () -> Unit = {},
     onApartmentSelected: (String) -> Unit = {},
     onPropertyClick: (id: String) -> Unit = {},
-    onCameraChanged: (UserLocationUI, Double) -> Unit
+    onCameraChanged: (UserLocationUI, Double, Boolean) -> Unit
 ) {
     var showSettingsOverlay by rememberSaveable { mutableStateOf(false) }
 
@@ -116,6 +119,8 @@ private fun MapScreenLayout(
     )
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
     val isExpanded = sheetState.currentValue == SheetValue.Expanded
+    val avgRent = uiState.avgRent
+    val topSize = uiState.topPropertySize
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -147,6 +152,25 @@ private fun MapScreenLayout(
                 .padding(innerPadding)
         ) {
             mapContent()
+
+            avgRent?.let { rent ->
+                AverageRentCard(
+                    avgRent = rent.toInt(),
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 12.dp, top = 12.dp)
+                )
+            }
+
+            topSize?.let { size ->
+                MostPopularAptSizeCard(
+                    size = size,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = 12.dp, top = 12.dp)
+                )
+            }
+
 
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -212,7 +236,7 @@ fun MapScreenPreview() {
                 rating = 4.8,
                 lat = 4.6020,
                 lon = -74.0665,
-                price = "$120",
+                price = "$1'200.000",
                 imageUrl = ""
             ),
             PropertyPinUi(
@@ -222,11 +246,18 @@ fun MapScreenPreview() {
                 rating = 4.6,
                 lat = 4.6030,
                 lon = -74.0670,
-                price = "$450",
+                price = "$900.000",
                 imageUrl = ""
             )
         ),
-        selectedApartmentId = null
+        selectedApartmentId = null,
+        topPropertySize = PopularSize(
+            minM2 = 25,
+            maxM2 = 30,
+            count = 10,
+            avgSizeM2 = 28.2
+        ),
+        avgRent = 1200000.0
     )
 
     G46KotlinTheme {
@@ -237,7 +268,7 @@ fun MapScreenPreview() {
             onApartmentTapped = {},
             mapContent = {
                 PreviewMapWithMarkers(
-                    prices = listOf("$120", "$450", "$1.200")
+                    prices = listOf("$1'200.000", "$900.000", "$1'450.000")
                 )
             }
         )
@@ -258,21 +289,21 @@ private fun PreviewMapWithMarkers(prices: List<String>) {
 
         // Posiciones fijas solo para preview visual
         MarkerBubblePreview(
-            price = prices.getOrElse(0) { "$120" },
+            price = prices.getOrElse(0) { "$1'200" },
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .offset(x = 70.dp, y = 180.dp)
         )
 
         MarkerBubblePreview(
-            price = prices.getOrElse(1) { "$450" },
+            price = prices.getOrElse(1) { "$900" },
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .offset(x = 180.dp, y = 280.dp)
         )
 
         MarkerBubblePreview(
-            price = prices.getOrElse(2) { "$1.200" },
+            price = prices.getOrElse(2) { "$1'450" },
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .offset(x = 250.dp, y = 220.dp)
@@ -302,6 +333,11 @@ private fun MarkerBubblePreview(
         contentDescription = "Marcador con sombra",
         modifier = modifier
     )
+}
+
+private fun String.toCopIntOrNull(): Int? {
+    val digits = filter { it.isDigit() }
+    return digits.toIntOrNull()
 }
 
 

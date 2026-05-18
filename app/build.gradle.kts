@@ -19,13 +19,13 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // TODO: reemplazar con api en deployment
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://housing-app-backend-al3b.onrender.com/api/\"")
     }
 
     buildTypes {
 
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://housing-app-backend-al3b.onrender.com/api/\"")
         }
 
         release {
@@ -34,7 +34,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://housing-app-backend-al3b.onrender.com/api/\"")
         }
     }
     compileOptions {
@@ -77,6 +77,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.foundation.layout)
+    implementation(libs.androidx.tv.material)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.compose.material.icons.core)

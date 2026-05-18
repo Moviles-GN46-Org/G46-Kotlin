@@ -25,8 +25,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
 import com.example.g46_kotlin.R
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import kotlinx.serialization.Serializable
 
-
+@Serializable
 data class HousingCardUi(
     val id: String,
     val name: String,
@@ -44,6 +50,8 @@ data class HousingCardUi(
 fun HousingCard(
     ui: HousingCardUi,
     modifier: Modifier = Modifier,
+    isFavorite: Boolean = false,
+    onToggleFavorite: (() -> Unit)? = null,
     onCardClick: () -> Unit = {},
     onAvailabilityClick: () -> Unit = {}
 ) {
@@ -79,6 +87,18 @@ fun HousingCard(
                         error = painterResource(id = R.drawable.house_example),
                         placeholder = painterResource(id = R.drawable.house_example)
                     )
+                }
+                if (onToggleFavorite != null) {
+                    IconButton(
+                        onClick = onToggleFavorite,
+                        modifier = Modifier.align(Alignment.TopEnd)
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
+                            tint = if (isFavorite) Color(0xFFE53935) else Color.White
+                        )
+                    }
                 }
             }
 

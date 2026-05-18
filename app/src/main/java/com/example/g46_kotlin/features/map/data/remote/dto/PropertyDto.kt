@@ -1,5 +1,6 @@
 package com.example.g46_kotlin.features.map.data.remote.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
@@ -13,7 +14,9 @@ data class PropertiesData(
     val properties: List<PropertyDto>,
     val total: Int,
     val page: Int,
-    val limit: Int
+    val limit: Int,
+    @SerialName("averageMonthlyRent")
+    val avgRent: Double? = null
 )
 
 @Serializable
@@ -31,7 +34,7 @@ data class PropertyDto(
     val city: String,
     val latitude: Double,
     val longitude: Double,
-    val sizeM2: Int,
+    val sizeM2: Double,
     val bedrooms: Int,
     val bathrooms: Int,
     val furnished: Boolean,
@@ -54,4 +57,24 @@ data class LandlordDto(
     val lastName: String,
     val profilePictureUrl: String? = null,
     val isVerified: Boolean
+)
+
+@Serializable
+data class PopularSizeResponse(
+    val success: Boolean,
+    val data: PopularSizePayload
+)
+
+@Serializable
+data class PopularSizePayload(
+    val popularSize: PopularSizeDto
+)
+
+@Serializable
+data class PopularSizeDto(
+    val sizeRange: String,
+    val bucketMinM2: Int,
+    val bucketMaxM2: Int,
+    val count: Int,
+    val averageSizeM2: Double
 )

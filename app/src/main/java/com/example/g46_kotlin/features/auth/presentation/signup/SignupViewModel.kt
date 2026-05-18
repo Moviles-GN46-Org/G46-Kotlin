@@ -2,10 +2,12 @@ package com.example.g46_kotlin.features.auth.presentation.signup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.g46_kotlin.features.auth.domain.model.AuthResult
 import com.example.g46_kotlin.features.auth.domain.model.UserRole
+import com.example.g46_kotlin.features.auth.domain.repository.AuthRepository
+import com.example.g46_kotlin.features.auth.domain.repository.RegisterParams
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -21,7 +23,9 @@ sealed interface SignupEffect {
 }
 
 @HiltViewModel
-class SignupViewModel @Inject constructor() : ViewModel() {
+class SignupViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SignupUiState())
     val uiState: StateFlow<SignupUiState> = _uiState.asStateFlow()
@@ -141,12 +145,15 @@ class SignupViewModel @Inject constructor() : ViewModel() {
             is SignupUiEvent.OnBioChanged -> {
                 _uiState.update { it.copy(bio = event.bio, message = null) }
             }
+
             is SignupUiEvent.OnBudgetMinChanged -> {
                 _uiState.update { it.copy(budgetMin = event.budgetMin, message = null) }
             }
+
             is SignupUiEvent.OnBudgetMaxChanged -> {
                 _uiState.update { it.copy(budgetMax = event.budgetMax, message = null) }
             }
+
             is SignupUiEvent.OnPreferredAreaChanged -> {
                 _uiState.update { it.copy(preferredArea = event.preferredArea, message = null) }
             }
@@ -193,7 +200,10 @@ class SignupViewModel @Inject constructor() : ViewModel() {
                 if (!validateStep4()) return
                 _uiState.update { it.copy(currentStep = 5, message = null) }
             }
-            5 -> { onSubmit() }
+
+            5 -> {
+                onSubmit()
+            }
         }
     }
 
@@ -204,6 +214,7 @@ class SignupViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    // TODO: hacer una verificacion de email real (register -> verify-email -> refresh token)
     private fun onSubmit() {
         val state = _uiState.value
 
@@ -216,10 +227,35 @@ class SignupViewModel @Inject constructor() : ViewModel() {
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, message = null) }
-            delay(500)
-            _uiState.update { it.copy(isLoading = false) }
-            _effects.emit(SignupEffect.ShowMessage("Signup pending backend integration"))
-            _effects.emit(SignupEffect.Finished)
+
+            val result = authRepository.register(
+                RegisterParams(
+                    email = state.universityEmail.trim(),
+                    password = state.password,
+                    firstName = state.firstName.trim(),
+                    lastName = state.lastName.trim(),
+                    role = state.selectedRole
+                )
+            )
+
+            when (result) {
+                is AuthResult.Error -> {
+                    _uiState.update { it.copy(isLoading = false, message = result.message) }
+                    _effects.emit(SignupEffect.ShowMessage(result.message))
+                }
+
+                is AuthResult.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            message = null,
+                            password = ""
+                        )
+                    }
+                    _effects.emit(SignupEffect.ShowMessage("Account created successfully. Please log in."))
+                    _effects.emit(SignupEffect.Finished)
+                }
+            }
         }
     }
 
@@ -230,9 +266,12 @@ class SignupViewModel @Inject constructor() : ViewModel() {
         val lastNameError = if (state.lastName.trim().isBlank()) "Last name is required" else null
 
         val email = state.universityEmail.trim()
+        val isStudent = state.selectedRole == UserRole.STUDENT
+
         val universityEmailError = when {
             email.isBlank() -> "University email is required"
             !isValidEmail(email) -> "Enter a valid university email"
+            isStudent && !isAcademicStudentEmail(email) -> "Students must use an academic .edu email"
             else -> null
         }
 
@@ -291,7 +330,9 @@ class SignupViewModel @Inject constructor() : ViewModel() {
             it.copy(
                 message = if (sleepScheduleError != null || cleanlinessError != null || noiseError != null) {
                     "Please complete all fields"
-                } else null
+                } else {
+                    null
+                }
             )
         }
 
@@ -332,6 +373,11 @@ class SignupViewModel @Inject constructor() : ViewModel() {
 
     private fun isValidEmail(value: String): Boolean {
         val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
-        return emailRegex.matches(value)
+        return emailRegex.matches(value.trim())
+    }
+
+    private fun isAcademicStudentEmail(value: String): Boolean {
+        val academicEmailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.edu(\\.[A-Za-z]{2,})?$".toRegex()
+        return academicEmailRegex.matches(value.trim().lowercase())
     }
 }

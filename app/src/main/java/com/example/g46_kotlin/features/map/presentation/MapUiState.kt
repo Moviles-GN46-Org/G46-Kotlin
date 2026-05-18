@@ -1,5 +1,7 @@
 package com.example.g46_kotlin.features.map.presentation
 
+import com.example.g46_kotlin.features.map.domain.model.PopularSize
+
 data class PropertyPinUi (
     val id: String,
     val title: String,
@@ -24,4 +26,7 @@ data class MapUiState(
     val apartments: List<PropertyPinUi> = emptyList(),
     val errorMessage: String? = null,
     val selectedApartmentId: String? = null,
+    val isFollowingUser: Boolean = true,
+    val avgRent: Double? = null,
+    val topPropertySize: PopularSize? = null
 )

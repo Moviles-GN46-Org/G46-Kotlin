@@ -10,3 +10,15 @@ data class Property(
     val price: String,
     val image: String,
 )
+
+data class NearbyPropertiesResult(
+    val properties: List<Property>,
+    val avgRent: Double?
+)
+
+data class PopularSize(
+    val minM2: Int,
+    val maxM2: Int,
+    val count: Int,
+    val avgSizeM2: Double
+)

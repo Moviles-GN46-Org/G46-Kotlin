@@ -13,11 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.g46_kotlin.features.map.presentation.screen.MapScreen
 import com.example.g46_kotlin.features.map.presentation.MapViewModel
+import com.example.g46_kotlin.features.map.presentation.screen.MapNoInternetScreen
 
 @Composable
 fun MapRoute(
@@ -27,7 +29,9 @@ fun MapRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
 
     var hasLocationPermission by remember {
         mutableStateOf(hasLocationPermission(context))
@@ -68,15 +72,21 @@ fun MapRoute(
         }
     }
 
-    //TODO: Implementar configuración/filtros del mapa
-    MapScreen(
-        uiState = uiState,
-        onBack = onBackClick,
-        onSettingsClick = {},
-        onPropertyClick = onPropertyClick,
-        onApartmentSelected = viewModel::onApartmentSelected,
-        onCameraChanged = viewModel::onCameraChanged
-    )
+    if (!isConnected) {
+        MapNoInternetScreen(
+            onBack = onBackClick,
+        )
+    } else {
+        //TODO: Implementar configuración/filtros del mapa
+        MapScreen(
+            uiState = uiState,
+            onBack = onBackClick,
+            onSettingsClick = {},
+            onPropertyClick = onPropertyClick,
+            onApartmentSelected = viewModel::onApartmentSelected,
+            onCameraChanged = viewModel::onCameraChanged
+        )
+    }
 }
 
 private fun hasLocationPermission(context: Context): Boolean {

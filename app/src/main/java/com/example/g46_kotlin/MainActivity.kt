@@ -52,9 +52,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.example.g46_kotlin.features.auth.presentation.login.route.LoginRoute
+import com.example.g46_kotlin.features.favorites.presentation.route.FavoritesRoute
 import com.example.g46_kotlin.features.house.presentation.route.HouseRoute
 import com.example.g46_kotlin.features.house.presentation.route.PropertyDetailRoute
 import com.example.g46_kotlin.features.map.presentation.route.MapRoute
+import com.example.g46_kotlin.features.notifications.presentation.route.NotificationsRoute
 import com.example.g46_kotlin.ui.theme.DustyTaupe
 import com.example.g46_kotlin.ui.theme.LightBronze
 
@@ -162,6 +164,12 @@ fun G46KotlinApp(
                         navController.navigate(AppRoutes.propertyDetail(id)) {
                             launchSingleTop = true
                         }
+                    },
+                    onNotificationsClick = {
+                        navController.navigate(AppRoutes.Notifications)
+                    },
+                    onFavoritesClick = {
+                        navController.navigate(AppRoutes.Favorites)
                     }
                 )
             }
@@ -205,6 +213,35 @@ fun G46KotlinApp(
                 @Suppress("UNUSED_VARIABLE")
                 PropertyDetailRoute(
                     onBackClick = { navController.popBackStack() },
+                )
+            }
+
+            composable(
+                route = AppRoutes.Notifications,
+            ) {
+                NotificationsRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onPropertyClick = { propertyId ->
+                        navController.navigate(AppRoutes.propertyDetail(propertyId)) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onChatClick = { chatId ->
+                        {}
+                    },
+                    onRoomieClick = { roomieId ->
+                        {}
+                    },
+                )
+            }
+            composable(AppRoutes.Favorites) {
+                FavoritesRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onPropertyClick = { id ->
+                        navController.navigate(AppRoutes.propertyDetail(id)) {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
         }
@@ -261,7 +298,7 @@ private fun CasandesBottomBar(
                 clip = false
             )
             .clip(barShape)
-            .background(WarmLinen)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         NavigationBar(
             modifier = Modifier
@@ -288,13 +325,13 @@ private fun CasandesBottomBar(
                             painter = painterResource(iconRes),
                             contentDescription = labelText,
                             modifier = Modifier.size(35.dp),
-                            tint = if (selected) LightBronze else DustyTaupe
+                            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     label = {
                         Text(
                             text = labelText,
-                            color = if (selected) LightBronze else DustyTaupe
+                            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     alwaysShowLabel = true,

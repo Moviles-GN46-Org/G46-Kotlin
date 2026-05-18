@@ -1,6 +1,9 @@
 package com.example.g46_kotlin.core.di
 
+import android.content.Context
 import com.example.g46_kotlin.BuildConfig
+import com.example.g46_kotlin.core.data.network.NetworkMonitorImpl
+import com.example.g46_kotlin.core.domain.contract.NetworkMonitor
 import com.example.g46_kotlin.features.auth.data.remote.AuthApiService
 import com.example.g46_kotlin.features.house.data.remote.HouseApiService
 import com.example.g46_kotlin.features.map.data.remote.MapApiService
@@ -20,7 +23,8 @@ import com.example.g46_kotlin.core.network.TokenAuthenticator
 import com.example.g46_kotlin.features.auth.data.remote.AuthRefreshApiService
 import javax.inject.Named
 import com.example.g46_kotlin.features.analytics.data.remote.AnalyticsApiService
-
+import com.example.g46_kotlin.features.notifications.data.remote.NotificationsApiService
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 
 @Module
@@ -85,6 +89,12 @@ object CoreModule {
 
     @Provides
     @Singleton
+    fun provideNetworkMonitor(
+        @ApplicationContext context: Context
+    ): NetworkMonitor = NetworkMonitorImpl(context)
+
+    @Provides
+    @Singleton
     @Named("noAuthClient")
     fun provideNoAuthOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -110,5 +120,10 @@ object CoreModule {
     fun provideAuthRefreshApiService(
         @Named("noAuthRetrofit") retrofit: Retrofit
     ): AuthRefreshApiService = retrofit.create(AuthRefreshApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideNotificationsApiService(retrofit: Retrofit): NotificationsApiService =
+        retrofit.create(NotificationsApiService::class.java)
 
 }

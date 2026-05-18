@@ -28,7 +28,7 @@ class PropertyDetailMapper @Inject constructor() {
             latitude = dto.latitude,
             longitude = dto.longitude,
 
-            sizeM2 = dto.sizeM2.toDouble(),
+            sizeM2 = dto.sizeM2,
             bedrooms = dto.bedrooms,
             bathrooms = dto.bathrooms,
             furnished = dto.furnished,

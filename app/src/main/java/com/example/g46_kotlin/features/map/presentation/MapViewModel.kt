@@ -1,7 +1,9 @@
 package com.example.g46_kotlin.features.map.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.g46_kotlin.core.domain.contract.NetworkMonitor
 import com.example.g46_kotlin.core.location.CurrentLocationSource
 import com.example.g46_kotlin.features.map.domain.usecase.GetNearbyApartmentsUseCase
 import com.example.g46_kotlin.features.map.presentation.mapper.PropertyPinUiMapper
@@ -18,15 +20,23 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
-
+import com.example.g46_kotlin.features.map.domain.usecase.GetTopPropertySizeUseCase
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
 
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val getNearbyApartmentsUseCase: GetNearbyApartmentsUseCase,
+    private val getTopPropertySizeUseCase: GetTopPropertySizeUseCase,
     private val currentLocationSource: CurrentLocationSource,
     private val propertyPinUiMapper: PropertyPinUiMapper,
-    private val analyticsRepository: AnalyticsRepository
+    private val analyticsRepository: AnalyticsRepository,
+    private val networkMonitor: NetworkMonitor
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(MapUiState())
@@ -35,11 +45,28 @@ class MapViewModel @Inject constructor(
     private var locationTrackingJob: Job? = null
     private var lastApartmentsRequestLocation: UserLocationUI? = null
 
+    private var lastLoadFailed = false
+
+    val isConnected = networkMonitor.isConnected
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            true
+        )
+
+
     private companion object {
         const val ANDES_LAT = 4.6016042953614225
         const val ANDES_LON = -74.06614174023011
         const val APARTMENTS_RELOAD_MIN_DISTANCE_METERS = 120.0
-        const val DEFAULT_RADIUS_KM = 7.0
+
+        const val DEFAULT_RADIUS_METERS = 7000
+        const val STOP_FOLLOW_DISTANCE_METERS = 80.0
+        private const val TAG = "MapViewModel"
+    }
+
+    init {
+        observeConnectivity()
     }
 
     fun onApartmentSelected(id: String) {
@@ -49,6 +76,8 @@ class MapViewModel @Inject constructor(
     fun startLocationTracking(hasLocationPermission: Boolean) {
         if (locationTrackingJob?.isActive == true) return
 
+        Log.d(TAG, "startLocationTracking(hasPermission=$hasLocationPermission)")
+
         if (!hasLocationPermission) {
             setFallbackIfNeeded()
             return
@@ -56,6 +85,7 @@ class MapViewModel @Inject constructor(
 
         locationTrackingJob = viewModelScope.launch {
             val first = currentLocationSource.getCurrentLocationOrNull()
+            Log.d(TAG, "firstLocation=${first?.lat},${first?.lon}")
             if (first != null) {
                 onLocationResolved(first.lat, first.lon)
             } else {
@@ -63,6 +93,7 @@ class MapViewModel @Inject constructor(
             }
 
             currentLocationSource.observeLocationUpdates().collect { loc ->
+                Log.d(TAG, "locationUpdate=${loc.lat},${loc.lon}")
                 onLocationResolved(loc.lat, loc.lon)
             }
         }
@@ -81,12 +112,16 @@ class MapViewModel @Inject constructor(
 
     fun onLocationResolved(lat: Double, lon: Double) {
         val newLocation = UserLocationUI(lat, lon)
-
+        Log.d(TAG, "onLocationResolved lat=$lat lon=$lon follow=${_uiState.value.isFollowingUser} cam=${_uiState.value.cameraCenter}")
         _uiState.update { current ->
             current.copy(
                 userLocation = newLocation,
                 errorMessage = null,
-                cameraCenter = current.cameraCenter ?: newLocation
+                cameraCenter = if (current.isFollowingUser) {
+                    newLocation
+                } else {
+                    current.cameraCenter ?: newLocation
+                }
             )
         }
 
@@ -121,32 +156,50 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+            val radiusMeters = DEFAULT_RADIUS_METERS
+            val radiusKm = radiusMeters / 1000.0
+
             launch {
                 runCatching {
                     analyticsRepository.trackMapSearch(
                         lat = lat,
                         lng = lon,
-                        radiusKm = DEFAULT_RADIUS_KM
+                        radiusKm = radiusKm
                     )
                 }
             }
 
             runCatching {
-                getNearbyApartmentsUseCase(lat, lon)
-            }.onSuccess { apartments ->
+                coroutineScope {
+                    val apartmentsDeferred = async { getNearbyApartmentsUseCase(userLat = lat, userLon = lon, radiusMeters = radiusMeters) }
+                    val topSizeDeferred = async { getTopPropertySizeUseCase() }
+
+                    val apartmentsResult = apartmentsDeferred.await()
+                    val topSizeResult = topSizeDeferred.await()
+
+                    apartmentsResult to topSizeResult
+                }
+            }.onSuccess { (apartmentsResult, topSize) ->
+                lastLoadFailed = false
+
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        apartments = apartments.map(propertyPinUiMapper::toUi),
-                        errorMessage = null
+                        apartments = apartmentsResult.properties.map(propertyPinUiMapper::toUi),
+                        errorMessage = null,
+                        avgRent = apartmentsResult.avgRent,
+                        topPropertySize = topSize
                     )
                 }
             }.onFailure { e ->
+                lastLoadFailed = true
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         apartments = emptyList(),
-                        errorMessage = e.message ?: "Error cargando apartamentos cercanos"
+                        errorMessage = e.message ?: "Error loading nearby apartments"
                     )
                 }
             }
@@ -176,12 +229,49 @@ class MapViewModel @Inject constructor(
         super.onCleared()
     }
 
-    fun onCameraChanged(center: UserLocationUI, zoom: Double) {
-        _uiState.update {
-            it.copy(
-                cameraCenter = center,
-                cameraZoom = zoom
+    //TODO: para evitar bugs similares, agregar funcion y boton para volver a centrar usuario
+
+    fun onCameraChanged(center: UserLocationUI, zoom: Double, fromUserGesture: Boolean) {
+        _uiState.update { current ->
+            if (current.isFollowingUser && !fromUserGesture) {
+                Log.d(TAG, "onCameraChanged ignored (programmatic while following) center=${center.lat},${center.lon} zoom=$zoom")
+                return@update current
+            }
+
+            val movedAwayFromUser = current.userLocation != null &&
+                    distanceMeters(
+                        lat1 = current.userLocation.lat,
+                        lon1 = current.userLocation.lon,
+                        lat2 = center.lat,
+                        lon2 = center.lon
+                    ) > STOP_FOLLOW_DISTANCE_METERS
+
+            val shouldStopFollowing = current.isFollowingUser &&
+                    movedAwayFromUser
+
+            Log.d(
+                TAG,
+                "onCameraChanged center=${center.lat},${center.lon} zoom=$zoom fromUser=$fromUserGesture movedAway=$movedAwayFromUser stopFollow=$shouldStopFollowing"
             )
+
+            current.copy(
+                cameraCenter = center,
+                cameraZoom = zoom,
+                isFollowingUser = if (shouldStopFollowing) false else current.isFollowingUser
+            )
+        }
+    }
+
+    private fun observeConnectivity() {
+        viewModelScope.launch {
+            isConnected
+                .filter { it }
+                .collect {
+                    if (lastLoadFailed) {
+                        Log.d(TAG, "Internet restored → retrying apartments")
+                        retryLoadApartments()
+                    }
+                }
         }
     }
 }
