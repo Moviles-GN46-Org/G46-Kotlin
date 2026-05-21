@@ -12,13 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.g46_kotlin.features.house.presentation.screen.PropertyDetailScreen
 import com.example.g46_kotlin.features.house.presentation.PropertyDetailViewModel
 import com.example.g46_kotlin.features.house.presentation.screen.PropertyDetailNoInternetScreen
+import com.example.g46_kotlin.features.house.presentation.screen.PropertyDetailScreen
 
 @Composable
 fun PropertyDetailRoute(
     onBackClick: () -> Unit,
+    onNavigateToChat: (String) -> Unit,
     viewModel: PropertyDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -31,20 +32,27 @@ fun PropertyDetailRoute(
         }
     }
 
+    LaunchedEffect(uiState.navigateToChatId) {
+        val chatId = uiState.navigateToChatId
+        if (chatId != null) {
+            viewModel.onChatNavigated()
+            onNavigateToChat(chatId)
+        }
+    }
+
     if (!isConnected) {
         PropertyDetailNoInternetScreen(onBackClick = onBackClick)
         return
     }
+
     val detail = uiState.detail
 
-    //TODO: Implementar mejores pantallas en caso de error/loading
     when {
         uiState.isLoading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         }
-
         uiState.errorMessage != null -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
@@ -53,13 +61,15 @@ fun PropertyDetailRoute(
                 )
             }
         }
-
         detail != null -> {
             PropertyDetailScreen(
                 detail = detail,
                 isFavorite = isFavorite,
+                isStartingChat = uiState.isStartingChat,
                 onToggleFavorite = viewModel::onToggleFavorite,
-                onBackClick = onBackClick
+                onBackClick = onBackClick,
+                onContactClick = viewModel::onContactLandlord,
+                responseTimeBucket = uiState.responseTimeBucket
             )
         }
     }

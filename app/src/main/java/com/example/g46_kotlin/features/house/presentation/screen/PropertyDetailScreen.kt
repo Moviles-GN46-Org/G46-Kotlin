@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,21 +36,28 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.ui.graphics.Color
-import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.foundation.layout.statusBarsPadding
 import coil.compose.AsyncImage
 import com.example.g46_kotlin.R
-import androidx.compose.foundation.layout.statusBarsPadding
 import com.example.g46_kotlin.features.house.presentation.PropertyDetailUi
+import com.example.g46_kotlin.ui.theme.G46KotlinTheme
+
+
 
 @Composable
 fun PropertyDetailScreen(
     detail: PropertyDetailUi,
     isFavorite: Boolean,
+    isStartingChat: Boolean = false,
     onToggleFavorite: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onContactClick: () -> Unit = {},
+    responseTimeBucket: String? = null
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -85,7 +93,11 @@ fun PropertyDetailScreen(
             }
 
             item {
-                ContactLandlordSection()
+                ContactLandlordSection(
+                    onContactClick = onContactClick,
+                    isStartingChat = isStartingChat,
+                    responseTimeBucket = responseTimeBucket
+                )
             }
         }
     }
@@ -418,14 +430,50 @@ private fun AmenityChip(
 
 
 @Composable
-private fun ContactLandlordSection() {
+private fun ContactLandlordSection(
+    onContactClick: () -> Unit,
+    isStartingChat: Boolean = false,
+    responseTimeBucket: String? = null
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 20.dp)
     ) {
+        val responseLabel = when (responseTimeBucket) {
+            "<1h"   -> "Suele responder en menos de 1 hora"
+            "hours" -> "Suele responder en unas horas"
+            "day"   -> "Suele responder en ~1 día"
+            ">day"  -> "Suele responder en más de 1 día"
+            else    -> null
+        }
+
+        if (responseLabel != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Schedule,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = responseLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
         Button(
-            onClick = {},
+            onClick = onContactClick,
+            enabled = !isStartingChat,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
@@ -435,11 +483,19 @@ private fun ContactLandlordSection() {
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(
-                text = "Contact Landlord",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+            if (isStartingChat) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = "Contact Landlord",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

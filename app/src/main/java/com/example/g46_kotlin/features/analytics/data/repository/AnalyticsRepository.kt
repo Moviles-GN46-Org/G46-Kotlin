@@ -7,6 +7,7 @@ import com.example.g46_kotlin.features.analytics.data.remote.dto.SearchEventRequ
 import com.example.g46_kotlin.features.analytics.data.remote.dto.SearchFiltersDto
 import com.example.g46_kotlin.features.house.domain.model.PropertySortBy
 import com.example.g46_kotlin.features.house.domain.model.SearchPropertiesFilters
+import com.example.g46_kotlin.features.analytics.data.remote.dto.LandlordResponseTimeDto
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -113,4 +114,7 @@ class AnalyticsRepository @Inject constructor(
             )
         )
     }
+
+    suspend fun getLandlordResponseTime(landlordId: String): LandlordResponseTimeDto? =
+        runCatching { api.getLandlordResponseTime(landlordId).data }.getOrNull()
 }
