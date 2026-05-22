@@ -24,6 +24,7 @@ import com.example.g46_kotlin.features.auth.data.remote.AuthRefreshApiService
 import javax.inject.Named
 import com.example.g46_kotlin.features.analytics.data.remote.AnalyticsApiService
 import com.example.g46_kotlin.features.notifications.data.remote.NotificationsApiService
+import com.example.g46_kotlin.features.chat.data.remote.ChatApiService
 import dagger.hilt.android.qualifiers.ApplicationContext
 
 
@@ -125,5 +126,10 @@ object CoreModule {
     @Singleton
     fun provideNotificationsApiService(retrofit: Retrofit): NotificationsApiService =
         retrofit.create(NotificationsApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideChatApiService(retrofit: Retrofit): ChatApiService =
+        retrofit.create(ChatApiService::class.java)
 
 }

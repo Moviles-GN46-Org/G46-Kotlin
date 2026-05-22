@@ -62,3 +62,15 @@ data class PreferredMaxDistanceSummaryDataDto(
     val lastUpdatedAt: String? = null,
     val message: String = ""
 )
+@Serializable
+data class LandlordResponseTimeDto(
+    val medianMinutes: Int? = null,
+    val sampleSize: Int,
+    val bucket: String
+)
+
+@Serializable
+data class LandlordResponseTimeResponse(
+    val success: Boolean,
+    val data: LandlordResponseTimeDto
+)

@@ -7,6 +7,7 @@ import com.example.g46_kotlin.cards.HousingCardUi
 import com.example.g46_kotlin.features.favorites.domain.repository.FavoritesRepository
 import com.example.g46_kotlin.features.house.domain.usecase.GetPropertyByIdUseCase
 import com.example.g46_kotlin.features.house.presentation.mapper.PropertyDetailUiMapper
+import com.example.g46_kotlin.features.analytics.data.repository.AnalyticsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +27,8 @@ class PropertyDetailViewModel @Inject constructor(
     private val propertyDetailUiMapper: PropertyDetailUiMapper,
     private val favoritesRepository: FavoritesRepository,
     private val networkMonitor: NetworkMonitor,
+    private val startChatUseCase: com.example.g46_kotlin.features.chat.domain.usecase.StartChatUseCase,
+    private val analyticsRepository: AnalyticsRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -59,6 +62,10 @@ class PropertyDetailViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(isLoading = false, detail = propertyDetailUiMapper.toUi(detail))
                     }
+                    launch {
+                        val rt = analyticsRepository.getLandlordResponseTime(detail.landlordId)
+                        _uiState.update { it.copy(responseTimeBucket = rt?.bucket) }
+                    }
                 }
                 .onFailure { throwable ->
                     _uiState.update {
@@ -82,5 +89,24 @@ class PropertyDetailViewModel @Inject constructor(
             )
             favoritesRepository.toggleFavorite(card)
         }
+    }
+
+    fun onContactLandlord() {
+        val pid = propertyId
+        if (_uiState.value.isStartingChat) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isStartingChat = true) }
+            runCatching { startChatUseCase(pid) }
+                .onSuccess { chat ->
+                    _uiState.update { it.copy(isStartingChat = false, navigateToChatId = chat.id) }
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(isStartingChat = false, errorMessage = error.message) }
+                }
+        }
+    }
+
+    fun onChatNavigated() {
+        _uiState.update { it.copy(navigateToChatId = null) }
     }
 }
