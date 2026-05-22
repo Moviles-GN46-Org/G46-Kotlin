@@ -10,11 +10,12 @@ object AppRoutes {
     const val Map = "map"
     const val Settings = "settings"
     const val PropertyDetail = "propertyDetail/{propertyId}"
-    const val Chats = "chats?chatId={chatId}"
+    const val Chats = "chats"
     const val Feed = "feed"
     const val Roomies = "roomies"
     const val Notifications = "notifications"
     const val Favorites = "favorites"
     fun propertyDetail(propertyId: String) = "propertyDetail/$propertyId"
-
-    fun chats(chatId: String? = null) = if (chatId != null) "chats?chatId=$chatId" else "chats"}
+    const val ChatDetail = "chatDetail/{chatId}"
+    fun chatDetail(chatId: String) = "chatDetail/$chatId"
+}

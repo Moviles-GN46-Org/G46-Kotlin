@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.ui.Alignment
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -59,8 +60,11 @@ import com.example.g46_kotlin.features.map.presentation.route.MapRoute
 import com.example.g46_kotlin.features.notifications.presentation.route.NotificationsRoute
 import com.example.g46_kotlin.features.roomie.domain.model.Roomie
 import com.example.g46_kotlin.features.roomie.presentation.route.RoomieRoute
+import com.example.g46_kotlin.features.chat.presentation.list.route.ChatListRoute
+import com.example.g46_kotlin.features.chat.presentation.detail.route.ChatDetailRoute
 import com.example.g46_kotlin.ui.theme.DustyTaupe
 import com.example.g46_kotlin.ui.theme.LightBronze
+
 
 
 @AndroidEntryPoint
@@ -193,11 +197,28 @@ fun G46KotlinApp(
                 }) { Text("Log out") }
             }
 
-            //TODO: Implementar vista de chats
-            composable(
-                route = AppRoutes.Chats,
-            ) {
+            composable(AppRoutes.Chats) {
+                ChatListRoute(
+                    onChatClick = { chatId ->
+                        navController.navigate(AppRoutes.chatDetail(chatId)) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
 
+            composable(
+                route = AppRoutes.PropertyDetail,
+                arguments = listOf(navArgument("propertyId") { type = NavType.StringType })
+            ) { _ ->
+                PropertyDetailRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToChat = { chatId ->
+                        navController.navigate(AppRoutes.chatDetail(chatId)) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
             }
 
             //TODO: Implementar vista de feed
@@ -219,12 +240,16 @@ fun G46KotlinApp(
             }
 
             composable(
-                route = AppRoutes.PropertyDetail,
-                arguments = listOf(navArgument("propertyId") {type = NavType.StringType})
-            ) { _ ->
-                @Suppress("UNUSED_VARIABLE")
-                PropertyDetailRoute(
+                route = AppRoutes.ChatDetail,
+                arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+            ) {
+                ChatDetailRoute(
                     onBackClick = { navController.popBackStack() },
+                    onViewListingClick = { propertyId ->
+                        navController.navigate(AppRoutes.propertyDetail(propertyId)) {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
