@@ -196,21 +196,8 @@ fun G46KotlinApp(
             //TODO: Implementar vista de chats
             composable(
                 route = AppRoutes.Chats,
-                arguments = listOf(
-                    navArgument("chatId") {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    }
-                )
-            ){ navBackStackEntry ->
+            ) {
 
-                val chatId = navBackStackEntry.arguments?.getString("chatId")
-                if (chatId != null) {
-                    Text(text = "Chat $chatId")
-                } else {
-                    Text(text = "No specific chat provided")
-                }
             }
 
             //TODO: Implementar vista de feed
@@ -227,6 +214,7 @@ fun G46KotlinApp(
                     onRoomieClick = { roomieId ->
                         {}
                     },
+                    onNotifClick = { navController.navigate(AppRoutes.Notifications) }
                 )
             }
 

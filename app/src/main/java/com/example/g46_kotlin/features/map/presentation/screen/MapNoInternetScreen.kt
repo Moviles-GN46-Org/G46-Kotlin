@@ -1,5 +1,6 @@
 package com.example.g46_kotlin.features.map.presentation.screen
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -42,7 +43,7 @@ fun MapNoInternetScreen(
             onSettingsClick = {}
         )
 
-        androidx.compose.foundation.layout.Box(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp),
@@ -81,7 +82,7 @@ fun MapNoInternetScreen(
                     textAlign = TextAlign.Center
                 )
 
-                androidx.compose.foundation.layout.Spacer(
+                Spacer(
                     modifier = Modifier.height(24.dp)
                 )
 

@@ -44,6 +44,7 @@ import com.example.g46_kotlin.features.roomie.presentation.model.PreferenceUiSpe
 import coil.compose.AsyncImage
 
 data class RoomieCardUi(
+    val id: String = "",
     val name: String,
     val age: Int,
     val matchRate: Int,

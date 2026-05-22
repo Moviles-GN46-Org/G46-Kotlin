@@ -6,14 +6,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.WifiOff
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,8 +36,13 @@ import com.example.g46_kotlin.R
 import com.example.g46_kotlin.features.roomie.domain.model.PreferenceCategory
 import com.example.g46_kotlin.features.roomie.presentation.RoomieUiEvent
 import com.example.g46_kotlin.features.roomie.presentation.RoomieUiState
+import com.example.g46_kotlin.features.roomie.presentation.components.LoadingRoomies
+import com.example.g46_kotlin.features.roomie.presentation.components.RoomieActions
 import com.example.g46_kotlin.features.roomie.presentation.components.RoomieCard
 import com.example.g46_kotlin.features.roomie.presentation.components.RoomieCardUi
+import com.example.g46_kotlin.features.roomie.presentation.components.RoomieEmptyState
+import com.example.g46_kotlin.features.roomie.presentation.components.RoomieErrorState
+import com.example.g46_kotlin.features.roomie.presentation.components.RoomieHeader
 import com.example.g46_kotlin.features.roomie.presentation.model.PreferenceRegistry
 import com.example.g46_kotlin.ui.theme.G46KotlinTheme
 
@@ -49,64 +60,51 @@ fun RoomieScreen(
 
         RoomieHeader(onNotifClick)
 
+        if (uiState.isLoading) {
+            LoadingRoomies()
+        } else if  (uiState.errorMessage != null) {
+            RoomieErrorState(
+                errorMessage = uiState.errorMessage,
+                onRetry = { onEvent(RoomieUiEvent.OnRetryAfterError) }
+            )
+        } else if (uiState.current == null) {
+            RoomieEmptyState()
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .padding(top = 20.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
         ) {
             uiState.current?.let {
-                RoomieCard(
-                    ui = it,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } ?: run {
-                Text(
-                    text = "No more roomies to show",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 16.sp,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 20.dp, start = 16.dp, end = 16.dp),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        RoomieCard(
+                            ui = it,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        RoomieActions(
+                            uiState = uiState,
+                            onEvent = onEvent
+                        )
+                    }
+                }
             }
-        }
-    }
-}
-
-@Composable
-private fun RoomieHeader(
-    onNotifClick: () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .statusBarsPadding()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(66.dp)
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onNotifClick) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_notif),
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Text(
-                text = "Find your ideal roomie",
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.size(48.dp))
         }
     }
 }
@@ -115,7 +113,7 @@ private fun RoomieHeader(
 @Composable
 fun RoomieScreenPreview() {
 
-    val test_uiState = RoomieUiState(
+    val testUiState = RoomieUiState(
         current = RoomieCardUi(
             name = "Marcus",
             age = 23,
@@ -134,7 +132,7 @@ fun RoomieScreenPreview() {
 
     G46KotlinTheme{
         RoomieScreen(
-            uiState = test_uiState,
+            uiState = testUiState,
             onEvent = {}
         )
     }

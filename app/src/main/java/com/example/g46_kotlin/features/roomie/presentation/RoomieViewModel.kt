@@ -11,19 +11,29 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.g46_kotlin.core.domain.contract.NetworkMonitor
 import com.example.g46_kotlin.features.roomie.domain.model.Roomie
 import com.example.g46_kotlin.features.roomie.presentation.components.RoomieCardUi
 import com.example.g46_kotlin.features.roomie.presentation.mapper.mapMultiOptionPreferences
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import retrofit2.HttpException
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import java.util.concurrent.TimeoutException
 import javax.inject.Inject
-import kotlin.invoke
 
 
 @HiltViewModel
 class RoomieViewModel @Inject constructor(
     private val getRecommendedRoomiesUseCase: GetRecommendedRoomiesUseCase,
-    private val submitRoomieUseCase: SubmitRoomieUseCase
+    private val submitRoomieUseCase: SubmitRoomieUseCase,
+    private val networkMonitor: NetworkMonitor
 ): ViewModel() {
     private val _uiState = MutableStateFlow(RoomieUiState())
     val uiState: StateFlow<RoomieUiState> = _uiState.asStateFlow()
@@ -31,8 +41,30 @@ class RoomieViewModel @Inject constructor(
     private val _effects = MutableSharedFlow<RoomieEffect>()
     val effects: SharedFlow<RoomieEffect> = _effects.asSharedFlow()
 
-    //historial local
+    //historial local en cache
     private val decisionHistory = ArrayDeque<DecidedCard>()
+
+    private data class PendingSwipe(
+        val roomieId: String,
+        val liked: Boolean,
+        val createdAt: Long = System.currentTimeMillis()
+    )
+
+    private val pendingSwipes = ArrayDeque<PendingSwipe>()
+    private var isFlushingPending = false
+
+    val isConnected = networkMonitor.isConnected
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            true
+        )
+
+    init {
+        observeConnectivity()
+    }
+
+    private var lastLoadFailed = false
 
     fun onEvent(event: RoomieUiEvent) {
         when (event) {
@@ -47,17 +79,25 @@ class RoomieViewModel @Inject constructor(
     }
     private fun onScreenStarted() {
         if (_uiState.value.queue.isEmpty()) loadQueue()
+
     }
 
     private fun onRefresh() = loadQueue(force = true)
 
     private fun loadQueue(force: Boolean = false) {
+
+        if (_uiState.value.isLoading && !force) return
+
         viewModelScope.launch {
             _uiState.update {
                 it.copy(isLoading = true, errorMessage = null, endReached = false)
             }
 
-            runCatching { getRecommendedRoomiesUseCase.invoke() }
+            runCatching {
+                withTimeoutOrNull(5_000L) {
+                    getRecommendedRoomiesUseCase.invoke()
+                }?: throw TimeoutException("Timeout cargando recomendaciones")
+            }
                 .onSuccess { roomies ->
                     val cards = roomies.map(::toCardUi)
                     _uiState.update {
@@ -71,8 +111,10 @@ class RoomieViewModel @Inject constructor(
                             canUndo = decisionHistory.isNotEmpty()
                         )
                     }
+                    lastLoadFailed = false
                 }
                 .onFailure { e ->
+                    lastLoadFailed = true
                     _uiState.update {
                         it.copy(isLoading = false, errorMessage = e.message ?: "Error cargando roomies")
                     }
@@ -110,8 +152,17 @@ class RoomieViewModel @Inject constructor(
                         _effects.emit(RoomieEffect.ShowMessage("It's a match!"))
                     }
                 }
-                .onFailure {
-                    _effects.emit(RoomieEffect.ShowMessage("Error enviando swipe"))
+                .onFailure { e ->
+                    lastLoadFailed = true
+                    pendingSwipes.addLast(PendingSwipe(roomieId = roomieId, liked = liked))
+
+                    val message = if (isNetworkError(e)) {
+                        "Sin internet. Guardamos tu swipe y lo reintentamos cuando vuelva la conexión."
+                    } else {
+                        "Error enviando swipe. Intenta de nuevo."
+                    }
+
+                    _effects.emit(RoomieEffect.ShowMessage(message))
                 }
 
             _uiState.update { it.copy(isSubmittingDecision = false) }
@@ -155,6 +206,7 @@ class RoomieViewModel @Inject constructor(
         )
 
         return RoomieCardUi(
+            id = roomie.id,
             name = "${roomie.firstName} ${roomie.lastName}",
             age = roomie.age,
             matchRate = roomie.age,
@@ -165,5 +217,60 @@ class RoomieViewModel @Inject constructor(
             habitsPreferences = prefs,
             profilePicture = roomie.profilePictureUrl
         )
+    }
+
+    private fun observeConnectivity() {
+        viewModelScope.launch {
+            isConnected
+                .filter { it }
+                .collect {
+                    if (lastLoadFailed) {
+                        loadQueue(force = true)
+                    }
+                    flushPendingSwipes()
+                }
+        }
+    }
+
+    private fun isNetworkError(e: Throwable): Boolean {
+        return when (e) {
+            is UnknownHostException -> true
+            is SocketTimeoutException -> true
+            is IOException -> true
+            is HttpException -> false
+            else -> false
+        }
+    }
+
+    private fun flushPendingSwipes() {
+        if (isFlushingPending) return
+        if (pendingSwipes.isEmpty()) return
+
+        viewModelScope.launch {
+            isFlushingPending = true
+            try {
+                while (pendingSwipes.isNotEmpty()) {
+                    val swipe = pendingSwipes.first()
+
+                    val success = runCatching {
+                        submitRoomieUseCase(swipe.roomieId, swipe.liked)
+                    }.isSuccess
+
+                    if (success) {
+                        pendingSwipes.removeFirst()
+                    } else {
+                        break
+                    }
+                }
+
+                if (pendingSwipes.isEmpty()) {
+                    _effects.emit(RoomieEffect.ShowMessage("Swipes pendientes sincronizados"))
+                } else {
+                    _effects.emit(RoomieEffect.ShowMessage("${pendingSwipes.size} swipes aún pendientes"))
+                }
+            } finally {
+                isFlushingPending = false
+            }
+        }
     }
 }
