@@ -56,8 +56,24 @@ class LoginViewModel @Inject constructor(
             LoginUiEvent.OnSubmit -> submitLogin()
             LoginUiEvent.OnSignUpClick -> emitEffect(LoginEffect.NavigateToSignUp)
             LoginUiEvent.OnForgotPasswordClick -> emitEffect(LoginEffect.ShowMessage("Forgot password pending"))
-            LoginUiEvent.OnGoogleClick -> emitEffect(LoginEffect.ShowMessage("Google login pending"))
-            LoginUiEvent.OnAppleClick -> emitEffect(LoginEffect.ShowMessage("Apple login pending"))
+
+            LoginUiEvent.OnGoogleClick -> {
+                emitEffect(
+                    LoginEffect.NavigateToNotImplemented(
+                        title = "Login con Google",
+                        message = "Esta funcionalidad aún no está disponible."
+                    )
+                )
+            }
+            LoginUiEvent.OnAppleClick -> {
+                emitEffect(
+                    LoginEffect.NavigateToNotImplemented(
+                        title = "Login con Apple",
+                        message = "Esta funcionalidad aún no está disponible."
+                    )
+                )
+            }
+
         }
     }
 

@@ -52,12 +52,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
+import com.example.g46_kotlin.core.presentation.screen.NotImplementedScreen
 import com.example.g46_kotlin.features.auth.presentation.login.route.LoginRoute
 import com.example.g46_kotlin.features.favorites.presentation.route.FavoritesRoute
 import com.example.g46_kotlin.features.house.presentation.route.HouseRoute
 import com.example.g46_kotlin.features.house.presentation.route.PropertyDetailRoute
 import com.example.g46_kotlin.features.map.presentation.route.MapRoute
 import com.example.g46_kotlin.features.notifications.presentation.route.NotificationsRoute
+import com.example.g46_kotlin.features.roomie.domain.model.Roomie
+import com.example.g46_kotlin.features.roomie.presentation.route.RoomieRoute
 import com.example.g46_kotlin.features.chat.presentation.list.route.ChatListRoute
 import com.example.g46_kotlin.features.chat.presentation.detail.route.ChatDetailRoute
 import com.example.g46_kotlin.ui.theme.DustyTaupe
@@ -117,6 +120,9 @@ fun G46KotlinApp(
                         scope.launch {
                             snackbarHostState.showSnackbar(message)
                         }
+                    },
+                    onNotImplemented = {
+                        navController.navigate(AppRoutes.NotImplemented)
                     }
                 )
             }
@@ -130,6 +136,12 @@ fun G46KotlinApp(
                             snackbarHostState.showSnackbar(message)
                         }
                     }
+                )
+            }
+
+            composable (AppRoutes.NotImplemented) {
+                NotImplementedScreen(
+                    onActionClick = { navController.popBackStack() }
                 )
             }
         }
@@ -190,9 +202,16 @@ fun G46KotlinApp(
             }
             //TODO: Implementar view de profile mas adelante, quitar logout
             composable(AppRoutes.Profile) {
-                Button(onClick = {
-                    sessionViewModel.logout()
-                }) { Text("Log out") }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Button(onClick = { sessionViewModel.logout() }) {
+                        Text("Logout")
+                    }
+                }
             }
 
             composable(AppRoutes.Chats) {
@@ -221,12 +240,20 @@ fun G46KotlinApp(
 
             //TODO: Implementar vista de feed
             composable(AppRoutes.Feed){
-                Text(text = "Feed")
+
             }
 
-            //TODO: Implementar vista de Roomies
             composable(AppRoutes.Roomies){
-                Text(text = "Roomies")
+                RoomieRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onChatClick = { chatId ->
+                        navController.navigate(AppRoutes.chatDetail(chatId))
+                    },
+                    onRoomieClick = { roomieId ->
+                        {}
+                    },
+                    onNotifClick = { navController.navigate(AppRoutes.Notifications) }
+                )
             }
 
             composable(
@@ -269,6 +296,12 @@ fun G46KotlinApp(
                             launchSingleTop = true
                         }
                     }
+                )
+            }
+
+            composable(AppRoutes.NotImplemented) {
+                NotImplementedScreen(
+                    onActionClick = { navController.popBackStack() }
                 )
             }
         }
@@ -337,7 +370,8 @@ private fun CasandesBottomBar(
             val items = listOf(
                 Triple(AppRoutes.Home, R.drawable.ic_house, "Home"),
                 Triple(AppRoutes.Chats, R.drawable.ic_messages_square, "Chats"),
-                Triple(AppRoutes.Feed, R.drawable.ic_images, "Feed"),
+                //TODO: Implementar vista de feed
+                Triple(AppRoutes.NotImplemented, R.drawable.ic_images, "Feed"),
                 Triple(AppRoutes.Roomies, R.drawable.ic_heart_handshake, "Roomies"),
                 Triple(AppRoutes.Profile, R.drawable.ic_circle_user_round, "Profile")
             )
