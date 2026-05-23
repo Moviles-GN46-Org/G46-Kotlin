@@ -16,4 +16,8 @@ object AppRoutes {
     const val Notifications = "notifications"
     const val Favorites = "favorites"
     fun propertyDetail(propertyId: String) = "propertyDetail/$propertyId"
+    const val ChatDetail = "chatDetail/{chatId}"
+    fun chatDetail(chatId: String) = "chatDetail/$chatId"
+
+    const val NotImplemented = "notImplemented"
 }

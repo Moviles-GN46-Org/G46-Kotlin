@@ -1,5 +1,6 @@
 package com.example.g46_kotlin.features.analytics.data.remote
 
+import com.example.g46_kotlin.features.analytics.data.remote.dto.LandlordResponseTimeResponse
 import com.example.g46_kotlin.features.analytics.data.remote.dto.PreferredMaxDistanceSummaryResponseDto
 import com.example.g46_kotlin.features.analytics.data.remote.dto.SearchEventRequestDto
 import com.example.g46_kotlin.features.analytics.data.remote.dto.SearchEventResponseDto
@@ -7,6 +8,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
+import retrofit2.http.Path
 
 interface AnalyticsApiService {
     @POST("analytics/search-events")
@@ -22,4 +24,7 @@ interface AnalyticsApiService {
         @Query("from") fromIso: String,
         @Query("to") toIso: String
     ): PreferredMaxDistanceSummaryResponseDto
+
+    @GET("analytics/landlord/{id}/response-time")
+    suspend fun getLandlordResponseTime(@Path("id") landlordId: String): LandlordResponseTimeResponse
 }

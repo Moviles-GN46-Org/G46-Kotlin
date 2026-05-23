@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.ui.Alignment
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -51,14 +52,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
+import com.example.g46_kotlin.core.presentation.screen.NotImplementedScreen
 import com.example.g46_kotlin.features.auth.presentation.login.route.LoginRoute
 import com.example.g46_kotlin.features.favorites.presentation.route.FavoritesRoute
 import com.example.g46_kotlin.features.house.presentation.route.HouseRoute
 import com.example.g46_kotlin.features.house.presentation.route.PropertyDetailRoute
 import com.example.g46_kotlin.features.map.presentation.route.MapRoute
 import com.example.g46_kotlin.features.notifications.presentation.route.NotificationsRoute
+import com.example.g46_kotlin.features.roomie.domain.model.Roomie
+import com.example.g46_kotlin.features.roomie.presentation.route.RoomieRoute
+import com.example.g46_kotlin.features.chat.presentation.list.route.ChatListRoute
+import com.example.g46_kotlin.features.chat.presentation.detail.route.ChatDetailRoute
 import com.example.g46_kotlin.ui.theme.DustyTaupe
 import com.example.g46_kotlin.ui.theme.LightBronze
+
 
 
 @AndroidEntryPoint
@@ -113,6 +120,9 @@ fun G46KotlinApp(
                         scope.launch {
                             snackbarHostState.showSnackbar(message)
                         }
+                    },
+                    onNotImplemented = {
+                        navController.navigate(AppRoutes.NotImplemented)
                     }
                 )
             }
@@ -126,6 +136,12 @@ fun G46KotlinApp(
                             snackbarHostState.showSnackbar(message)
                         }
                     }
+                )
+            }
+
+            composable (AppRoutes.NotImplemented) {
+                NotImplementedScreen(
+                    onActionClick = { navController.popBackStack() }
                 )
             }
         }
@@ -186,33 +202,71 @@ fun G46KotlinApp(
             }
             //TODO: Implementar view de profile mas adelante, quitar logout
             composable(AppRoutes.Profile) {
-                Button(onClick = {
-                    sessionViewModel.logout()
-                }) { Text("Log out") }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Button(onClick = { sessionViewModel.logout() }) {
+                        Text("Logout")
+                    }
+                }
             }
 
-            //TODO: Implementar vista de chats
-            composable(AppRoutes.Chats){
-                Text(text = "Chats")
-            }
-
-            //TODO: Implementar vista de feed
-            composable(AppRoutes.Feed){
-                Text(text = "Feed")
-            }
-
-            //TODO: Implementar vista de Roomies
-            composable(AppRoutes.Roomies){
-                Text(text = "Roomies")
+            composable(AppRoutes.Chats) {
+                ChatListRoute(
+                    onChatClick = { chatId ->
+                        navController.navigate(AppRoutes.chatDetail(chatId)) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
             }
 
             composable(
                 route = AppRoutes.PropertyDetail,
-                arguments = listOf(navArgument("propertyId") {type = NavType.StringType})
+                arguments = listOf(navArgument("propertyId") { type = NavType.StringType })
             ) { _ ->
-                @Suppress("UNUSED_VARIABLE")
                 PropertyDetailRoute(
                     onBackClick = { navController.popBackStack() },
+                    onNavigateToChat = { chatId ->
+                        navController.navigate(AppRoutes.chatDetail(chatId)) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            //TODO: Implementar vista de feed
+            composable(AppRoutes.Feed){
+
+            }
+
+            composable(AppRoutes.Roomies){
+                RoomieRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onChatClick = { chatId ->
+                        navController.navigate(AppRoutes.chatDetail(chatId))
+                    },
+                    onRoomieClick = { roomieId ->
+                        {}
+                    },
+                    onNotifClick = { navController.navigate(AppRoutes.Notifications) }
+                )
+            }
+
+            composable(
+                route = AppRoutes.ChatDetail,
+                arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+            ) {
+                ChatDetailRoute(
+                    onBackClick = { navController.popBackStack() },
+                    onViewListingClick = { propertyId ->
+                        navController.navigate(AppRoutes.propertyDetail(propertyId)) {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
@@ -227,7 +281,7 @@ fun G46KotlinApp(
                         }
                     },
                     onChatClick = { chatId ->
-                        {}
+                        { navController.navigate(AppRoutes.chatDetail(chatId)) }
                     },
                     onRoomieClick = { roomieId ->
                         {}
@@ -242,6 +296,12 @@ fun G46KotlinApp(
                             launchSingleTop = true
                         }
                     }
+                )
+            }
+
+            composable(AppRoutes.NotImplemented) {
+                NotImplementedScreen(
+                    onActionClick = { navController.popBackStack() }
                 )
             }
         }
@@ -310,7 +370,8 @@ private fun CasandesBottomBar(
             val items = listOf(
                 Triple(AppRoutes.Home, R.drawable.ic_house, "Home"),
                 Triple(AppRoutes.Chats, R.drawable.ic_messages_square, "Chats"),
-                Triple(AppRoutes.Feed, R.drawable.ic_images, "Feed"),
+                //TODO: Implementar vista de feed
+                Triple(AppRoutes.NotImplemented, R.drawable.ic_images, "Feed"),
                 Triple(AppRoutes.Roomies, R.drawable.ic_heart_handshake, "Roomies"),
                 Triple(AppRoutes.Profile, R.drawable.ic_circle_user_round, "Profile")
             )

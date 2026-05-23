@@ -11,6 +11,9 @@ interface MapApiService {
         @Query("lat") userLat: Double,
         @Query("lng") userLon: Double,
         @Query("radiusKm") radiusKm: Double,
+        @Query("sortBy") sortBy: String = "distance",
+        @Query("limit") limit: Int = 20,
+        @Query("page") page: Int = 1,
         @Query("includeAveragePrice") includeAveragePrice: Boolean = true
     ): PropertiesResponse
 

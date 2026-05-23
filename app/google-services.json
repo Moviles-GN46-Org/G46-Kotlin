@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "764259648299",
+    "project_id": "casandes-kotlin",
+    "storage_bucket": "casandes-kotlin.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764259648299:android:43f4e9ef7ce531d3e0fb6e",
+        "android_client_info": {
+          "package_name": "com.example.g46_kotlin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPCVlLvuSOY__-L5yZ4Mk6J5CnzxXtmes"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
