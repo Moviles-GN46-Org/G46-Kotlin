@@ -1,6 +1,7 @@
 package com.example.g46_kotlin.features.map.presentation.screen
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
@@ -42,6 +43,7 @@ import org.osmdroid.views.overlay.Marker
 import kotlin.collections.forEach
 import android.graphics.Color as AndroidColor
 
+@SuppressLint("RememberReturnType")
 @Composable
 fun MapRender(
     userLocation: UserLocationUI?,
@@ -69,6 +71,10 @@ fun MapRender(
     val maxZoom = 25.0
     val zoomStep = 1.0
 
+    val markerCache = remember { mutableMapOf<String, Marker>() }
+
+    val userMarkerRef = remember { mutableStateOf<Marker?>(null) }
+    val lastUserLocationRef = remember { mutableStateOf<UserLocationUI?>(null) }
 
     fun reportCamera(mapView: MapView, fromUserGesture: Boolean) {
         val center = mapView.mapCenter
@@ -135,6 +141,12 @@ fun MapRender(
         onDispose {
             mapRef?.removeMapListener(mapListener)
             zoomAnimator?.cancel()
+
+            userMarkerRef.value?.let { marker ->
+                mapRef?.overlays?.remove(marker)
+            }
+            userMarkerRef.value = null
+            lastUserLocationRef.value = null
         }
     }
 
@@ -183,36 +195,63 @@ fun MapRender(
                     }
                 }
 
-                mapView.overlays.clear()
+                val newApartmentsIds = apartments.map { it.id }.toSet()
+
+                val idsToRemove = markerCache.keys - newApartmentsIds
+                idsToRemove.forEach { id ->
+                    markerCache[id]?.let { marker ->
+                        mapView.overlays.remove(marker)
+                    }
+                    markerCache.remove(id)
+                }
 
                 //Properties markers
                 apartments.forEach { apt ->
-                    val marker = Marker(mapView).apply {
-                        position = GeoPoint(apt.lat, apt.lon)
-                        title = apt.title
-                        icon = MapMarkerFactory.createMarkerIcon(context, apt.price)
-                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-
-                        setOnMarkerClickListener { _, _ ->
-                            onApartmentClick(apt.id)
-                            true
+                    if (!markerCache.containsKey(apt.id)) {
+                        val marker = Marker(mapView).apply {
+                            position = GeoPoint(apt.lat, apt.lon)
+                            title = apt.title
+                            icon = MapMarkerFactory.createMarkerIcon(context, apt.price)
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            setOnMarkerClickListener { _, _ ->
+                                onApartmentClick(apt.id)
+                                true
+                            }
                         }
+                        markerCache[apt.id] = marker
+                        mapView.overlays.add(marker)
                     }
-                    mapView.overlays.add(marker)
                 }
 
                 //User marker
                 userLocation?.let { loc ->
-                    val userMarker = Marker(mapView).apply {
-                        position = GeoPoint(loc.lat, loc.lon)
-                        title = "Your location"
-                        icon = userMarkerIcon
-                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    val currentUserMarker = userMarkerRef.value
+                    val lastLocation = lastUserLocationRef.value
+
+                    val locationChanged = lastLocation == null ||
+                            lastLocation.lat != loc.lat ||
+                            lastLocation.lon != loc.lon
+
+                    if (currentUserMarker == null) {
+                        val userMarker = Marker(mapView).apply {
+                            position = GeoPoint(loc.lat, loc.lon)
+                            title = "Your location"
+                            icon = userMarkerIcon
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                        }
+                        userMarkerRef.value = userMarker
+                        lastUserLocationRef.value = loc
+                        mapView.overlays.add(userMarker)
+                    } else if (locationChanged) {
+                        currentUserMarker.position = GeoPoint(loc.lat, loc.lon)
+                        currentUserMarker.icon = userMarkerIcon
+                        lastUserLocationRef.value = loc
                     }
-                    mapView.overlays.add(userMarker)
                 }
 
-                mapView.invalidate()
+                if (idsToRemove.isNotEmpty() || apartments.any {!markerCache.containsKey(it.id)}) {
+                    mapView.invalidate()
+                }
             }
         )
 
