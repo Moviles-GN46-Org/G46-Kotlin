@@ -13,6 +13,7 @@ import com.example.g46_kotlin.features.auth.presentation.login.LoginViewModel
 fun LoginRoute(
     onSignUpClick: () -> Unit,
     onShowMessage: (String) -> Unit,
+    onNotImplemented: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -22,6 +23,7 @@ fun LoginRoute(
             when (effect) {
                 is LoginEffect.NavigateToSignUp -> onSignUpClick()
                 is LoginEffect.ShowMessage -> onShowMessage(effect.message)
+                is LoginEffect.NavigateToNotImplemented -> onNotImplemented()
             }
         }
     }

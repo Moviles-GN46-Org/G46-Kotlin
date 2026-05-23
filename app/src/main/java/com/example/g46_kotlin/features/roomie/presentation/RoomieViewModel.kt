@@ -206,7 +206,7 @@ class RoomieViewModel @Inject constructor(
         )
 
         return RoomieCardUi(
-            id = roomie.id,
+            id = roomie.userId,
             name = "${roomie.firstName} ${roomie.lastName}",
             age = roomie.age,
             matchRate = roomie.age,
