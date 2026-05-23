@@ -73,6 +73,7 @@ fun NotificationCardFactory(
                 onRoomieClick(model.id)
             }
         )
+
         is NotificationCardModel.PropertyMatch -> PropertyMatchNotification(
             notificationUi = model,
             onClick = {

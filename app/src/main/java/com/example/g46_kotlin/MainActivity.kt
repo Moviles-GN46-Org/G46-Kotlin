@@ -281,7 +281,7 @@ fun G46KotlinApp(
                         }
                     },
                     onChatClick = { chatId ->
-                        {}
+                        { navController.navigate(AppRoutes.chatDetail(chatId)) }
                     },
                     onRoomieClick = { roomieId ->
                         {}

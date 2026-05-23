@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.collection.LruCache
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
 import com.example.g46_kotlin.R
@@ -17,7 +18,16 @@ import kotlin.math.roundToInt
 
 object MapMarkerFactory {
 
+	private val bitmapCache = LruCache<String, Bitmap>(maxSize = 40)
+
 	fun createMarkerIcon(context: Context, price: String): BitmapDrawable {
+		val cached = bitmapCache[price]
+		if (cached != null) {
+			return cached.toDrawable(context.resources)
+		}
+
+		val bitmap = createMarkerBitmap(context, price)
+		bitmapCache.put(price, bitmap)
 		return createMarkerBitmap(context, price).toDrawable(context.resources)
 	}
 
